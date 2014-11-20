@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+0.14.0 (2014-11-20)
+-------------------
+- When a subdomain of a verified domain is added by the same user,
+  automatically set it as verified.
+- Add `publicsuffix <http://pypi.python.org/pypi/publicsuffix>`_ dependency.
+- Check that newly added domains are valid.
+
 0.13.0 (2014-02-27)
 -------------------
 - Upgrade to Django 1.6.2
