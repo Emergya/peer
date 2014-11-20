@@ -29,14 +29,18 @@
 
 import httplib
 import urllib2
+import whois
+from whois.parser import PywhoisError
 import dns.resolver
 from dns.resolver import NXDOMAIN
 from dns.exception import DNSException, Timeout
+from publicsuffix import PublicSuffixList
 
 from django.contrib import messages
 from django.utils.translation import ugettext as _
+from django.core.exceptions import ValidationError
 
-from peer.domain.models import DomainToken
+from peer.domain.models import DomainToken, Domain
 from peer.domain.utils import get_custom_user_agent, SmartRedirectHandler
 
 
@@ -129,3 +133,42 @@ def check_domain_token(domain_name, token):
     if valid_token:
         DomainToken.objects.filter(domain=domain_name).delete()
     return valid_token
+
+
+def check_superdomain_verified(domain):
+    '''
+    True if some superdomain of the given domain is already
+    verified and has the same owner as the given domain.
+    False otherwise.
+    '''
+    segments = domain.name.split('.')
+    while segments:
+        try:
+            Domain.objects.get(name='.'.join(segments),
+                               validated=True,
+                               owner=domain.owner)
+        except Domain.DoesNotExist:
+            segments = segments[1:]
+            continue
+        return True
+    return False
+
+
+def validate_non_public_suffix(value):
+    '''
+    check that value is not a public suffix
+    '''
+    psl = PublicSuffixList()
+    if psl.get_public_suffix(value) != psl.get_public_suffix('x.' + value):
+        raise ValidationError(_('You cannot register public suffixes'))
+
+
+def whois_validate_domain(value):
+    '''
+    Check that this is a domain according to whois
+    '''
+    try:
+        whois.whois(value)
+    except PywhoisError:
+        msg = _('%(domain)s does not seem to be a valid domain name')
+        raise ValidationError(msg % {'domain': value})

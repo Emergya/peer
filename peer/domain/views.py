@@ -49,7 +49,8 @@ from peer.domain.utils import (send_mail_for_validation,
 from peer.domain.validation import (http_validate_ownership,
                                     dns_validate_ownership,
                                     email_validate_ownership,
-                                    check_domain_token)
+                                    check_domain_token,
+                                    check_superdomain_verified)
 
 
 @login_required
@@ -60,6 +61,8 @@ def domain_add(request):
             messages.success(request, _(u'Domain created'))
             instance = form.save(commit=False)
             instance.owner = request.user
+            if check_superdomain_verified(instance):
+                return _domain_validate(request, instance)
             instance.save()
             return HttpResponseRedirect(
                 reverse('domain_verify',
@@ -119,15 +122,7 @@ def domain_verify(request, domain_id, token=False):
 
     if check:
         if valid:
-            domain.validated = True
-            domain.save()
-            if getattr(settings, 'NOTIFY_DOMAIN_OWNER', False):
-                token = uuid.uuid4().hex
-                DomainToken.objects.create(domain=domain.name, token=token)
-                send_notification_mail_to_domain_owner(request, domain, token)
-            messages.success(
-                request, _(u'The domain ownership was successfully verified'))
-            return HttpResponseRedirect(reverse('account_profile'))
+            return _domain_validate(request, domain)
         else:
             messages.error(
                 request, _(u'Error while checking domain ownership'))
@@ -146,6 +141,18 @@ def domain_verify(request, domain_id, token=False):
         'domain_contact_list': domain_contact_list,
         'whois_has_emails': whois_has_emails,
     }, context_instance=RequestContext(request))
+
+
+def _domain_validate(request, domain):
+    domain.validated = True
+    domain.save()
+    if getattr(settings, 'NOTIFY_DOMAIN_OWNER', False):
+        token = uuid.uuid4().hex
+        DomainToken.objects.create(domain=domain.name, token=token)
+        send_notification_mail_to_domain_owner(request, domain, token)
+    messages.success(
+        request, _(u'The domain ownership was successfully verified'))
+    return HttpResponseRedirect(reverse('account_profile'))
 
 
 def domain_invalidate(request, domain_id, token):

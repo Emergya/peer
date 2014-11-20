@@ -11,14 +11,18 @@ In the user profile view, accessible by clicking on the button labelled with
 the username in the upper right corner, there is a link labelled
 **add domain**. Following it, the user is presented with a form to add a
 new domain. In this form the user simply has to fill in the name of the
-domain, and click on the *add domain* button.  After adding a domain the user
-is redirected to the verification page of the domain, which is also the main
-page of a domain.
+domain, and click on the *add domain* button.
 
-Adding a domain is not enough to use it in the system. PEER has to verify
-that the user has actual management rights over that domain in the DNS
-environment. To do this, the user can then click a button labelled *Verify
-Ownership* which takes her to the verification page. In this page there
+Adding a domain is not enough to use it in the system. Once a domain is added,
+PEER has to verify that the user has actual management rights over that domain
+in the DNS environment. If the user has already registered and verified a
+superdomain of the new domain, the new domain will automatically be marked as
+verified. Otherwise, after adding a domain, the user is redirected to the
+verification page of the domain, which is also the main page of a domain.
+
+It is not compulsory to verify the domain immediately after adding it: the
+user can, at any later time, click on a button labelled *Verify
+Ownership*, which takes her to the verification page. In this page there
 are several options to validate the domain.
 
 
