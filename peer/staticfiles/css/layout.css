@@ -24,7 +24,6 @@
 }
 
 body {
-    width: 1024px;
     padding: 0 30px;
     margin: 0 auto;
     font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -297,7 +296,6 @@ header#header hgroup h2 {
 
 .welcome {
     border-top: none;
-    width: 960px;
     margin: 0 auto;
     position: relative;
     padding-top: 17px;
@@ -431,11 +429,8 @@ section ul {
 
 footer {
     bottom: 0;
-    margin-left: 50px;
     clear: both;
-    width: 940px;
     font-size: 10px;
-    float: left;
     margin-top: 21px;
 }
 
