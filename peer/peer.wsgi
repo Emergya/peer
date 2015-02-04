@@ -1,68 +1,41 @@
-# Copyright 2011 Terena. All rights reserved.
+"""
+WSGI config for moocng project.
 
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
+This module contains the WSGI application used by Django's development server
+and any production WSGI deployments. It should expose a module-level variable
+named ``application``. Django's ``runserver`` and ``runfcgi`` commands discover
+this application via the ``WSGI_APPLICATION`` setting.
 
-#    1. Redistributions of source code must retain the above copyright notice,
-#       this list of conditions and the following disclaimer.
+Usually you will have the standard Django WSGI application here, but it also
+might make sense to replace the whole Django WSGI application with a custom one
+that later delegates to the Django one. For example, you could introduce WSGI
+middleware here, or combine a Django application with an application of another
+framework.
 
-#    2. Redistributions in binary form must reproduce the above copyright notice,
-#       this list of conditions and the following disclaimer in the documentation
-#        and/or other materials provided with the distribution.
-
-# THIS SOFTWARE IS PROVIDED BY TERENA ``AS IS'' AND ANY EXPRESS OR IMPLIED
-# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-# EVENT SHALL TERENA OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-# The views and conclusions contained in the software and documentation are those
-# of the authors and should not be interpreted as representing official policies,
-# either expressed or implied, of Terena.
-
+"""
 import os
-import site
-import sys
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "peer.settings")
+
+# This application object is used by any WSGI server configured to use this
+# file. This includes Django's development server, if the WSGI_APPLICATION
+# setting points here.
+#from django.core.wsgi import get_wsgi_application
+#application = get_wsgi_application()
+
+import warnings
+warnings.simplefilter("ignore")
 
 
-def grandparent(path):
-    return os.path.dirname(os.path.dirname(path))
+# Apply WSGI middleware here.
+# from helloworld.wsgi import HelloWorldApplication
+# application = HelloWorldApplication(application)
+def application(environ, start_response):
+    virtualenv = environ.get('VIRTUALENV', None)
+    if virtualenv is not None:
+        activate_this = os.path.join(virtualenv, 'bin', 'activate_this.py')
+        execfile(activate_this, dict(__file__=activate_this))
 
-
-def greatgrandparent(path):
-    return os.path.dirname(grandparent(path))
-
-
-def activate_virtualenv():
-    site_packages = greatgrandparent(os.path.abspath(__file__))
-    if sys.platform == 'win32':
-        base = grandparent(site_packages)
-    else:
-        base = greatgrandparent(site_packages)
-
-    prev_sys_path = list(sys.path)
-    site.addsitedir(site_packages)
-    sys.real_prefix = sys.prefix
-    sys.prefix = base
-    # Move the added items to the front of the path:
-    new_sys_path = []
-    for item in list(sys.path):
-        if item not in prev_sys_path:
-            new_sys_path.append(item)
-            sys.path.remove(item)
-    sys.path[:0] = new_sys_path
-
-
-activate_virtualenv()
-os.environ['DJANGO_SETTINGS_MODULE'] = 'peer.settings'
-
-# now it is safe to import django
-from django.core.handlers.wsgi import WSGIHandler
-
-application = WSGIHandler()
+    from django.core.wsgi import get_wsgi_application
+    django_app = get_wsgi_application()
+    return django_app(environ, start_response)

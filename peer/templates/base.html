@@ -65,10 +65,7 @@
 
       <ul id="user-actions">
         {% block user_actions %}
-          {% if user.is_anonymous %}
-            <li><a class="button" href="{% url 'registration_register' %}">{% trans "Sign up" %}</a></li>
-            <li><a class="button" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></li>
-          {% else %}
+          {% if user.is_authenticated %}
             <li>
                 <div>
                     <a id="user-profile" href="{% url 'account_profile' %}">{{ user }}</a>

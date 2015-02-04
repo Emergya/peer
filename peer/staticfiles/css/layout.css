@@ -23,6 +23,10 @@
     width: 45%;
 }
 
+.centerText {
+    text-align: center;
+}
+
 body {
     padding: 0 30px;
     margin: 0 auto;
@@ -63,6 +67,12 @@ h2 {
     margin: 0.5em 0 0.3em;
     font-weight: 300;
     letter-spacing: 0.6px;
+}
+
+h3 {
+    font-size: 1.4em;
+    margin: 0.4em 0 0.3em;
+    line-height: 1.6em;
 }
 
 section {

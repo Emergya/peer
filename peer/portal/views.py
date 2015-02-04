@@ -38,11 +38,15 @@ from peer.entity.filters import get_filters
 
 
 def index(request):
-    entities = Entity.objects.all()[:get_entities_per_page()]
-
+    entities = False
+    filters = False
+    if (request.user.is_authenticated):
+        entities = Entity.objects.all()[:get_entities_per_page()]
+        filters = get_filters(request.GET)
     return render_to_response('portal/index.html', {
         'entities': entities,
-        'filters': get_filters(request.GET),
+        'filters': filters,
+        'user': request.user,
     }, context_instance=RequestContext(request))
 
 

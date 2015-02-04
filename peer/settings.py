@@ -123,6 +123,7 @@ PEER_THEME = {
     'FOOTER_BACKGROUND': '',
     'HOME_TITLE': 'Nice to meet you!!',
     'HOME_SUBTITLE': 'Say hello to federated worldwide services',
+    'HOME_SLOGAN': 'Default text for the slogan',
     'JQUERY_UI_THEME': 'default-theme',
 }
 
@@ -186,7 +187,6 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'captcha',
     'registration',
-    'south',
     'djangosaml2',
     'peer.account',
     'peer.domain',

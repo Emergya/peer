@@ -46,7 +46,7 @@ def recursive_include(directory, patterns):
 
 # be careful with the syntax of this line since it is parsed from
 # the docs/conf.py file
-VERSION = '0.14.0'
+VERSION = '0.16.0'
 
 setup(
     name='peer',
@@ -72,20 +72,20 @@ setup(
     },
     zip_safe=False,
     install_requires=[
-        'Django==1.6.2',
-        'South==0.7.3',
+        'Django==1.7.1',
         'psycopg2==2.4.2',
-        'django-registration==1.0',
-        'django-recaptcha==0.0.9',
+        'django-registration-redux==1.1',
+        'django-recaptcha==1.0.2',
         'fudge==1.0.3',
-        'django-vff==0.2b2',
+        'django-vff==0.2b3',
         'lxml==3.1.2',
         'Pygments==1.4',
         'dnspython==1.11.0',
-        'gitdb==0.6.0',
-        'djangosaml2-dj16==0.10.0',
+        'gitdb==0.6.4',
+        'djangosaml2',
         'python-whois==0.2',
         'publicsuffix==1.0.5',
+        'pycrypto==2.6.1',
     ],
     dependency_links=[
         'http://launchpad.net/pysaml2/0.2.1/0.2.1/+download/pysaml2-0.2.1.tgz',
