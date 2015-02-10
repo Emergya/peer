@@ -35,16 +35,16 @@ _ = lambda s: s
 
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+    # ('Ioannis Kakavas', 'ikakavas@grnet.gr'),
 )
 
 MANAGERS = ADMINS
 
-DEFAULT_FROM_EMAIL = 'no-reply@example.com'
+DEFAULT_FROM_EMAIL = 'no-reply@peer.aai.grnet.gr'
 
 DATABASES = {
     'default': {
@@ -52,8 +52,8 @@ DATABASES = {
         'NAME': 'peer',                                      # Or path to database file if using sqlite3.
         'USER': 'peer',                                      # Not used with sqlite3.
         'PASSWORD': 'peer',                                  # Not used with sqlite3.
-        'HOST': '',                                          # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                                          # Set to empty string for default. Not used with sqlite3.
+        'HOST': 'localhost',                                          # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '5433',                                          # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -64,7 +64,7 @@ DATABASES = {
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = None
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -121,8 +121,8 @@ PEER_THEME = {
     'HEADER_BACKGROUND': '',
     'CONTENT_BACKGROUND': '',
     'FOOTER_BACKGROUND': '',
-    'HOME_TITLE': 'Nice to meet you!!',
-    'HOME_SUBTITLE': 'Say hello to federated worldwide services',
+    'HOME_TITLE': 'GRNET Federation AAI',
+    'HOME_SUBTITLE': 'GRNET Federation public registry',
     'JQUERY_UI_THEME': 'default-theme',
 }
 
@@ -156,6 +156,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.messages.context_processors.messages',
     'peer.portal.context_processors.peer_theme',
     'peer.portal.context_processors.auth',
+    'peer.entity.context_processors.global_settings',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -192,6 +193,7 @@ INSTALLED_APPS = (
     'peer.domain',
     'peer.entity',
     'peer.portal',
+    'django_fsm'
 )
 
 # needed for django-registration
@@ -206,8 +208,8 @@ AUTHENTICATION_BACKENDS = (
 
 # Email settings. Commented by security, but should be rewrite on a local or
 # production settings
-# EMAIL_HOST = 'smtp.example.com'
-# EMAIL_PORT = 25
+#EMAIL_HOST = 'localhost'
+#EMAIL_PORT = 25
 
 # reCaptcha keys. Not filled for security
 RECAPTCHA_PUBLIC_KEY = ''
@@ -228,10 +230,28 @@ LOGGING = {
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+	'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'peer.log',
+            'formatter': 'verbose'
+        },
+
+    },
+    'formatters': {
+        'verbose': {
+            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt': "%d/%b/%Y %H:%M:%S"
+        },
     },
     'loggers': {
-        'django.request': {
+        'django': {
+            'handlers': ['file'],
+            'propagate': True,
+            'level': 'DEBUG',
+        },
+	'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
@@ -266,7 +286,7 @@ METADATA_VALIDATORS = (
 # VFF VERSIONED FILE BACKEND:
 VFF_BACKEND = 'vff.git_backend.GitBackend'
 # VFF (git backend) Path to the root of the git repo:
-# VFF_REPO_ROOT = '/path/to/git/repo'
+VFF_REPO_ROOT = 'peer_test'
 # VFF (git backend) Relative path within the git repo
 # to the directory where vff keeps its managed files:
 # VFF_REPO_PATH = 'my/dir'
@@ -313,7 +333,7 @@ NSCA_NOTIFICATION_LEVEL = 3
 NSCA_SERVICE = 'peer'
 
 # Federated auth
-SAML_ENABLED = True
+SAML_ENABLED = False
 SESSION_EXPIRE_AT_BROWSER_CLOSE = SAML_ENABLED
 SAML_CREATE_UNKNOWN_USER = True
 SAML_ATTRIBUTE_MAPPING = {
@@ -330,6 +350,9 @@ SAML_CONFIG = {}  # YOU MUST OVERWRITE THIS IN THE LOCAL SETTINGS
 # Remote user auth
 REMOTE_USER_ENABLED = False
 
+
+# Moderation
+MODERATION_ENABLED = True
 
 try:
     from local_settings import *

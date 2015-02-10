@@ -30,8 +30,7 @@ from django import template
 
 register = template.Library()
 
-from peer.entity.security import can_edit_entity, can_change_entity_team
-
+from peer.entity.security import can_edit_entity, can_change_entity_team, can_approve_change
 
 class PermissionNode(template.Node):
 
@@ -50,16 +49,17 @@ class PermissionNode(template.Node):
         else:
             return ''
 
+class ApproveNode(PermissionNode):
+
+    checker_function = can_approve_change
 
 class EditNode(PermissionNode):
 
     checker_function = can_edit_entity
 
-
 class ChangeTeamNode(PermissionNode):
 
     checker_function = can_change_entity_team
-
 
 @register.tag
 def canedit(parser, token):
@@ -83,3 +83,14 @@ def canchangeteam(parser, token):
     nodelist = parser.parse(('endcanchangeteam', ))
     parser.delete_first_token()
     return ChangeTeamNode(entity, nodelist)
+
+@register.tag
+def canapprove(parser, token):
+    try:
+        name, entity = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError('%r tag requires one argument' %
+                                           token.split_contents()[0])
+    nodelist = parser.parse(('endcanapprove', ))
+    parser.delete_first_token()
+    return ApproveNode(entity, nodelist)

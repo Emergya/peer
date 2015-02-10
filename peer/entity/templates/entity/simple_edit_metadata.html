@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n entity_permissions %}
 
 {% block content %}
 <form class="metadataForm"
@@ -27,7 +27,19 @@
   </fieldset>
 
   <fieldset class="actionRow">
-    <input class="button" type="submit" value="Submit" />
+      {% if MODERATION_ENABLED%}
+            {% canedit entity %}
+    <input class="button" name="submit_changes" type="submit" value="Submit changes for moderation" />
+            {% endcanedit %}
+            {% canapprove entity %}
+    <input class="button" name="approve_changes" type="submit" value="Review and publish changes" />
+            {% endcanapprove %}
+      {% else %}
+            {% canedit entity %}
+    <input class="button" name="submit_changes" type="submit" value="Submit changes" />
+            {% endcanedit %}
+      {% endif %}
+    <input type="hidden" name="button_clicked" value="">
   </fieldset>
 </form>
 {% endblock %}

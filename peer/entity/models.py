@@ -4,8 +4,8 @@
 # modification, are permitted provided that the following conditions
 # are met:
 #
-#    1. Redistributions of source code must retain the above copyright notice,
-#       this list of conditions and the following disclaimer.
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
 #
 #    2. Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
@@ -35,7 +35,7 @@ from django.db import models
 from django.utils.translation import ugettext
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
-
+from django_fsm import FSMField, transition
 from vff.field import VersionedFileField
 
 from peer.customfields import SafeCharField
@@ -55,7 +55,6 @@ CONNECTION_TIMEOUT = 10
 
 
 class Metadata(object):
-
     def __init__(self, etree):
         self.etree = etree
 
@@ -223,14 +222,25 @@ class Metadata(object):
 
 class Entity(models.Model):
 
+    class STATE:
+        NEW = 'new'
+        MOD = 'modified'
+        PUB = 'published'
+
+    state = FSMField(default=STATE.NEW, protected=True, verbose_name=_(u'Entity Metadata State'))
     metadata = VersionedFileField('metadata', verbose_name=_(u'Entity metadata'),
-                                  blank=True, null=True,)
+                                  blank=True, null=True, )
+    temp_metadata = models.TextField(verbose_name=_(u'Metadata pending review'), blank=True, null=True)
+    diff_metadata = models.TextField(verbose_name=_(u'Diff pending review'), blank=True, null=True)
     owner = models.ForeignKey(User, verbose_name=_('Owner'),
                               blank=True, null=True)
     domain = models.ForeignKey(Domain, verbose_name=_('Domain'))
     delegates = models.ManyToManyField(User, verbose_name=_('Delegates'),
                                        related_name='permission_delegated',
                                        through='PermissionDelegation')
+    reviewers = models.ManyToManyField(User, verbose_name=_(u'Specified Reviewers'),
+                                       related_name='review_specified',
+                                       through='ReviewSpecification')
     creation_time = models.DateTimeField(verbose_name=_(u'Creation time'),
                                          auto_now_add=True)
     modification_time = models.DateTimeField(verbose_name=_(u'Modification time'),
@@ -261,6 +271,7 @@ class Entity(models.Model):
     objects = EntityManager()
 
     def __unicode__(self):
+
         result = unicode(self.id)
         if self.has_metadata():
             if self.display_name:
@@ -290,7 +301,10 @@ class Entity(models.Model):
 
     def _load_metadata(self):
         if not hasattr(self, '_parsed_metadata'):
-            data = self.metadata.read()
+            if settings.MODERATION_ENABLED and self.state == self.STATE.MOD and self.temp_metadata != "":
+                data = self.temp_metadata
+            else:
+                data = self.metadata.read()
             if not data:
                 raise ValueError('no metadata content')
             try:
@@ -402,10 +416,23 @@ class Entity(models.Model):
 
         return 'Success: Data was updated successfully'
 
+    @transition(field=state, source='*', target=STATE.MOD)
+    def modify(self, diff, temp_metadata):
+        self.diff_metadata = diff
+        self.temp_metadata = temp_metadata
+
+    @transition(field=state, source='*', target=STATE.PUB)
+    def approve(self, name, content, username, commit_msg):
+        self.diff_metadata = ''
+        self.temp_metadata = ''
+        self.metadata.save(name, content, username, commit_msg)
+
 
 def handler_entity_pre_save(sender, instance, **kwargs):
     if not instance.is_metarefreshable:
         instance.metarefresh_frequency = 'N'  # Never
+
+
 models.signals.pre_save.connect(handler_entity_pre_save, sender=Entity)
 
 
@@ -424,7 +451,6 @@ if hasattr(settings, 'NSCA_COMMAND') and settings.NSCA_COMMAND:
 
 
 class EntityGroup(models.Model):
-
     name = SafeCharField(_(u'Name of the group'), max_length=200)
     query = SafeCharField(_(u'Query that defines the group'), max_length=100)
     owner = models.ForeignKey(User, verbose_name=_('Owner'))
@@ -438,7 +464,6 @@ class EntityGroup(models.Model):
 
 
 class PermissionDelegation(models.Model):
-
     entity = models.ForeignKey(Entity, verbose_name=_(u'Entity'))
     delegate = models.ForeignKey(User, verbose_name=_('Delegate'),
                                  related_name='permission_delegate')
@@ -453,3 +478,16 @@ class PermissionDelegation(models.Model):
     class Meta:
         verbose_name = _(u'Permission delegation')
         verbose_name_plural = _(u'Permission delegations')
+
+
+class ReviewSpecification(models.Model):
+    entity = models.ForeignKey(Entity, verbose_name=_(u'Entity'))
+    reviewer = models.ForeignKey(User, verbose_name=_(u'Reviewer'), related_name=_(u'specified reviewer'))
+
+    def __unicode__(self):
+        return ugettext(
+            u' specified reviewers for %(entity)s entity') % {'entity': unicode(self.entity)}
+
+    class Meta:
+        verbose_name = _(u'Reviewer specification')
+        verbose_name_plural = _(u'Reviewer specifications')

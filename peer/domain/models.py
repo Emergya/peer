@@ -51,6 +51,9 @@ class Domain(models.Model):
     team = models.ManyToManyField(User, verbose_name=_('Team'),
                                   related_name='team_domains',
                                   through='DomainTeamMembership')
+    reviewers = models.ManyToManyField(User, verbose_name=_('Reviewers'),
+                                       related_name='reviewer_team_domains',
+                                       through='DomainReviewerTeamMembership')
 
     @property
     def validation_url(self):
@@ -103,6 +106,24 @@ class DomainTeamMembership(models.Model):
     class Meta:
         verbose_name = _(u'Domain team membership')
         verbose_name_plural = _(u'Domain team memberships')
+
+    def __unicode__(self):
+        return ugettext(
+            u'%(user)s can create entities with domain %(domain)s') % {
+            'user': self.member.username, 'domain': self.domain.name}
+
+
+class DomainReviewerTeamMembership(models.Model):
+
+    domain = models.ForeignKey(Domain, verbose_name=_(u'Domain'))
+    member = models.ForeignKey(User, verbose_name=_('Member'),
+                               related_name='domain_reviewer_teams')
+    date = models.DateTimeField(_(u'Membership date'),
+                                default=datetime.now)
+
+    class Meta:
+        verbose_name = _(u'Domain reviewer team membership')
+        verbose_name_plural = _(u'Domain reviewer team memberships')
 
     def __unicode__(self):
         return ugettext(
