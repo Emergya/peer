@@ -29,7 +29,7 @@
 
 from django.conf import settings
 from django.core.paginator import Paginator, Page, InvalidPage, EmptyPage
-from django.utils.simplejson import dumps
+from json import dumps
 
 
 class EntitiesPaginator(Paginator):

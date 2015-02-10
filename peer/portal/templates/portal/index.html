@@ -16,22 +16,29 @@
     <img class="hello" src="{{ STATIC_URL }}images/hello_icon.png" alt="¡Hola!" width="95" height="141">
   </header>
 
-  <form id="search" method="get" action="{% url 'search_entities' %}">
-    <input type="text" name="query" id="query" autofocus="autofocus" />
-  </form>
+  {% if user.is_authenticated %}
+    <form id="search" method="get" action="{% url 'search_entities' %}">
+        <input type="text" name="query" id="query" autofocus="autofocus" />
+    </form>
 
-  {% include "portal/menu.html" %}
+    {% include "portal/menu.html" %}
 
-  <section id="home-content" class="mainContent">
-    <h1>{% trans "Latest Entities" %}</h1>
-    <ul class="entityList">
-      {% for entity in entities %}
-      {% render_entity_as_list_item entity %}
-      {% endfor %}
-    </ul>
+    <section id="home-content" class="mainContent">
+        <h1>{% trans "Latest Entities" %}</h1>
+        <ul class="entityList">
+        {% for entity in entities %}
+        {% render_entity_as_list_item entity %}
+        {% endfor %}
+        </ul>
 
-    <p><a class="button" href="{% url 'entities_list' %}">{% trans "Full list of entities" %}</a></p>
-  </section>
+        <p><a class="button" href="{% url 'entities_list' %}">{% trans "Full list of entities" %}</a></p>
+    </section>
+  {% else %}
+    <div class="centerText">
+      <h3>{{ HOME_SLOGAN }}</h3>
+      <p><a class="button" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></p>
+    </div>
+  {% endif %}
 
 </section>
 

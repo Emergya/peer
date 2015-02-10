@@ -123,6 +123,7 @@ PEER_THEME = {
     'FOOTER_BACKGROUND': '',
     'HOME_TITLE': 'GRNET Federation AAI',
     'HOME_SUBTITLE': 'GRNET Federation public registry',
+    'HOME_SLOGAN': 'Default text for the slogan',
     'JQUERY_UI_THEME': 'default-theme',
 }
 
@@ -187,7 +188,6 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'captcha',
     'registration',
-    'south',
     'djangosaml2',
     'peer.account',
     'peer.domain',
