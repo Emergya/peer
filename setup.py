@@ -86,6 +86,7 @@ setup(
         'python-whois==0.2',
         'publicsuffix==1.0.5',
         'pycrypto==2.6.1',
+        'django-fsm',
     ],
     dependency_links=[
         'http://launchpad.net/pysaml2/0.2.1/0.2.1/+download/pysaml2-0.2.1.tgz',

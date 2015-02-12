@@ -7,7 +7,7 @@
 # 1. Redistributions of source code must retain the above copyright notice,
 # this list of conditions and the following disclaimer.
 #
-#    2. Redistributions in binary form must reproduce the above copyright
+# 2. Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
 #
@@ -221,7 +221,6 @@ class Metadata(object):
 
 
 class Entity(models.Model):
-
     class STATE:
         NEW = 'new'
         MOD = 'modified'
@@ -230,7 +229,7 @@ class Entity(models.Model):
     state = FSMField(default=STATE.NEW, protected=True, verbose_name=_(u'Entity Metadata State'))
     metadata = VersionedFileField('metadata', verbose_name=_(u'Entity metadata'),
                                   blank=True, null=True, )
-    temp_metadata = models.TextField(verbose_name=_(u'Metadata pending review'), blank=True, null=True)
+    temp_metadata = models.TextField(default='', verbose_name=_(u'Metadata pending review'), blank=True, null=True)
     diff_metadata = models.TextField(verbose_name=_(u'Diff pending review'), blank=True, null=True)
     owner = models.ForeignKey(User, verbose_name=_('Owner'),
                               blank=True, null=True)
@@ -238,9 +237,9 @@ class Entity(models.Model):
     delegates = models.ManyToManyField(User, verbose_name=_('Delegates'),
                                        related_name='permission_delegated',
                                        through='PermissionDelegation')
-    reviewers = models.ManyToManyField(User, verbose_name=_(u'Specified Reviewers'),
-                                       related_name='review_specified',
-                                       through='ReviewSpecification')
+    moderators = models.ManyToManyField(User, verbose_name=_(u'Delegated Moderators'),
+                                        related_name='moderation_delegated',
+                                        through='ModerationDelegation')
     creation_time = models.DateTimeField(verbose_name=_(u'Creation time'),
                                          auto_now_add=True)
     modification_time = models.DateTimeField(verbose_name=_(u'Modification time'),
@@ -301,8 +300,11 @@ class Entity(models.Model):
 
     def _load_metadata(self):
         if not hasattr(self, '_parsed_metadata'):
-            if settings.MODERATION_ENABLED and self.state == self.STATE.MOD and self.temp_metadata != "":
-                data = self.temp_metadata
+            if settings.MODERATION_ENABLED:
+                if self.temp_metadata != '' and self.state != 'published':
+                    data = self.temp_metadata
+                else:
+                    data = self.metadata.read()
             else:
                 data = self.metadata.read()
             if not data:
@@ -417,15 +419,17 @@ class Entity(models.Model):
         return 'Success: Data was updated successfully'
 
     @transition(field=state, source='*', target=STATE.MOD)
-    def modify(self, diff, temp_metadata):
-        self.diff_metadata = diff
+    def modify(self, temp_metadata):
         self.temp_metadata = temp_metadata
 
     @transition(field=state, source='*', target=STATE.PUB)
     def approve(self, name, content, username, commit_msg):
-        self.diff_metadata = ''
         self.temp_metadata = ''
         self.metadata.save(name, content, username, commit_msg)
+
+    @transition(field=state, source=STATE.MOD, target=STATE.PUB)
+    def reject(self):
+        self.temp_metadata = ''
 
 
 def handler_entity_pre_save(sender, instance, **kwargs):
@@ -480,14 +484,14 @@ class PermissionDelegation(models.Model):
         verbose_name_plural = _(u'Permission delegations')
 
 
-class ReviewSpecification(models.Model):
+class ModerationDelegation(models.Model):
     entity = models.ForeignKey(Entity, verbose_name=_(u'Entity'))
-    reviewer = models.ForeignKey(User, verbose_name=_(u'Reviewer'), related_name=_(u'specified reviewer'))
+    moderator = models.ForeignKey(User, verbose_name=_(u'Moderator'), related_name=_(u'delegated moderator'))
 
     def __unicode__(self):
         return ugettext(
-            u' specified reviewers for %(entity)s entity') % {'entity': unicode(self.entity)}
+            u'%(user)s delegates moderation for %(entity)s entity') % {'entity': unicode(self.entity)}
 
     class Meta:
-        verbose_name = _(u'Reviewer specification')
-        verbose_name_plural = _(u'Reviewer specifications')
+        verbose_name = _(u'Moderation delegation')
+        verbose_name_plural = _(u'Moderation delegations')

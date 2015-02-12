@@ -1,7 +1,7 @@
 {% load i18n account entity_renderers %}
 
 <li>
-<div {% if entity.state != "published" and MODERATION_ENABLED %} class="not_published" {% endif %}>
+<div>
   <ul class="features">
   {% if endpoints %}
   <li>{{ endpoints }}<span class="ui-icon ui-icon-link" title="{% trans "Endpoints" %}"></span></li>
@@ -16,7 +16,7 @@
   {% endif %}
   </ul>
 
-<a class="entityName" href="{{ entity.get_absolute_url }}">{{ entity }}</a> {% if entity.state != "published" and MODERATION_ENABLED %} (Pending review) {% endif %}
+<a class="entityName" href="{{ entity.get_absolute_url }}">{{ entity }}</a> {% if moderation_enabled and entity.state != "published"%} (Pending moderation) {% endif %}
 <ul>
   <li><a href="{% url 'search_entities' %}?domain={{ entity.domain }}">{{ entity.domain }}</a></li>
 

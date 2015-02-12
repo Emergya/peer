@@ -8,13 +8,17 @@
         var settings = $.extend({
             titleReviewMsg: 'Review Changes',
             titleCommitMsg: 'Commit Changes',
+            titleDiscardMsg: 'Discard Changes',
+            diffDiscardMsg: 'The following changes will be discarded',
             validatingMsg: 'Validating metadata ...',
             validMetadataMsg: 'The metadata is valid!',
             invalidMetadataMsg: 'The metadata is not valid!',
             submitButtonLabel: 'Submit changes',
+            discardButtonLabel: 'Discard changes',
             closeButtonLabel: 'Cancel',
             noCommitMessageAlert: 'Please write a commit message',
             noReviewMessageAlert: 'Please write a short message describing your changes',
+            noDiscardMessageAlert: 'Please write a short message describing why you discard the changes',
             noTOUAcceptedAlert: 'You must accept the terms of use',
             mandatoryInput: 'This input field is mandatory'
         }, options),
@@ -31,7 +35,7 @@
                         '<label id="msg" for="' + msg_id + '"></label>',
                         '<label class="error_label"></label>',
                         '<input type="text" id="' + msg_id + '" name="' + msg_id + '" style="width: 90%" />',
-                        '<p>and review your changes</p>',
+                        '<p id="after_diff_msg">and review your changes</p>',
                         '<div style="overflow: auto;"></div>',
                         '</div>',
                         '</div>',
@@ -81,7 +85,11 @@
 
             successHandler = function (data, textStatus, jqXHR) {
                 commit_spinner.stop();
-                $dialog.find("h2").text(settings.validMetadataMsg);
+                if ($dialog.dialog("option", "title") === settings.titleDiscardMsg){
+                    $dialog.find("h2").text("");
+                }else{
+                    $dialog.find("h2").text(settings.validMetadataMsg);
+                }
                 $dialog.find("#dialog-commit-msg").val("");
                 $diffViewer.html(data);
 
@@ -91,13 +99,24 @@
                 resizeDiffViewer();
 
                 // Show both buttons
-                $dialog.dialog("option", "buttons", [{
-                    text: settings.submitButtonLabel,
-                    click: submitButtonHandler
-                }, {
-                    text: settings.closeButtonLabel,
-                    click: closeButtonHandler
+                if ($dialog.dialog("option", "title") === settings.titleDiscardMsg){
+                    $dialog.dialog("option", "buttons", [{
+                        text: settings.discardButtonLabel,
+                        click: submitButtonHandler
+                    }, {
+                        text: settings.closeButtonLabel,
+                        click: closeButtonHandler
+                    }]);
+                }else{
+                    $dialog.dialog("option", "buttons", [{
+                        text: settings.submitButtonLabel,
+                        click: submitButtonHandler
+                    }, {
+                        text: settings.closeButtonLabel,
+                        click: closeButtonHandler
                 }]);
+                }
+
             };
 
             errorHandler = function (jqXHR, textStatus, errorThrown) {
@@ -146,16 +165,19 @@
 
             openHandler = function (event, ui) {
                 var act = $(this).data('action');
-                if (act === undefined){
-                    $dialog.dialog("option", "title", settings.titleCommitMsg)
-                    $dialog.find("#msg").html(settings.noCommitMessageAlert)
+                if (act === 'commit_changes'){
+                    $dialog.dialog("option", "title", settings.titleCommitMsg);
+                    $dialog.find("#msg").html(settings.noCommitMessageAlert);
                 }else if (act == 'submit_changes'){
-                    $dialog.dialog("option", "title", settings.titleReviewMsg)
-                    $dialog.find("#msg").html(settings.noReviewMessageAlert)
-
+                    $dialog.dialog("option", "title", settings.titleReviewMsg);
+                    $dialog.find("#msg").html(settings.noReviewMessageAlert);
                 }else if (act == 'approve_changes'){
-                    $dialog.dialog("option", "title", settings.titleCommitMsg)
-                    $dialog.find("#msg").html(settings.noCommitMessageAlert)
+                    $dialog.dialog("option", "title", settings.titleCommitMsg);
+                    $dialog.find("#msg").html(settings.noCommitMessageAlert);
+                }else if (act == 'discard_changes'){
+                    $dialog.dialog("option", "title", settings.titleDiscardMsg);
+                    $dialog.find("#msg").html(settings.noDiscardMessageAlert);
+                    $dialog.find("#after_diff_msg").html(settings.diffDiscardMsg);
                 }
                 // Hide the messages at the top of the page
                 $('.ui-state-error').parent().remove();
@@ -208,28 +230,28 @@
             $commitMsgInput.parent().hide();
 
             // Form submit buttons trigger the dialog
-            // If we are using the moderation flow
-            if ($form.find("input[name=submit_changes]").size() > 0 || $form.find("input[name=approve_changes]").size()>0 ){
-                $form.find("input[name=submit_changes]").click(function (event) {
-                    event.preventDefault();
-                    if ($form.find('input[type=file]').size() > 0 && $form.find('input[type=file]').val() == ""){
-                        $form.find('input[type=file]').addClass("error_message")
-                    }else{
-                        $dialog.data("action", "submit_changes").dialog('open');
-                    }
 
+            $form.find("input[name=submit_changes]").click(function (event) {
+                event.preventDefault();
+                if ($form.find('input[type=file]').size() > 0 && $form.find('input[type=file]').val() == ""){
+                    $form.find('input[type=file]').addClass("error_message")
+                }else{
+                    $dialog.data("action", "submit_changes").dialog('open');
+                }
+            });
+            $form.find("input[name=approve_changes]").click(function (event) {
+                event.preventDefault();
+                $dialog.data("action", "approve_changes").dialog('open');
+            });
+            $form.find("input[name=discard_changes]").click(function (event) {
+                event.preventDefault();
+                $dialog.data("action", "discard_changes").dialog('open');
+            });
+            $form.find("input[name=commit_changes]").click(function (event) {
+                event.preventDefault();
+                $dialog.data("action", "commit_changes").dialog('open');
+            });
 
-                });
-                $form.find("input[name=approve_changes]").click(function (event) {
-                    event.preventDefault();
-                    $dialog.data("action", "approve_changes").dialog('open');
-                });
-            }else{
-                $form.find("input[type=submit]").click(function (event) {
-                    event.preventDefault();
-                    $dialog.dialog('open');
-                });
-            }
         });
 
     };

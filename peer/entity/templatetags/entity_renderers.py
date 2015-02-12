@@ -33,7 +33,7 @@ register = template.Library()
 
 
 @register.inclusion_tag('entity/list_item.html')
-def render_entity_as_list_item(entity):
+def render_entity_as_list_item(entity, moderation_enabled):
     has_metadata = entity.has_metadata()
 
     state = None
@@ -71,6 +71,7 @@ def render_entity_as_list_item(entity):
         'endpoints': endpoints,
         'contacts': contacts,
         'certificates': certificates,
+        'moderation_enabled': moderation_enabled,
     }
 
 

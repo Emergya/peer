@@ -38,6 +38,7 @@ User Manual
    users
    domains
    entities
+   moderation_flow
 
 Appendices
 ==========

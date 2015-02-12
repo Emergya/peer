@@ -83,10 +83,34 @@ in order to make it easier to fix these problems.
 All the inputs in these forms are required: leaving one of them empty will
 trigger a validation error, and the user will be prompted to fill in the
 missing value. Additionally, the system will check that the entered metadata
-(irrespective of the method used to enter it) is valid according tot the
+(irrespective of the method used to enter it) is valid according to the
 validators that are configured in this PEER site. If it isn't valid,
 the metadata will not be saved and the user will be prompted to enter
 correct values, with indications, whenever possible, of the detected errors.
+
+Metadata changes moderation
+---------------------------
+
+Moderation for metadata changes can be turned by setting the value of MODERATION_ENABLED 
+to True in settings.py. When moderation is enabled the changes made to the metadata of entities
+by the domain owner are not automatically committed in VCS and thus reflected to the
+Entity metadata. Instead, the changes are stored in the django database temporarily. The
+domain owner can make consecutive changes to the metadata and these are accumulated and
+stored for moderation. It should be noted that the changes are reflected in the user
+interface so that the entity owner can see the current version of the metadata
+after his changes and act upon them, revoking the changes or making additional ones.
+
+The moderation is handled by superusers and optionally from a group of users called
+"Moderators". The moderation privilege can also be delegated to certain users manually
+through the django admin site.
+
+When a moderator logs in to peer, they have the possibility to view and approve the accumulated
+changes for an entity's metadata and, by submitting their approval, commit the metadata
+to the file, thus marking the changes "published". They also have the possibility to
+make further changes and submit them for moderation again ( by another moderator - or
+themselves in the future ).
+
+The moderation applies to all the 3 methods of metadata edition.
 
 Details view
 ------------

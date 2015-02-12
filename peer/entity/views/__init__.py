@@ -66,7 +66,6 @@ def entity_add_with_domain(request, domain_name=None,
     else:
         domain = get_object_or_404(Domain, name=domain_name)
         entity = Entity(domain=domain)
-
     if request.method == 'POST':
         form = EntityForm(request.user, request.POST, instance=entity)
         if form.is_valid():
@@ -94,9 +93,14 @@ def entity_add_with_domain(request, domain_name=None,
 def entity_view(request, entity_id):
     entity = get_object_or_404(Entity, id=entity_id)
     if entity.has_metadata():
-        revs = add_previous_revisions(entity.metadata.list_revisions())
+        try:
+            revs = add_previous_revisions(entity.metadata.list_revisions())
+        except ValueError:
+            # New entity with no commited metadata, so revisions are empty
+            revs = []
     else:
         revs = []
+
 
     return render_to_response('entity/view.html', {
         'entity': entity,

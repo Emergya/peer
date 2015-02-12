@@ -2,7 +2,7 @@
 
 <ul class="entityList">
     {% for entity in entities.object_list %}
-      {% render_entity_as_list_item entity %}
+      {% render_entity_as_list_item entity MODERATION_ENABLED %}
     {% endfor %}
 </ul>
 

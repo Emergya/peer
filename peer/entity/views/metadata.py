@@ -87,6 +87,8 @@ def _get_success_message(action):
             success_message = _('Entity metadata has been modified')
         elif 'submit_changes' == action:
             success_message = _('Entity metadata modification has been submitted for review')
+        elif 'discard_changes' == action:
+            success_message = _('Entity metadata modifications have been discarded')
     else:
         success_message = _('Entity metadata has been modified')
     return success_message
@@ -141,6 +143,9 @@ def text_edit_metadata(request, entity_id):
                 if 'approve_changes' == request.POST['button_clicked']:
                     if not can_approve_change(request.user, entity):
                         raise PermissionDenied
+                if 'discard_changes' == request.POST['button_clicked']:
+                    if not can_approve_change(request.user, entity):
+                        raise PermissionDenied
         else:
             if not can_edit_entity(request.user, entity):
                         raise PermissionDenied
@@ -167,6 +172,9 @@ def file_edit_metadata(request, entity_id):
                 if 'approve_changes' == request.POST['button_clicked']:
                     if not can_approve_change(request.user, entity):
                         raise PermissionDenied
+                if 'discard_changes' == request.POST['button_clicked']:
+                    if not can_approve_change(request.user, entity):
+                        raise PermissionDenied
         else:
             if not can_edit_entity(request.user, entity):
                         raise PermissionDenied
@@ -182,11 +190,22 @@ def file_edit_metadata(request, entity_id):
 @login_required
 def remote_edit_metadata(request, entity_id):
     entity = get_object_or_404(Entity, id=entity_id)
-    if not can_edit_entity(request.user, entity):
-        raise PermissionDenied
-
     if request.method == 'POST':
         form = MetadataRemoteEditForm(entity, request.user, request.POST)
+        if settings.MODERATION_ENABLED:
+            if 'button_clicked' in request.POST and request.POST['button_clicked'] != '' and len(request.FILES) > 0:
+                if 'submit_changes' == request.POST['button_clicked']:
+                    if not can_edit_entity(request.user, entity):
+                        raise PermissionDenied
+                if 'approve_changes' == request.POST['button_clicked']:
+                    if not can_approve_change(request.user, entity):
+                        raise PermissionDenied
+                if 'discard_changes' == request.POST['button_clicked']:
+                    if not can_approve_change(request.user, entity):
+                        raise PermissionDenied
+        else:
+            if not can_edit_entity(request.user, entity):
+                        raise PermissionDenied
         result = _handle_metadata_post(request, form, 'remote_edit_metadata')
         if result is not None:
             return result

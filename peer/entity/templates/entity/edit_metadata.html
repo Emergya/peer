@@ -90,24 +90,27 @@
                     'error': true
                 }
             });
-            // If we are using the moderation flow
-            if ($("form input[name=submit_changes]").size() > 0 || $("form input[name=approve_changes]").size()>0 ){
-                $("form input[name=submit_changes]").click(function () {
-                    $("form input[name=button_clicked]").val("submit_changes");
-                    $("a[href='#rawmetadata']").click();
-                    return true;
-                });
-                 $("form input[name=approve_changes]").click(function () {
-                    $("form input[name=button_clicked]").val("approve_changes");
-                    $("a[href='#rawmetadata']").click();
-                    return true;
-                });
-            }else{
-                $("form#text_edit_form input[type=submit]").click(function () {
-                    $("a[href='#rawmetadata']").click();
-                    return true;
-                });
-            }
+            $("form input[name=commit_changes]").click(function () {
+                $("form input[name=button_clicked]").val("commit_changes");
+                $("a[href='#rawmetadata']").click();
+                return true;
+            });
+            $("form input[name=submit_changes]").click(function () {
+                $("form input[name=button_clicked]").val("submit_changes");
+                $("a[href='#rawmetadata']").click();
+                return true;
+            });
+             $("form input[name=approve_changes]").click(function () {
+                $("form input[name=button_clicked]").val("approve_changes");
+                $("a[href='#rawmetadata']").click();
+                return true;
+            });
+            $("form input[name=discard_changes]").click(function () {
+                $("form input[name=button_clicked]").val("discard_changes");
+                $("a[href='#rawmetadata']").click();
+                return true;
+            });
+
             // There should be an API in SAMLmetaJS for this
             // This is just a hack until we add such API
             $("#text_edit_form input, #text_edit_form textarea, #text_edit_form select").live('change', set_dirty);

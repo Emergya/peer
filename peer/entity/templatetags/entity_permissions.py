@@ -32,6 +32,7 @@ register = template.Library()
 
 from peer.entity.security import can_edit_entity, can_change_entity_team, can_approve_change
 
+
 class PermissionNode(template.Node):
 
     checker_function = None

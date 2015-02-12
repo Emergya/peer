@@ -10,7 +10,7 @@
       <li><a href="{% url 'edit_metadata' entity.id %}">{% trans "Edit metadata" %}</a></li>
       {% if MODERATION_ENABLED and entity.state != "published"%}
             {% canapprove entity %}
-      <li><a href="{% url 'edit_metadata' entity.id %}">{% trans "Approve metadata changes" %}</a></li>
+      <li><a href="{% url 'edit_metadata' entity.id %}">{% trans "Approve/Reject metadata changes" %}</a></li>
             {% endcanapprove %}
       {% endif %}
       <li><a href="{% url 'entity_remove' entity.id %}">{% trans "Remove" %}</a></li>

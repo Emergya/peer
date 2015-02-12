@@ -27,16 +27,17 @@
   </fieldset>
 
   <fieldset class="actionRow">
-      {% if MODERATION_ENABLED%}
+      {% if MODERATION_ENABLED %}
             {% canedit entity %}
     <input class="button" name="submit_changes" type="submit" value="Submit changes for moderation" />
             {% endcanedit %}
             {% canapprove entity %}
     <input class="button" name="approve_changes" type="submit" value="Review and publish changes" />
+    <input class="button" name="discard_changes" type="submit" value="Discard changes" />
             {% endcanapprove %}
       {% else %}
             {% canedit entity %}
-    <input class="button" name="submit_changes" type="submit" value="Submit changes" />
+    <input class="button" type="submit" value="Submit changes" />
             {% endcanedit %}
       {% endif %}
     <input type="hidden" name="button_clicked" value="">

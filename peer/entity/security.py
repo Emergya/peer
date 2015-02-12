@@ -50,7 +50,7 @@ def can_approve_change(user, entity):
     if user.is_superuser:
         return True
     try:
-        entity.reviewers.get(id=user.id)
+        entity.moderators.get(id=user.id)
         return True
     except ObjectDoesNotExist:
         return False

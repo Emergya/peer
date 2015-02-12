@@ -176,10 +176,11 @@ class BaseMetadataEditForm(forms.Form):
         commit_msg = self.cleaned_data['commit_msg_' + self.type].encode('utf8')
         if settings.MODERATION_ENABLED:
             if action == 'submit_changes':
-                diff = self.get_diff()
-                self.entity.modify(diff, self.metadata)
+                self.entity.modify(self.metadata)
             elif action == 'approve_changes':
                 self.entity.approve(name, content, username, commit_msg)
+            elif action == 'discard_changes':
+                self.entity.reject()
         else:
             self.entity.metadata.save(name, content, username, commit_msg)
         self.entity.save()

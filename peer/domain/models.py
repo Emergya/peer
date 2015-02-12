@@ -4,7 +4,7 @@
 # modification, are permitted provided that the following conditions
 # are met:
 #
-#    1. Redistributions of source code must retain the above copyright notice,
+# 1. Redistributions of source code must retain the above copyright notice,
 #       this list of conditions and the following disclaimer.
 #
 #    2. Redistributions in binary form must reproduce the above copyright
@@ -39,7 +39,6 @@ from peer.domain.utils import generate_validation_key
 
 
 class Domain(models.Model):
-
     name = SafeCharField(_(u'Domain name'), max_length=100, unique=True)
     owner = models.ForeignKey(User, verbose_name=_('Identified domain owner'),
                               blank=True, null=True)
@@ -51,9 +50,9 @@ class Domain(models.Model):
     team = models.ManyToManyField(User, verbose_name=_('Team'),
                                   related_name='team_domains',
                                   through='DomainTeamMembership')
-    reviewers = models.ManyToManyField(User, verbose_name=_('Reviewers'),
-                                       related_name='reviewer_team_domains',
-                                       through='DomainReviewerTeamMembership')
+    moderators = models.ManyToManyField(User, verbose_name=_('Reviewers'),
+                                        related_name='moderator_team_domains',
+                                        through='DomainModeratorsTeamMembership')
 
     @property
     def validation_url(self):
@@ -92,11 +91,11 @@ def pre_save_handler(sender, instance, **kwargs):
             instance.owner and instance.owner.username)
         instance.save()
 
+
 signals.post_save.connect(pre_save_handler, sender=Domain)
 
 
 class DomainTeamMembership(models.Model):
-
     domain = models.ForeignKey(Domain, verbose_name=_(u'Domain'))
     member = models.ForeignKey(User, verbose_name=_('Member'),
                                related_name='domain_teams')
@@ -113,26 +112,24 @@ class DomainTeamMembership(models.Model):
             'user': self.member.username, 'domain': self.domain.name}
 
 
-class DomainReviewerTeamMembership(models.Model):
-
+class DomainModeratorsTeamMembership(models.Model):
     domain = models.ForeignKey(Domain, verbose_name=_(u'Domain'))
     member = models.ForeignKey(User, verbose_name=_('Member'),
-                               related_name='domain_reviewer_teams')
+                               related_name='domain_moderator_teams')
     date = models.DateTimeField(_(u'Membership date'),
                                 default=datetime.now)
 
     class Meta:
-        verbose_name = _(u'Domain reviewer team membership')
-        verbose_name_plural = _(u'Domain reviewer team memberships')
+        verbose_name = _(u'Domain moderator team membership')
+        verbose_name_plural = _(u'Domain moderator team memberships')
 
     def __unicode__(self):
         return ugettext(
-            u'%(user)s can create entities with domain %(domain)s') % {
+            u'%(user)s can moderate entities with domain %(domain)s') % {
             'user': self.member.username, 'domain': self.domain.name}
 
 
 class DomainToken(models.Model):
-
     domain = models.CharField(_(u'Domain name'), max_length=100)
     token = models.CharField(_(u'Token'), unique=True, max_length=100)
 
