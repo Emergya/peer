@@ -1,6 +1,18 @@
 CHANGES
 =======
 
+0.17.0 (2015-02-12)
+-------------------
+
+- Updated djangosaml2 to 0.13.0
+
+0.16.0 (2015-02-04)
+-------------------
+
+- django 1.7 support
+- some changes in the front page
+- Updated GitPython to 0.3.6, gitdb to 0.6.4, django-vff to 0.2b3
+
 0.14.0 (2014-11-20)
 -------------------
 - When a subdomain of a verified domain is added by the same user,
