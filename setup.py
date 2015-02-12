@@ -82,12 +82,11 @@ setup(
         'Pygments==1.4',
         'dnspython==1.11.0',
         'gitdb==0.6.4',
-        'djangosaml2',
+        'djangosaml2==0.13.0',
         'python-whois==0.2',
         'publicsuffix==1.0.5',
         'pycrypto==2.6.1',
     ],
     dependency_links=[
-        'http://launchpad.net/pysaml2/0.2.1/0.2.1/+download/pysaml2-0.2.1.tgz',
     ]
 )
