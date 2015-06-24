@@ -73,7 +73,6 @@ setup(
     zip_safe=False,
     install_requires=[
         'Django==1.8.2',
-        'psycopg2==2.4.5',
         'django-registration-redux==1.1',
         'django-recaptcha==1.0.2',
         'fudge==1.0.3',
@@ -88,6 +87,9 @@ setup(
         'pycrypto==2.6.1',
         'django-fsm',
     ],
+    extras_require = {
+        'PG': ['psycopg2 == 2.5.4',],
+    },
     dependency_links=[
     ]
 )
