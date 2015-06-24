@@ -31,9 +31,14 @@ from django import template
 register = template.Library()
 
 
+
 @register.inclusion_tag('entity/list_item.html')
-def render_entity_as_list_item(entity):
+def render_entity_as_list_item(entity, moderation_enabled):
     has_metadata = entity.has_metadata()
+
+    state = None
+    if has_metadata and entity.state:
+        state = entity.state
 
     organization = None
     if has_metadata and entity.organization:
@@ -59,12 +64,14 @@ def render_entity_as_list_item(entity):
 
     return {
         'entity': entity,
+        'state': state,
         'has_metadata': has_metadata,
         'organization': organization,
         'valid_until': valid_until,
         'endpoints': endpoints,
         'contacts': contacts,
         'certificates': certificates,
+        'moderation_enabled': moderation_enabled,
     }
 
 

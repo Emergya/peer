@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load i18n %}
+{% load i18n entity_permissions %}
 
 {% block jspluginscss %}
 <link type="text/css" href="{{ STATIC_URL }}js/SAMLmetaJS/css/samlmetajs.css" rel="Stylesheet" />
@@ -43,8 +43,8 @@
 <script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/mdreader.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/samlmeta.xml.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/spin.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.mesh.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.form.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.mesh.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.form.js"></script>
 {% for plugin in samlmetajs_plugins %}
 <script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/samlmeta.plugin.{{ plugin }}.js"></script>
 {% endfor %}
@@ -90,7 +90,23 @@
                     'error': true
                 }
             });
-            $("form#text_edit_form input[type=submit]").click(function () {
+            $("form input[name=commit_changes]").click(function () {
+                $("form input[name=button_clicked]").val("commit_changes");
+                $("a[href='#rawmetadata']").click();
+                return true;
+            });
+            $("form input[name=submit_changes]").click(function () {
+                $("form input[name=button_clicked]").val("submit_changes");
+                $("a[href='#rawmetadata']").click();
+                return true;
+            });
+             $("form input[name=approve_changes]").click(function () {
+                $("form input[name=button_clicked]").val("approve_changes");
+                $("a[href='#rawmetadata']").click();
+                return true;
+            });
+            $("form input[name=discard_changes]").click(function () {
+                $("form input[name=button_clicked]").val("discard_changes");
                 $("a[href='#rawmetadata']").click();
                 return true;
             });

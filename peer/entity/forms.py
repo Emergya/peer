@@ -32,6 +32,7 @@ from django import forms
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext as U
+from django.conf import settings
 
 from peer.account.templatetags.account import authorname
 from peer.customfields import TermsOfUseField, readtou
@@ -137,7 +138,6 @@ class BaseMetadataEditForm(forms.Form):
             raise forms.ValidationError('Empty metadata is not allowed')
 
         metadata = self._field_value_to_metadata(data)
-
         if not metadata:
             raise forms.ValidationError('Empty metadata is not allowed')
 
@@ -169,13 +169,20 @@ class BaseMetadataEditForm(forms.Form):
             text2 = text2.decode('utf-8', 'ignore')
         return u'\n'.join(difflib.unified_diff(text1.split('\n'), text2.split('\n')))
 
-    def save(self):
+    def save(self, action):
         content = write_temp_file(self.metadata)
-
         name = self.entity.metadata.name
         username = authorname(self.user)
         commit_msg = self.cleaned_data['commit_msg_' + self.type].encode('utf8')
-        self.entity.metadata.save(name, content, username, commit_msg)
+        if settings.MODERATION_ENABLED:
+            if action == 'submit_changes':
+                self.entity.modify(self.metadata)
+            elif action == 'approve_changes':
+                self.entity.approve(name, content, username, commit_msg)
+            elif action == 'discard_changes':
+                self.entity.reject()
+        else:
+            self.entity.metadata.save(name, content, username, commit_msg)
         self.entity.save()
 
 
