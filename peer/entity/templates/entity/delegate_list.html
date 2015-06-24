@@ -16,7 +16,7 @@
                  value="{{ delegate.pk }}"
                  />
           <span class="user-name">{% safefullname delegate %}</span>
-          <button type="button" id="{% url 'remove_delegate' entity_id,delegate.id %}"
+          <button type="button" id="{% url 'remove_delegate' entity_id delegate.id %}"
                   class="button remove-delegate-button">
             {% trans "Remove" %}
           </button>

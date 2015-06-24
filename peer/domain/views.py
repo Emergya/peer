@@ -34,7 +34,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.utils.translation import ugettext as _
@@ -252,7 +252,7 @@ def add_delegate(request, domain_id, username):
     user = User.objects.get(username=username)
     if user:
         if user in domain.team.all():
-            return 'delegate'
+            return HttpResponse('delegate')
         else:
             membership = DomainTeamMembership(domain=domain, member=user)
             membership.save()
@@ -269,12 +269,12 @@ def remove_delegate(request, domain_id, username):
     user = User.objects.get(username=username)
     if user:
         if user not in domain.team.all():
-            return 'notdelegate'
+            return HttpResponse('notdelegate')
         else:
             entities = Entity.objects.filter(owner=user)
             for entity in entities:
                 if entity.domain == domain:
-                    return 'hasentities'
+                    return HttpResponse('hasentities')
 
             membership = DomainTeamMembership.objects.get(domain=domain,
                                                           member=user)

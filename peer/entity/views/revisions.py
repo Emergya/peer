@@ -75,7 +75,7 @@ def get_latest_metadata(request, entity_id):
     entity = get_object_or_404(Entity, id=entity_id)
     metadata_text = entity.metadata.get_revision()
     return HttpResponse(metadata_text,
-                        mimetype="application/samlmetadata+xml")
+                        content_type="application/samlmetadata+xml")
 
 
 @cache_page(60 * 60 * 24)
@@ -83,6 +83,5 @@ def get_pygments_css(request):
     formatter = HtmlFormatter(linenos=True, outencoding='utf-8')
     return HttpResponse(
         content=formatter.get_style_defs(arg=''),
-        mimetype='text/css',
         content_type='text/css; charset=' + settings.DEFAULT_CHARSET,
     )
