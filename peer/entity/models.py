@@ -486,7 +486,7 @@ class PermissionDelegation(models.Model):
 
 class ModerationDelegation(models.Model):
     entity = models.ForeignKey(Entity, verbose_name=_(u'Entity'))
-    moderator = models.ForeignKey(User, verbose_name=_(u'Moderator'), related_name=_(u'delegated moderator'))
+    moderator = models.ForeignKey(User, verbose_name=_(u'Moderator'), related_name='delegated_moderator')
 
     def __unicode__(self):
         return ugettext(
