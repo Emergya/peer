@@ -16,7 +16,7 @@
   {% endif %}
   </ul>
 
-<a class="entityName" href="{{ entity.get_absolute_url }}">{{ entity }}</a>
+<a class="entityName" href="{{ entity.get_absolute_url }}">{{ entity }}</a> {% if moderation_enabled and entity.state != "published"%} (Pending moderation) {% endif %}
 <ul>
   <li><a href="{% url 'search_entities' %}?domain={{ entity.domain }}">{{ entity.domain }}</a></li>
 

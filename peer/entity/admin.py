@@ -28,7 +28,7 @@
 
 from django.contrib import admin
 
-from peer.entity.models import Entity, PermissionDelegation
+from peer.entity.models import Entity, PermissionDelegation, ModerationDelegation
 
 
 class EntityAdmin(admin.ModelAdmin):
@@ -40,5 +40,10 @@ class PermissionDelegationAdmin(admin.ModelAdmin):
     pass
 
 
+class ModerationDelegationAdmin(admin.ModelAdmin):
+    pass
+
+
 admin.site.register(Entity, EntityAdmin)
 admin.site.register(PermissionDelegation, PermissionDelegationAdmin)
+admin.site.register(ModerationDelegation, ModerationDelegationAdmin)

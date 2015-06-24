@@ -265,6 +265,10 @@ li.validated {
     -webkit-box-shadow: 0px 0px 0 white;
 }
 
+.entityList .not_published {
+    background-color: #EB9999;
+}
+
 li.validated,
 li.notValidated {
     color: #ff7b33;
@@ -325,6 +329,16 @@ ul.errorlist li.warning {
 ul.errorlist li.error {
     padding-left: 20px;
     background: rgba(255, 201, 172, 0.4) url(../images/error_icon.png) 4px 2px no-repeat;
+}
+
+
+/* input error */
+.error_message {
+    border: #FF0000 1px solid
+}
+
+.error_label {
+    color: #FF0000
 }
 
 /* jquery UI */

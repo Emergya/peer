@@ -27,6 +27,7 @@
 # policies, either expressed or implied, of Terena.
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
 
 
 def can_edit_entity(user, entity):
@@ -43,6 +44,16 @@ def can_edit_entity(user, entity):
         return False
 
     return False
+
+
+def can_approve_change(user, entity):
+    if user.is_superuser:
+        return True
+    try:
+        entity.moderators.get(id=user.id)
+        return True
+    except ObjectDoesNotExist:
+        return False
 
 
 def can_edit_entity_group(user, entity_group):

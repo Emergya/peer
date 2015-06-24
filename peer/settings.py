@@ -330,6 +330,8 @@ SAML_CONFIG = {}  # YOU MUST OVERWRITE THIS IN THE LOCAL SETTINGS
 # Remote user auth
 REMOTE_USER_ENABLED = False
 
+# Moderation
+MODERATION_ENABLED = True
 
 try:
     from local_settings import *
