@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+0.17.1 (2015-06-24)
+-------------------
+
+- Use the new built-in schema migration framework.
+
 0.17.0 (2015-02-12)
 -------------------
 
