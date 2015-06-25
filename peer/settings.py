@@ -157,6 +157,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.messages.context_processors.messages',
     'peer.portal.context_processors.peer_theme',
     'peer.portal.context_processors.auth',
+    'peer.entity.context_processors.get_settings',
 )
 
 MIDDLEWARE_CLASSES = (
