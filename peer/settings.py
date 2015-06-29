@@ -35,7 +35,7 @@ _ = lambda s: s
 
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -121,9 +121,6 @@ PEER_THEME = {
     'HEADER_BACKGROUND': '',
     'CONTENT_BACKGROUND': '',
     'FOOTER_BACKGROUND': '',
-    'HOME_TITLE': 'Nice to meet you!!',
-    'HOME_SUBTITLE': 'Say hello to federated worldwide services',
-    'HOME_SLOGAN': 'Default text for the slogan',
     'JQUERY_UI_THEME': 'default-theme',
 }
 
@@ -193,11 +190,14 @@ INSTALLED_APPS = (
     'peer.domain',
     'peer.entity',
     'peer.portal',
+    'ckeditor',
 )
 
 # needed for django-registration
 ACCOUNT_ACTIVATION_DAYS = 2
 LOGIN_REDIRECT_URL = '/'
+
+CKEDITOR_UPLOAD_PATH = "uploads/"
 
 AUTHENTICATION_BACKENDS = (
     'djangosaml2.backends.Saml2Backend',
@@ -215,7 +215,7 @@ RECAPTCHA_PUBLIC_KEY = ''
 RECAPTCHA_PRIVATE_KEY = ''
 # Uncomment the following line to make reCaptcha validation submits
 # to be made over SSL
-#RECAPTCHA_USE_SSL = True
+# RECAPTCHA_USE_SSL = True
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -314,7 +314,7 @@ NSCA_NOTIFICATION_LEVEL = 3
 NSCA_SERVICE = 'peer'
 
 # Federated auth
-SAML_ENABLED = True
+SAML_ENABLED = False
 SESSION_EXPIRE_AT_BROWSER_CLOSE = SAML_ENABLED
 SAML_CREATE_UNKNOWN_USER = True
 SAML_ATTRIBUTE_MAPPING = {

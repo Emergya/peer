@@ -7,39 +7,31 @@
 {% endblock %}
 
 {% block content %}
-<section class="welcome">
-  <header>
-    <hgroup>
-      <h1>{{ HOME_TITLE }}</h1>
-      <h2>{{ HOME_SUBTITLE }}</h2>
-    </hgroup>
-    <img class="hello" src="{{ STATIC_URL }}images/hello_icon.png" alt="¡Hola!" width="95" height="141">
-  </header>
-
   {% if user.is_authenticated %}
     <form id="search" method="get" action="{% url 'search_entities' %}">
         <input type="text" name="query" id="query" autofocus="autofocus" />
     </form>
 
+    <!-- group entities for domain -->
     {% include "portal/menu.html" %}
 
+    <!-- your actions menu -->
+    {% include "account/menu.html" %}
+
     <section id="home-content" class="mainContent">
-        <h1>{% trans "Latest Entities" %}</h1>
+        <h1>{% trans "Your Entities" %}</h1>
         <ul class="entityList">
-        {% for entity in entities %}
-        {% render_entity_as_list_item entity MODERATION_ENABLED%}
-        {% endfor %}
+        {% include "entity/listing.include.html" %}
         </ul>
 
         <p><a class="button" href="{% url 'entities_list' %}">{% trans "Full list of entities" %}</a></p>
+
     </section>
   {% else %}
     <div class="centerText">
-      <h3>{{ HOME_SLOGAN }}</h3>
+      <h3>{{ slogan|safe }}</h3>
       <p><a class="button" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></p>
     </div>
   {% endif %}
-
-</section>
 
 {% endblock %}

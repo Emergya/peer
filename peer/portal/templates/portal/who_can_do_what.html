@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% load i18n entity_renderers %}
+
+{% block extralinks %}
+<link href="{% url 'entities_feed' %}" rel="alternate" type="application/rss+xml" title="{% trans "Entities feed" %}" />
+{% endblock %}
+
+{% block content %}
+  <h1>
+    {{ wcdw|safe }}
+  </h1>
+
+{% endblock %}
