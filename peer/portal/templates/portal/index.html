@@ -7,8 +7,9 @@
 {% endblock %}
 
 {% block content %}
+<div class="menus">
   {% if user.is_authenticated %}
-    <form id="search" method="get" action="{% url 'search_entities' %}">
+    <form id="search" class="left clear" method="get" action="{% url 'search_entities' %}">
         <input type="text" name="query" id="query" autofocus="autofocus" />
     </form>
 
@@ -17,7 +18,7 @@
 
     <!-- your actions menu -->
     {% include "account/menu.html" %}
-
+</div>
     <section id="home-content" class="mainContent">
         <h1>{% trans "Your Entities" %}</h1>
         <ul class="entityList">
