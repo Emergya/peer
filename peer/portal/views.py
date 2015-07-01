@@ -50,7 +50,7 @@ def index(request):
         try:
             slogan = TextChunkModel.objects.get(identifier='slogan')
             slogan_text = slogan.text
-        except Exception:
+        except TextChunkModel.DoesNotExist:
             slogan_text = ''
     return render_to_response('portal/index.html', {
         'entities': entities,
@@ -72,7 +72,7 @@ def general_conditions(request):
     try:
         gc = TextChunkModel.objects.get(identifier='general conditions')
         gc_text = gc.text
-    except Exception:
+    except TextChunkModel.DoesNotExist:
         gc_text = ''
     return render_to_response('portal/general_conditions.html',
                               {'gc': gc_text},
@@ -83,7 +83,7 @@ def explanation(request):
     try:
         wcdw = TextChunkModel.objects.get(identifier='who can do what')
         wcdw_text = wcdw.text
-    except Exception:
+    except TextChunkModel.DoesNotExist:
         wcdw_text = ''
     return render_to_response('portal/who_can_do_what.html',
                               {'wcdw': wcdw_text},
