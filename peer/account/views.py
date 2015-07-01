@@ -207,5 +207,4 @@ def remove_superuser(request, username):
 
 
 class RegistrationCaptchaView(RegistrationView):
-    ''''''
-    # form_class = RegistrationFormCaptchaTOU
+    form_class = RegistrationFormCaptchaTOU
