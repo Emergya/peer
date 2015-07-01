@@ -32,7 +32,12 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
+
 admin.autodiscover()
+
+
+from peer.entity import entity_admin
+from peer.entity.adminsite import entities
 
 
 urlpatterns = patterns(
@@ -65,10 +70,10 @@ urlpatterns = patterns(
     url(r'^saml2/ls/$', 'djangosaml2.views.logout_service', {
         'next_page': '/accounts/logout/',
         }, name='saml2_ls'),
-    (r'^saml2/', include('djangosaml2.urls')),
+    url(r'^saml2/', include('djangosaml2.urls')),
 
-    (r'^domain/', include('peer.domain.urls')),
-    (r'^entity/', include('peer.entity.urls')),
+    url(r'^domain/', include('peer.domain.urls')),
+    url(r'^entity/', include(entities.urls)),
 )
 
 if settings.DEBUG:

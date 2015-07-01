@@ -3,7 +3,7 @@
 {% load i18n entity_renderers %}
 
 {% block extralinks %}
-<link href="{% url 'entities_feed' %}" rel="alternate" type="application/rss+xml" title="{% trans "Entities feed" %}" />
+<link href="{% url 'entities:entities_feed' %}" rel="alternate" type="application/rss+xml" title="{% trans "Entities feed" %}" />
 {% endblock %}
 
 {% block content %}
@@ -17,7 +17,7 @@
   </header>
 
   {% if user.is_authenticated %}
-    <form id="search" method="get" action="{% url 'search_entities' %}">
+    <form id="search" method="get" action="{% url 'entities:search_entities' %}">
         <input type="text" name="query" id="query" autofocus="autofocus" />
     </form>
 
@@ -31,7 +31,7 @@
         {% endfor %}
         </ul>
 
-        <p><a class="button" href="{% url 'entities_list' %}">{% trans "Full list of entities" %}</a></p>
+        <p><a class="button" href="{% url 'entities:entities_list' %}">{% trans "Full list of entities" %}</a></p>
     </section>
   {% else %}
     <div class="centerText">

@@ -221,6 +221,7 @@ class Metadata(object):
 
 
 class Entity(models.Model):
+    app_label = 'peer.entity'
     class STATE:
         NEW = 'new'
         MOD = 'modified'
@@ -290,7 +291,7 @@ class Entity(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('entity_view', (str(self.id), ))
+        return ('entities:entity_view', (str(self.id), ))
 
     class Meta:
         verbose_name = _(u'Entity')
@@ -309,6 +310,8 @@ class Entity(models.Model):
                 data = self.metadata.read()
             if not data:
                 raise ValueError('no metadata content')
+            if type(data) == unicode:
+                data = data.encode('utf-8')
             try:
                 self._parsed_metadata = etree.XML(data)
             except etree.XMLSyntaxError:
@@ -455,6 +458,7 @@ if hasattr(settings, 'NSCA_COMMAND') and settings.NSCA_COMMAND:
 
 
 class EntityGroup(models.Model):
+    app_label = 'peer.entity'
     name = SafeCharField(_(u'Name of the group'), max_length=200)
     query = SafeCharField(_(u'Query that defines the group'), max_length=100)
     owner = models.ForeignKey(User, verbose_name=_('Owner'))
@@ -468,6 +472,7 @@ class EntityGroup(models.Model):
 
 
 class PermissionDelegation(models.Model):
+    app_label = 'peer.entity'
     entity = models.ForeignKey(Entity, verbose_name=_(u'Entity'))
     delegate = models.ForeignKey(User, verbose_name=_('Delegate'),
                                  related_name='permission_delegate')
@@ -485,6 +490,7 @@ class PermissionDelegation(models.Model):
 
 
 class ModerationDelegation(models.Model):
+    app_label = 'peer.entity'
     entity = models.ForeignKey(Entity, verbose_name=_(u'Entity'))
     moderator = models.ForeignKey(User, verbose_name=_(u'Moderator'), related_name='delegated_moderator')
 

@@ -55,7 +55,7 @@ def entities_list(request):
 
 @login_required
 def entity_add(request):
-    return entity_add_with_domain(request, None, 'edit_metadata')
+    return entity_add_with_domain(request, None, 'entities:edit_metadata')
 
 
 @login_required
@@ -73,7 +73,7 @@ def entity_add_with_domain(request, domain_name=None,
             form.instance.owner = request.user
             form.instance.save()
             messages.success(request, _('Entity created succesfully'))
-            if return_view_name == 'edit_metadata':
+            if return_view_name == 'entities:edit_metadata':
                 url = reverse(return_view_name, args=[form.instance.id])
             else:
                 url = reverse(return_view_name)
@@ -101,7 +101,6 @@ def entity_view(request, entity_id):
     else:
         revs = []
 
-
     return render_to_response('entity/view.html', {
         'entity': entity,
         'revs': revs,
@@ -120,7 +119,7 @@ def entity_remove(request, entity_id):
         entity.metadata.delete(username, commit_msg)
         entity.delete()
         messages.success(request, _('Entity removed succesfully'))
-        return HttpResponseRedirect(reverse('entities_list'))
+        return HttpResponseRedirect(reverse('entities:entities_list'))
 
     return render_to_response('entity/remove.html', {
         'entity': entity,

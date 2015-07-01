@@ -178,6 +178,11 @@ p.user-list-label {
     padding-bottom: 3px;
 }
 
+div.actions > label {
+    display: inline-block;
+}
+
+
 fieldset {
     border: none;
     padding: 0 0 1em 0;
@@ -588,6 +593,10 @@ dl.examples dt {
 .map {
     width: 100%;
     height: 400px;
+}
+
+ul.deletable-object-list {
+    margin-bottom: 20px;
 }
 
 /* Entity View */

@@ -89,7 +89,7 @@ def monitoring_prefs(request, entity_id):
                 msg = _("You are not subscribed anymore to this entity's alerts")
             entity.save()
             messages.success(request, msg)
-            return HttpResponseRedirect(reverse('entity_view',
+            return HttpResponseRedirect(reverse('entities:entity_view',
                                                 args=(entity_id, )))
         else:
             messages.error(request,

@@ -138,6 +138,8 @@ class BaseMetadataEditForm(forms.Form):
             raise forms.ValidationError('Empty metadata is not allowed')
 
         metadata = self._field_value_to_metadata(data)
+        if type(metadata) == unicode:
+            metadata = metadata.encode('utf8')
         if not metadata:
             raise forms.ValidationError('Empty metadata is not allowed')
 

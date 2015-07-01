@@ -7,8 +7,8 @@
     <ul>
       <li><a href="{% url 'account_profile' %}">{% trans "Domains and entities" %}</a></li>
       <li><a href="{% url 'domain_add' %}">{% trans "Add domain" %}</a></li>
-      <li><a href="{% url 'entity_add' %}">{% trans "Add entity" %}</a></li>
-      <li><a href="{% url 'entity_group_add' %}">{% trans "Add entity group" %}</a></li>
+      <li><a href="{% url 'entities:entity_add' %}">{% trans "Add entity" %}</a></li>
+      <li><a href="{% url 'entities:entity_group_add' %}">{% trans "Add entity group" %}</a></li>
       {% if_local_session %}
       <li><a href="{% url 'account_profile_edit' %}">{% trans "Change personal information" %}</a></li>
       <li><a href="{% url 'password_change' %}">{% trans "Change password" %}</a></li>

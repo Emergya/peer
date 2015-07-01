@@ -128,4 +128,5 @@ def make_owner(request, entity_id):
     else:
         msg = _('You must provide the user id of the new owner')
     messages.success(request, msg)
-    return HttpResponseRedirect(reverse('entity_view', args=(entity_id,)))
+    return HttpResponseRedirect(reverse('entities:entity_view',
+                                         args=(entity_id,)))

@@ -53,7 +53,7 @@ class EntitiesFeed(Feed):
         self.request = request
 
     def link(self):
-        return reverse('entities_feed')
+        return reverse('entities:entities_feed')
 
     def items(self):
         if not self.request.GET:
@@ -95,7 +95,7 @@ class ChangesFeed(Feed):
                 % unicode(entity))
 
     def link(self, entity):
-        return entity.get_absolute_url()
+        return reverse('entities:entity_view', args=(entity.id,))
 
     def description(self, entity):
         return (ugettext(u'Recent changes made on the metadata of entity %s')
@@ -131,7 +131,7 @@ class ChangesFeed(Feed):
         return html
 
     def item_link(self, item):
-        return reverse('get_revision', args=[item['entity'].id,
+        return reverse('entities:get_revision', args=[item['entity'].id,
                                              item['revision']['versionid']])
 
     def item_author_name(self, item):

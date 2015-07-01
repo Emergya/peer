@@ -185,7 +185,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.admin',
+    'django.contrib.admin.apps.SimpleAdminConfig',
     'captcha',
     'registration',
     'djangosaml2',

@@ -10,11 +10,11 @@
     <h2>{{ entity }}</h2>
   </hgroup>
 
-  <form action="{% url 'entity_remove' entity.id %}" method="post">{% csrf_token %}
+  <form action="{% url 'entities:entity_remove' entity.id %}" method="post">{% csrf_token %}
     <p>{% blocktrans %}Are you sure you want to remove the entity {{ entity }}?{% endblocktrans %}</p>
     <fieldset class="actionRow">
       <input class="button" type="submit" value="{% trans "Yes, I am sure" %}" />
-      {% trans "or" %} <a class="button" href="{% url 'entity_view' entity.id %}">{% trans "Cancel" %}</a>
+      {% trans "or" %} <a class="button" href="{% url 'entities:entity_view' entity.id %}">{% trans "Cancel" %}</a>
     </fieldset>
   </form>
 </section>

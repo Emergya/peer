@@ -16,7 +16,7 @@
   <p>{% blocktrans %}Using this form you can subscribe to the alerts emitted when these
     errors occur.{% endblocktrans %}</p>
 
-  <form action="{% url 'monitoring_prefs' entity.id %}" method="post">{% csrf_token %}
+  <form action="{% url 'entities:monitoring_prefs' entity.id %}" method="post">{% csrf_token %}
     <fieldset>
       <p>
       {{ form.want_alerts }} <label style="display: inline" for="id_want_alerts">{{ form.want_alerts.label }}</label>
@@ -24,7 +24,7 @@
     </fieldset>
     <fieldset class="actionRow">
       <input class="button" type="submit" value="{% trans "Save changes" %}" />
-      {% trans "or" %} <a class="button" href="{% url 'entity_view' entity.id %}">{% trans "Cancel" %}</a>
+      {% trans "or" %} <a class="button" href="{% url 'entities:entity_view' entity.id %}">{% trans "Cancel" %}</a>
     </fieldset>
   </form>
 </section>

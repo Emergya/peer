@@ -3,12 +3,12 @@
 {% load i18n account entity_renderers %}
 
 {% block extralinks %}
-<link href="{% url 'changes_feed' entity.id %}" rel="alternate" type="application/rss+xml" title="{% trans "Changes feed" %}" />
+<link href="{% url 'entities:changes_feed' entity.id %}" rel="alternate" type="application/rss+xml" title="{% trans "Changes feed" %}" />
 {% endblock %}
 
 {% block extracss %}
 <link type="text/css" href="{{ STATIC_URL }}css/flags.css" rel="Stylesheet" />
-<link type="text/css" href="{% url 'get_pygments_css' %}" rel="Stylesheet" />
+<link type="text/css" href="{% url 'entities:get_pygments_css' %}" rel="Stylesheet" />
 {% endblock %}
 
 {% block content %}
@@ -21,7 +21,7 @@
   </hgroup>
 
   {% if entity.has_metadata %}
-  <a class="button right" href="{% url 'get_latest_metadata' entity.id %}">{% trans "Get latest version of the metadata" %}</a>
+  <a class="button right" href="{% url 'entities:get_latest_metadata' entity.id %}">{% trans "Get latest version of the metadata" %}</a>
   {% endif %}
 
   {% if entity.owner %}
@@ -141,7 +141,7 @@
       {% endif %}
 
       <dt class="ui-icon ui-icon-signal-diag" title="{% trans "Changes feed" %}">{% trans "Changes feed" %}</dt>
-      <dd><a href="{% url 'changes_feed' entity.id %}">{% trans "Changes feed" %}</a></dd>
+      <dd><a href="{% url 'entities:changes_feed' entity.id %}">{% trans "Changes feed" %}</a></dd>
     </dl>
 
     {% if entity.geolocationhint %}
@@ -167,7 +167,7 @@
               <td>{{ forloop.revcounter }}</td>
             <td>
               <a class="rev-link"
-                  href="{% url 'get_revision' entity.id rev.versionid %}"
+                  href="{% url 'entities:get_revision' entity.id rev.versionid %}"
                   title="{% trans "Revision" %} {{ rev.versionid }}">
                    @{{ rev.versionid|slice:"-5:" }}
               </a>

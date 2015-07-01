@@ -69,7 +69,8 @@ def _get_edit_metadata_form(request, entity, edit_mode, form=None):
             form = MetadataFileEditForm(entity, request.user)
         elif edit_mode == 'remote':
             form = MetadataRemoteEditForm(entity, request.user)
-    form_action = reverse('%s_edit_metadata' % edit_mode, args=(entity.id, ))
+    form_action = reverse('entities:%s_edit_metadata' % edit_mode,
+                           args=(entity.id, ))
 
     context_instance = RequestContext(request)
     return render_to_string('entity/simple_edit_metadata.html', {
@@ -149,7 +150,7 @@ def text_edit_metadata(request, entity_id):
         else:
             if not can_edit_entity(request.user, entity):
                         raise PermissionDenied
-        result = _handle_metadata_post(request, form, 'text_edit_metadata')
+        result = _handle_metadata_post(request, form, 'entities:text_edit_metadata')
         if result is not None:
             return result
     else:
@@ -178,7 +179,7 @@ def file_edit_metadata(request, entity_id):
         else:
             if not can_edit_entity(request.user, entity):
                         raise PermissionDenied
-        result = _handle_metadata_post(request, form, 'file_edit_metadata')
+        result = _handle_metadata_post(request, form, 'entities:file_edit_metadata')
         if result is not None:
             return result
     else:
@@ -206,7 +207,7 @@ def remote_edit_metadata(request, entity_id):
         else:
             if not can_edit_entity(request.user, entity):
                         raise PermissionDenied
-        result = _handle_metadata_post(request, form, 'remote_edit_metadata')
+        result = _handle_metadata_post(request, form, 'entities:remote_edit_metadata')
         if result is not None:
             return result
     else:

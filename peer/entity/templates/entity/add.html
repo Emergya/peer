@@ -10,7 +10,7 @@
 
   <p>{% trans "Here you can create a new entity. You must associate the new entity with a domain you already own. If you haven't registered any domain in PEER, please do so in your account profile." %}</p>
 
-  <form action="{% url 'entity_add' %}" method="post">{% csrf_token %}
+  <form action="{% url 'entities:entity_add' %}" method="post">{% csrf_token %}
     <fieldset>
     {{ form.as_p }}
     </fieldset>

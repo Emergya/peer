@@ -48,7 +48,7 @@
   {% else %}
   <p>{% trans "It looks like you have not created any entity yet." %}
 
-  <a href="{% url 'entity_add' %}">{% trans "Do you want to create one?" %}</a></p>
+  <a href="{% url 'entities:entity_add' %}">{% trans "Do you want to create one?" %}</a></p>
   {% endif %}
 
   {% if permission_delegations %}
@@ -66,9 +66,9 @@
     {% for entity_group in owned_group_entities %}
       <li class="validated">
         <span class="ui-icon ui-icon-copy"></span>
-        <a href="{% url 'entity_group_view' entity_group.id %}">{{ entity_group.name }}</a>
-        <a class="removeButton" href="{% url 'entity_group_remove' entity_group.id %}">{% trans "Remove entity group" %}</a>
-        <a class="button" href="{% url 'entity_group_edit' entity_group.id %}">{% trans "Edit entity group" %}</a>
+        <a href="{% url 'entities:entity_group_view' entity_group.id %}">{{ entity_group.name }}</a>
+        <a class="removeButton" href="{% url 'entities:entity_group_remove' entity_group.id %}">{% trans "Remove entity group" %}</a>
+        <a class="button" href="{% url 'entities:entity_group_edit' entity_group.id %}">{% trans "Edit entity group" %}</a>
       </li>
     {% endfor %}
   </ul>

@@ -6,9 +6,9 @@
       {% for filter in filters %}
       <h3>{{ filter.label }}</h3>
       <ul>
-        <li{% if filter.is_empty %} class="current"{% endif %}><a href="{% url 'search_entities' %}">{% trans "All" %}</a></li>
+        <li{% if filter.is_empty %} class="current"{% endif %}><a href="{% url 'entities:search_entities' %}">{% trans "All" %}</a></li>
         {% for option in filter.get_options %}
-        <li{% if option.is_current %} class="current"{% endif %}><a href="{% url 'search_entities' %}?query={{ search_terms }}&amp;{{ filter.name }}={{ option.value }}">{{ option.value }} ({{ option.count }})</a></li>
+        <li{% if option.is_current %} class="current"{% endif %}><a href="{% url 'entities:search_entities' %}?query={{ search_terms }}&amp;{{ filter.name }}={{ option.value }}">{{ option.value }} ({{ option.count }})</a></li>
         {% endfor %}
       </ul>
       {% endfor %}

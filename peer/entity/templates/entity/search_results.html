@@ -3,7 +3,7 @@
 {% load i18n %}
 
 {% block content %}
-<form id="search" method="get" action="{% url 'search_entities' %}">
+<form id="search" method="get" action="{% url 'entities:search_entities' %}">
   <input type="text" name="query" id="query" autofocus="autofocus" value="{{ search_terms }}"/>
 </form>
 

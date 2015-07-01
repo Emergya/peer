@@ -8,7 +8,7 @@
 
 {% block extracss %}
 <link type="text/css" href="{{ STATIC_URL }}css/terms-of-use.css" rel="Stylesheet" />
-<link type="text/css" href="{% url 'get_pygments_css' %}" rel="Stylesheet" />
+<link type="text/css" href="{% url 'entities:get_pygments_css' %}" rel="Stylesheet" />
 {% endblock %}
 
 {% block content %}

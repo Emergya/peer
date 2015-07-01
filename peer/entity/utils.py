@@ -204,6 +204,8 @@ def strip_entities_descriptor(metadata_text):
     result = metadata_text
     if result:
         try:
+            if type(result) == unicode:
+                result = result.encode('utf-8')
             root = etree.XML(result)
             if addns('EntitiesDescriptor') == root.tag:
                 children = root.getchildren()
