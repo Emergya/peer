@@ -48,8 +48,8 @@ class EntitiesChangeList(ChangeList):
 
 class PublicEntityAdmin(admin.ModelAdmin):
 
-    list_display = ('__unicode__', 'owner', 'domain', 'creation_time', 'modification_time')
-    list_filter = ('owner', 'domain__name', 'creation_time')
+    list_display = ('__unicode__', 'owner', 'domain', 'state', 'creation_time', 'modification_time')
+    list_filter = ('state', 'owner', 'domain__name', 'creation_time')
     change_list_template = 'entity/change_list.html'
     delete_selected_confirmation_template = 'entity/delete_selected_confirmation.html'
     search_fields = ('domain__name', 'owner__username')
