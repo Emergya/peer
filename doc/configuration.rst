@@ -648,3 +648,14 @@ that some settings need unique values you must provide yourself.
 
  # Nagios service name
  NSCA_SERVICE = 'peer'
+
+How to change the 'general conditions', 'who can do what?' and 'slogan' messages
+------------------------------
+
+You can easily change those messages from the admin site.
+
+1. Enter your credentials in the admin site: http://www.peer.com/admin
+#. Click on *Text chunk models* link.
+#. Click on the section you want to edit.
+#. Set the Text field. Do not modifty the Identifier field.
+#. Click on Save button.
