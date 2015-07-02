@@ -29,8 +29,8 @@
 
     </section>
   {% else %}
+    {{ slogan|safe }}
     <div class="centerText">
-      <h3>{{ slogan|safe }}</h3>
       <p><a class="button" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></p>
     </div>
   {% endif %}
