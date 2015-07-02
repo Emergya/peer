@@ -33,20 +33,28 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from peer.entity.models import Entity
-from peer.entity.paginator import get_entities_per_page
+from peer.entity.paginator import paginated_list_of_entities
 from peer.entity.filters import get_filters
+from peer.portal.models import TextChunkModel
 
 
 def index(request):
     entities = False
     filters = False
     if (request.user.is_authenticated()):
-        entities = Entity.objects.all()[:get_entities_per_page()]
+        entities_user = Entity.objects.filter(owner=request.user)
+        entities = paginated_list_of_entities(request, entities_user)
         filters = get_filters(request.GET)
+    try:
+        slogan = TextChunkModel.objects.get(identifier='slogan')
+        slogan_text = slogan.text
+    except TextChunkModel.DoesNotExist:
+        slogan_text = ''
     return render_to_response('portal/index.html', {
         'entities': entities,
         'filters': filters,
         'user': request.user,
+        'slogan': slogan_text,
     }, context_instance=RequestContext(request))
 
 
@@ -56,3 +64,25 @@ def remote_user_login(request):
     # By having the RemoteUser auth backend enabled everything
     # is managed automatically
     return HttpResponseRedirect(reverse('account_profile'))
+
+
+def general_conditions(request):
+    try:
+        gc = TextChunkModel.objects.get(identifier='general conditions')
+        gc_text = gc.text
+    except TextChunkModel.DoesNotExist:
+        gc_text = ''
+    return render_to_response('portal/general_conditions.html',
+                              {'gc': gc_text},
+                              context_instance=RequestContext(request))
+
+
+def explanation(request):
+    try:
+        wcdw = TextChunkModel.objects.get(identifier='who can do what')
+        wcdw_text = wcdw.text
+    except TextChunkModel.DoesNotExist:
+        wcdw_text = ''
+    return render_to_response('portal/who_can_do_what.html',
+                              {'wcdw': wcdw_text},
+                              context_instance=RequestContext(request))

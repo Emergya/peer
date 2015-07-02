@@ -31,7 +31,6 @@ from django import template
 register = template.Library()
 
 
-
 @register.inclusion_tag('entity/list_item.html')
 def render_entity_as_list_item(entity, moderation_enabled):
     has_metadata = entity.has_metadata()
