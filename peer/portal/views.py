@@ -41,17 +41,15 @@ from peer.portal.models import TextChunkModel
 def index(request):
     entities = False
     filters = False
-    slogan_text = ''
     if (request.user.is_authenticated()):
         entities_user = Entity.objects.filter(owner=request.user)
         entities = paginated_list_of_entities(request, entities_user)
         filters = get_filters(request.GET)
-    else:
-        try:
-            slogan = TextChunkModel.objects.get(identifier='slogan')
-            slogan_text = slogan.text
-        except TextChunkModel.DoesNotExist:
-            slogan_text = ''
+    try:
+        slogan = TextChunkModel.objects.get(identifier='slogan')
+        slogan_text = slogan.text
+    except TextChunkModel.DoesNotExist:
+        slogan_text = ''
     return render_to_response('portal/index.html', {
         'entities': entities,
         'filters': filters,

@@ -3,7 +3,6 @@
 {% load i18n %}
 
 {% block content %}
-<section>
   <hgroup>
     <h1>{% trans "Add entity" %}</h1>
   </hgroup>
@@ -19,5 +18,4 @@
       {% trans "or" %} <a class="button" href="{% url 'account_profile' %}">{% trans "Cancel" %}</a>
     </fieldset>
   </form>
-</section>
 {% endblock %}
