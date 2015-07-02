@@ -3,7 +3,6 @@
 {% load i18n %}
 
 {% block content %}
-<section>
   <hgroup>
     <h1>{% trans "Entities list" %}</h1>
   </hgroup>
@@ -15,8 +14,6 @@
   {% if entities.has_geoinfo %}
   <div class="map"></div>
   {% endif %}
-
-</section>
 {% endblock %}
 
 {% block extrajs %}

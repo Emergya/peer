@@ -7,6 +7,9 @@
 {% endblock %}
 
 {% block content %}
+  <div class="slogan">
+    {{ slogan|safe }}
+  </div>
 {% if user.is_authenticated %}
   <div class="menus">
     <form id="search" class="left clear" method="get" action="{% url 'search_entities' %}">
@@ -19,19 +22,14 @@
     <!-- your actions menu -->
     {% include "account/menu.html" %}
   </div>
-    <section id="home-content" class="mainContent">
-        <h1>{% trans "Your Entities" %}</h1>
-        <ul class="entityList">
-        {% include "entity/listing.include.html" %}
-        </ul>
-
-        <p><a class="button" href="{% url 'entities_list' %}">{% trans "Full list of entities" %}</a></p>
-
-    </section>
-{% else %}
-  <section>
-    {{ slogan|safe }}
+  <section id="home-content" class="mainContent">
+    <h1>{% trans "Your Entities" %}</h1>
+    <ul class="entityList">
+      {% include "entity/listing.include.html" %}
+    </ul>
+    <p><a class="button" href="{% url 'entities_list' %}">{% trans "Full list of entities" %}</a></p>
   </section>
+{% else %}
   <div class="centerText">
     <p><a class="button" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></p>
   </div>

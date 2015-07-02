@@ -3,7 +3,6 @@
 {% load i18n %}
 
 {% block content %}
-<section>
   <hgroup>
     <h2>{% trans "The registration process has finished successfully" %}</h2>
   </hgroup>
@@ -12,6 +11,4 @@
 
   {% url 'account_profile' as profile_url %}
   <p>{% blocktrans %}You can now start using the site. Maybe you would like to go to your <a class="button" href="{{ profile_url }}">user profile page</a> to fill some information about you and create some entities.{% endblocktrans %}</p>
-
-</section>
 {% endblock %}

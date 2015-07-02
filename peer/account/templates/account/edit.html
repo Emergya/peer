@@ -4,21 +4,21 @@
 
 {% block content %}
 {% include "account/menu.html" %}
-<section class="mainContent">
+  <section class="mainContent">
 
-  <hgroup>
-    <h1>{% trans "Change personal information" %}</h1>
-  </hgroup>
+    <hgroup>
+      <h1>{% trans "Change personal information" %}</h1>
+    </hgroup>
 
-  <form action="{% url 'account_profile_edit' %}" method="post">{% csrf_token %}
-    <fieldset>
-    {{ form.as_p }}
-    </fieldset>
-    <fieldset class="actionRow">
-      <input class="button" type="submit" value="{% trans "Save changes" %}" />
-      {% trans "or" %} <a class="button" href="{% url 'account_profile' %}">{% trans "Cancel" %}</a>
-    </fieldset>
-  </form>
+    <form action="{% url 'account_profile_edit' %}" method="post">{% csrf_token %}
+      <fieldset>
+      {{ form.as_p }}
+      </fieldset>
+      <fieldset class="actionRow">
+        <input class="button" type="submit" value="{% trans "Save changes" %}" />
+        {% trans "or" %} <a class="button" href="{% url 'account_profile' %}">{% trans "Cancel" %}</a>
+      </fieldset>
+    </form>
 
-</section>
+  </section>
 {% endblock %}

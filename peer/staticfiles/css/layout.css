@@ -28,6 +28,12 @@
     text-align: center;
 }
 
+.slogan {
+    border-bottom: 1px solid #BFC7ED;
+    margin-bottom: 40px;
+    padding-bottom: 12px;
+}
+
 body {
     padding: 0 30px;
     margin: 0 auto;
@@ -374,7 +380,7 @@ section ul {
     margin-top: 15px;
     margin-bottom: 15px;
     padding-bottom: 8px;
-    width: 250px
+    width: 250px;
     background: transparent url(../images/searcher_shadow.png) no-repeat center bottom;
 }
 
