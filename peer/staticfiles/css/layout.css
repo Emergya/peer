@@ -589,6 +589,12 @@ dl.examples dt {
     height: 400px;
 }
 
+/* home view */
+
+div#slogan-text {
+    margin-left: 50px;
+}
+
 /* Entity View */
 div.history {
     margin-top: 2em;

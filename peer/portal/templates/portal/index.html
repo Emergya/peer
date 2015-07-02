@@ -7,8 +7,8 @@
 {% endblock %}
 
 {% block content %}
+{% if user.is_authenticated %}
 <div class="menus">
-  {% if user.is_authenticated %}
     <form id="search" class="left clear" method="get" action="{% url 'search_entities' %}">
         <input type="text" name="query" id="query" autofocus="autofocus" />
     </form>
@@ -28,11 +28,13 @@
         <p><a class="button" href="{% url 'entities_list' %}">{% trans "Full list of entities" %}</a></p>
 
     </section>
-  {% else %}
-    {{ slogan|safe }}
-    <div class="centerText">
-      <p><a class="button" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></p>
-    </div>
-  {% endif %}
+{% else %}
+  <div class="slogan-text">
+  {{ slogan|safe }}
+  </div>
+  <div class="centerText">
+    <p><a class="button" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></p>
+  </div>
+{% endif %}
 
 {% endblock %}
