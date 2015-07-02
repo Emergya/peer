@@ -12,6 +12,7 @@
 
 .shadow {
     padding: 10px;
+    position: relative;
 }
 
 .hidden {
@@ -209,7 +210,6 @@ fieldset p {
 }
 
 span.ui-icon {
-    clear: left;
     float: left;
     margin-top: -2px;
     margin-right: 6px;
@@ -358,7 +358,8 @@ header#header hgroup h2 {
 }
 
 .mainContent {
-    clear: left;
+    clear: right;
+    padding-left: 250px;
     border: none;
     margin: 34px 260px 15px 40px;
 }
@@ -367,7 +368,6 @@ header#header hgroup h2 {
     border-top: none;
     margin-bottom: 1em;
     margin: 20px 260px 15px 10px;
-    padding-left: 0;
 }
 
 section ul {
@@ -378,9 +378,8 @@ section ul {
 #search {
     margin-top: 15px;
     margin-bottom: 15px;
-    float: right;
-    clear: right;
     padding-bottom: 8px;
+    width: 250px
     background: transparent url(../images/searcher_shadow.png) no-repeat center bottom;
 }
 
@@ -597,6 +596,12 @@ dl.examples dt {
 
 ul.deletable-object-list {
     margin-bottom: 20px;
+}
+
+/* home view */
+
+div#slogan-text {
+    margin-left: 50px;
 }
 
 /* Entity View */

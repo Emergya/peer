@@ -32,6 +32,8 @@ from django.conf.urls import patterns, url
 urlpatterns = patterns(
     'peer.portal.views',
     url(r'^$', 'index', name='index'),
+    url(r'^general_conditions$', 'general_conditions', name='general_conditions'),
+    url(r'^who_can_do_what$', 'explanation', name='explanation'),
 
     url('^remote-user-login', 'remote_user_login', name='remote_user_login')
 )

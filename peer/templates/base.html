@@ -89,8 +89,9 @@
 
     <footer>
       <ul>
-        <li><a href="#">{% trans "General conditions" %}</a></li>
+        <li><a href="{% url 'general_conditions' %}">{% trans "General conditions" %}</a></li>
         <li><a href="#">Terena PEER 2011</a></li>
+        <li><a href="{% url 'explanation' %}">{% trans "Who can do what?" %}</a></li>
       </ul>
       <hgroup>
         <h1><a href="{% url 'index' %}">PEER</a></h1>

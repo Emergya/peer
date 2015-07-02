@@ -239,4 +239,3 @@ def edit_metadata(request, entity_id, edit_mode='text',
         'samlmetajs_plugins': samlmetajs_plugins,
         'needs_google_maps': 'location' in samlmetajs_plugins,
     }, context_instance=RequestContext(request))
-

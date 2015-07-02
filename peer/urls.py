@@ -74,6 +74,7 @@ urlpatterns = patterns(
 
     url(r'^domain/', include('peer.domain.urls')),
     url(r'^entity/', include(entities.urls)),
+    url(r'^ckeditor/', include('ckeditor.urls')),
 )
 
 if settings.DEBUG:

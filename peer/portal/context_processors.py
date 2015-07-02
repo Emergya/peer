@@ -37,9 +37,6 @@ DEFAULT_THEME = {
     'HEADER_BACKGROUND': '',
     'CONTENT_BACKGROUND': '',
     'FOOTER_BACKGROUND': '',
-    'HOME_TITLE': 'Nice to meet you!!',
-    'HOME_SUBTITLE': 'Say hello to federated worldwide services',
-    'HOME_SLOGAN': 'A slogan that catches the purpose of the service',
     'JQUERY_UI_THEME': 'custom-theme',
 }
 
