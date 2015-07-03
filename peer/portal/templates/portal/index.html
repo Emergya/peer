@@ -1,34 +1,82 @@
 {% extends "base.html" %}
 
-{% load i18n entity_renderers %}
+{% load i18n entity_urls admin_static admin_list %}
 
 {% block extralinks %}
 <link href="{% url 'entities:entities_feed' %}" rel="alternate" type="application/rss+xml" title="{% trans "Entities feed" %}" />
 {% endblock %}
 
 {% block content %}
-  <div class="slogan">
-    {{ slogan|safe }}
-  </div>
+<div id="home-meta">
+
 {% if user.is_authenticated %}
   <div class="menus">
-    <form id="search" class="left clear" method="get" action="{% url 'entities:search_entities' %}">
-        <input type="text" name="query" id="query" autofocus="autofocus" />
-    </form>
-
-    <!-- group entities for domain -->
-    {% include "portal/menu.html" %}
-
     <!-- your actions menu -->
     {% include "account/menu.html" %}
   </div>
-    <section id="home-content" class="mainContent">
-        <h1>{% trans "Your Entities" %}</h1>
-        <ul class="entityList">
-        {% include "entity/listing.include.html" %}
-        </ul>
 
-        <p><a class="button" href="{% url 'entities:entities_list' %}">{% trans "Full list of entities" %}</a></p>
+{% endif %}
+
+<div class="{% if user.is_authenticated %}slogan{% else %}slogan-anon{% endif %}">
+    {{ slogan|safe }}
+  </div>
+</div>
+
+{% if user.is_authenticated %}
+    <section id="home-content" class="mainContent">
+        <h1>{% trans "Entities" %}</h1>
+
+      {% block filters %}
+        {% if cl.has_filters %}
+          <div id="peer-changelist-filter" class="clear left shadow">
+            <h2>{% trans 'Filter' %}</h2>
+            {% for spec in cl.filter_specs %}{% admin_list_filter cl spec %}{% endfor %}
+          </div>
+        {% endif %}
+      {% endblock %}
+
+  <div id="content-main">
+    {% block object-tools %}
+      {% if has_add_permission %}
+        <ul class="object-tools">
+          {% block object-tools-items %}
+            <li>
+              {% url 'entity_add' as add_url %}
+              <a href="{% add_preserved_filters add_url is_popup to_field %}" class="addlink">
+                {% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}
+              </a>
+            </li>
+          {% endblock %}
+        </ul>
+      {% endif %}
+    {% endblock %}
+    {% if cl.formset.errors %}
+        <p class="errornote">
+        {% if cl.formset.total_error_count == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}
+        </p>
+        {{ cl.formset.non_form_errors }}
+    {% endif %}
+    <div class="module{% if cl.has_filters %} filtered{% endif %}" id="peer-changelist">
+      {% block search %}{% search_form cl %}{% endblock %}
+      {% block date_hierarchy %}{% date_hierarchy cl %}{% endblock %}
+
+      <form id="changelist-form" action="" method="post"{% if cl.formset.is_multipart %} enctype="multipart/form-data"{% endif %} novalidate>{% csrf_token %}
+      {% if cl.formset %}
+        <div>{{ cl.formset.management_form }}</div>
+      {% endif %}
+
+      {% block result_list %}
+          {% if action_form and actions_on_top and cl.full_result_count %}{% admin_actions %}{% endif %}
+          {% result_list cl %}
+          {% if action_form and actions_on_bottom and cl.full_result_count %}{% admin_actions %}{% endif %}
+      {% endblock %}
+      <div id="peer-paginator">
+      {% block pagination %}{% pagination cl %}{% endblock %}
+      </div>
+      </form>
+    </div>
+  </div>
+
     </section>
 {% else %}
   <div class="centerText">

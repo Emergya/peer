@@ -28,12 +28,6 @@
     text-align: center;
 }
 
-.slogan {
-    border-bottom: 1px solid #BFC7ED;
-    margin-bottom: 40px;
-    padding-bottom: 12px;
-}
-
 body {
     padding: 0 30px;
     margin: 0 auto;
@@ -184,11 +178,6 @@ p.user-list-label {
     letter-spacing: 0.5px;
     padding-bottom: 3px;
 }
-
-div.actions > label {
-    display: inline-block;
-}
-
 
 fieldset {
     border: none;
@@ -371,9 +360,11 @@ header#header hgroup h2 {
 }
 
 #home-content {
+    clear: left;
     border-top: none;
     margin-bottom: 1em;
-    margin: 20px 260px 15px 10px;
+    margin: 20px 20px 15px 10px;
+    padding-left: 0;
 }
 
 section ul {
@@ -385,7 +376,7 @@ section ul {
     margin-top: 15px;
     margin-bottom: 15px;
     padding-bottom: 8px;
-    width: 250px;
+    width: 250px
     background: transparent url(../images/searcher_shadow.png) no-repeat center bottom;
 }
 
@@ -600,14 +591,20 @@ dl.examples dt {
     height: 400px;
 }
 
-ul.deletable-object-list {
-    margin-bottom: 20px;
-}
-
 /* home view */
 
-div#slogan-text {
-    margin-left: 50px;
+div.slogan {
+    padding-left: 25em;
+    padding-top: 2em;
+}
+
+div.slogan {
+    padding-left: 3em;
+    padding-top: 2em;
+}
+
+nav.peer-menu {
+    margin-bottom: 20px;
 }
 
 /* Entity View */

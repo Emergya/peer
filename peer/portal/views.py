@@ -26,36 +26,43 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Terena.
 
+import json
+
+from django.utils.translation import ugettext as _
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.http import JsonResponse
+from django.contrib import messages
+from django.conf import settings
 
 from peer.entity.models import Entity
+from peer.entity.entity_admin import PublicEntityAdmin
+from peer.entity.adminsite import entities
 from peer.entity.paginator import paginated_list_of_entities
 from peer.entity.filters import get_filters
 from peer.portal.models import TextChunkModel
+from peer.entity.entity_admin import (ENTITY_OP,
+                                      MD_REGISTRAR)
 
 
 def index(request):
-    entities = False
-    filters = False
-    if (request.user.is_authenticated()):
-        entities_user = Entity.objects.filter(owner=request.user)
-        entities = paginated_list_of_entities(request, entities_user)
-        filters = get_filters(request.GET)
     try:
         slogan = TextChunkModel.objects.get(identifier='slogan')
         slogan_text = slogan.text
     except TextChunkModel.DoesNotExist:
         slogan_text = ''
-    return render_to_response('portal/index.html', {
-        'entities': entities,
-        'filters': filters,
+
+    extra_context = {
         'user': request.user,
         'slogan': slogan_text,
-    }, context_instance=RequestContext(request))
+            }
+
+    entity_admin = PublicEntityAdmin(Entity, entities,
+            change_list_template='portal/index.html')
+    return entity_admin.changelist_view(request, extra_context)
 
 
 @login_required
@@ -86,3 +93,23 @@ def explanation(request):
     return render_to_response('portal/who_can_do_what.html',
                               {'wcdw': wcdw_text},
                               context_instance=RequestContext(request))
+
+
+@login_required
+def toggle_user_role(request):
+    try:
+        role = request.session.get('user-role', ENTITY_OP)
+        new_role = 1 >> role
+        request.session['user-role'] = new_role
+        messages.success(request, _('Role changed successfully'))
+    except Exception, e:
+        if settings.ADMINS:
+            email = settings.ADMIN[0][1]
+            msg = _('There was an error, please contact '
+                             'the site operator at %s.\n%s') % (email, str(e))
+        else:
+            msg = _('There was an error:\n%s') % str(e)
+        messages.error(request, msg)
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse('index')))
+

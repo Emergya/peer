@@ -28,6 +28,10 @@
 
 from django.conf import settings
 
+from peer.entity.entity_admin import (ENTITY_OP,
+                                      ENTITY_OP_LABEL,
+                                      MD_REGISTRAR_LABEL)
+
 
 DEFAULT_THEME = {
     'LINK_COLOR': '#5db39a',
@@ -62,3 +66,11 @@ def auth(request):
         })
 
     return result
+
+
+
+
+def user_role(request):
+    role = request.session.get('user-role', ENTITY_OP)
+    role_btn_label = role and ENTITY_OP_LABEL or MD_REGISTRAR_LABEL
+    return {'role_btn_label': role_btn_label}

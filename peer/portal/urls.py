@@ -35,5 +35,6 @@ urlpatterns = patterns(
     url(r'^general_conditions$', 'general_conditions', name='general_conditions'),
     url(r'^who_can_do_what$', 'explanation', name='explanation'),
 
-    url('^remote-user-login', 'remote_user_login', name='remote_user_login')
+    url('^remote-user-login', 'remote_user_login', name='remote_user_login'),
+    url('^toggle-user-role/$', 'toggle_user_role', name='toggle_user_role')
 )

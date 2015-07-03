@@ -56,8 +56,8 @@
 (function($) {
     $(document).ready(function () {
         var search_url = '{% url "search_users_auto" %}';
-        var add_delegate_url_template = '{% url "add_delegate" entity.id "__user__" %}';
-        var load_delegates_url = '{% url "list_delegates" entity.id %}';
+        var add_delegate_url_template = '{% url "entities:add_delegate" entity.id "__user__" %}';
+        var load_delegates_url = '{% url "entities:list_delegates" entity.id %}';
         $.fn.delegates.load_delegates(load_delegates_url);
         $('#q').autocomplete({source: search_url,
                               select: $.fn.delegates.enable_add_delegate});

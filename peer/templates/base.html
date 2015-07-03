@@ -1,4 +1,4 @@
-{% load i18n %}<!doctype html>
+{% load i18n admin_static %}<!doctype html>
 <html lang="en">
 
   <head>
@@ -19,6 +19,8 @@
     {% endblock %}
     <link type="text/css" href="{{ STATIC_URL }}css/layout.css" rel="Stylesheet" />
     <link type="text/css" href="{{ STATIC_URL }}css/color.css" rel="Stylesheet" />
+    <link type="text/css" href="{{ STATIC_URL }}css/listings.css" rel="stylesheet" />
+    <link type="text/css" href="{% static "admin/css/changelists.css" %}" rel="stylesheet" />
     {% block extracss %}
     {% endblock %}
     <style type="text/css">
@@ -74,6 +76,7 @@
                     <button id="user-menu-btn">Select an action</button>
                 </div>
             </li>
+            <li><a class="button" href="{% url 'toggle_user_role' %}">{{ role_btn_label }}</a></li>
             <li><a class="button" href="{% url 'auth_logout' %}">{% trans "Logout" %}</a></li>
           {% endif %}
         {% endblock %}
@@ -153,6 +156,7 @@
             {% endif %}
 
             $(".button").button();
+
           });
       }(jQuery));
     </script>

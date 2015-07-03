@@ -26,15 +26,21 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Terena.
 
+from django.db.models import Q
 from django.core.urlresolvers import reverse
 from django.contrib import admin
 from django.contrib.admin.utils import quote
 from django.contrib.admin.views.main import ChangeList
+from django.utils.translation import ugettext_lazy
 
 from peer.entity.models import Entity
 from peer.entity import views
 from peer.entity.adminsite import entities
 
+ENTITY_OP = 0
+ENTITY_OP_LABEL = ugettext_lazy('Act as Entity operator')
+MD_REGISTRAR = 1
+MD_REGISTRAR_LABEL = ugettext_lazy('Act as MD registrar')
 
 class EntitiesChangeList(ChangeList):
 
@@ -50,13 +56,27 @@ class PublicEntityAdmin(admin.ModelAdmin):
 
     list_display = ('__unicode__', 'owner', 'domain', 'state', 'creation_time', 'modification_time')
     list_filter = ('state', 'owner', 'domain__name', 'creation_time')
-    change_list_template = 'entity/change_list.html'
     delete_selected_confirmation_template = 'entity/delete_selected_confirmation.html'
     search_fields = ('domain__name', 'owner__username')
     show_full_result_count = True
 
+    def __init__(self, model, admin_site,
+                 change_list_template='entity/change_list.html'):
+        super(PublicEntityAdmin, self).__init__(model, admin_site)
+        self.change_list_template = change_list_template
+
     def get_queryset(self, request):
-        return super(PublicEntityAdmin, self).get_queryset(request)
+        if request.user.is_authenticated():
+            role = request.session.get('user-role', ENTITY_OP)
+            conditions = (Q(owner=request.user)
+                        | Q(state='published')
+                        | Q(delegates=request.user))
+            if role == ENTITY_OP:
+                qs = Entity.objects.filter(conditions)
+            else:
+                qs = Entity.objects.filter(conditions | Q(moderators=request.user))
+            return qs
+        return Entity.objects.filter(state='published')
 
     def get_urls(self):
         return []
