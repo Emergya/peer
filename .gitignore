@@ -11,11 +11,16 @@ lib/
 parts/
 src/
 var/
+dist/
+venv/
 peer/media/
+peer/static/
 *.pyc
 *.pyo
 *.swp
+*.swo
 *.egg-info
 _build
 setup.py
 *.*~
+peer.db
