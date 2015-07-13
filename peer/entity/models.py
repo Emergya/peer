@@ -50,6 +50,8 @@ from peer.entity.nagios import send_nagios_notification
 XML_NAMESPACE = NAMESPACES['xml']
 XMLDSIG_NAMESPACE = NAMESPACES['ds']
 MDUI_NAMESPACE = NAMESPACES['mdui']
+MDATTR_NAMESPACE = NAMESPACES['mdattr']
+SAML_NAMESPACE = NAMESPACES['saml']
 
 CONNECTION_TIMEOUT = 10
 
@@ -219,9 +221,55 @@ class Metadata(object):
 
         return result
 
+    # aluque
+    # Consideramos que siempre existe un campo IDPSSODescriptor o un campo SPSSODescriptor
+    @property
+    def role_descriptor(self):
+        path = [addns('IDPSSODescriptor'), ]
+        find_xml = self.etree.find('/'.join(path))
+        path2 = [addns('SPSSODescriptor'), ]
+        find_xml2 = self.etree.find('/'.join(path2))
+        if find_xml is not None and find_xml2 is not None:
+            res = 'Both'
+        elif find_xml is None:
+            res = 'SP'
+        else:
+            res = 'IDP'
+        return res
+
+    # aluque
+    @property
+    def description(self):
+        path = [addns('SPSSODescriptor'), addns('Extensions'),
+                addns('UIInfo', MDUI_NAMESPACE),
+                addns('Description', MDUI_NAMESPACE)]
+        find_xml = self.etree.find('/'.join(path))
+        if find_xml is not None:
+            desc = find_xml.text
+        else:
+            desc = ''
+        return desc
+
+    # aluque
+    @property
+    def attributes(self):
+        attrs = []
+        path = [addns('Extensions'), addns('EntityAttributes', MDATTR_NAMESPACE),
+                addns('Attribute', SAML_NAMESPACE)]
+        find_xml = self.etree.findall('/'.join(path))
+        for node_attr in find_xml:
+            if node_attr is not None:
+                element = {}
+                for items in node_attr.items():
+                    element[items[0]] = items[1]
+                element['Value'] = node_attr.getchildren()[0].text
+                attrs.append(element)
+        return attrs
+
 
 class Entity(models.Model):
     app_label = 'peer.entity'
+
     class STATE:
         NEW = 'new'
         MOD = 'modified'
@@ -358,6 +406,18 @@ class Entity(models.Model):
     @property
     def geolocationhint(self):
         return self._load_metadata().geolocationhint
+
+    @property
+    def role_descriptor(self):
+        return self._load_metadata().role_descriptor
+
+    @property
+    def description(self):
+        return self._load_metadata().description
+
+    @property
+    def attributes(self):
+        return self._load_metadata().attributes
 
     @property
     def logos(self):
