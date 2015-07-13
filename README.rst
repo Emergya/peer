@@ -2,20 +2,17 @@
 Public Endpoint Entities Registry
 =================================
 
-PEER is envisioned as a lightweight, global registrar for SAML Metadata
-representing both SAML and non-SAML endpoints (e.g., OpenID, IMI). It is
-intended as a focused activity to catalyze international use of federated
-identity. The service is not intended to be a replacement for federation
-or inter-federation, but is intended to be a tool supporting such activities.
+PEER is the software implementing REEP, which is envisioned as a lightweight, 
+global registrar service for SAML Metadata, extendable for non-SAML endpoints.
+Independently from REEP it can be deployed as metadata registry for federations. 
 
-* Project home: https://github.com/Yaco-Sistemas/peer
+* Project home: https://github.com/Emergya/peer
 * Mailing list: http://lists.iay.org.uk/listinfo.cgi/peer-iay.org.uk
 * Python package: https://pypi.python.org/pypi/peer/
+* REEP service: https://reep.refeds.org/
 
 Please read the documentation in the doc directory for more information. You
 can also read it online at http://packages.python.org/peer/
-
-There is a demo running on http://beta.terena-peer.yaco.es/
 
 Legal
 -----
