@@ -1,0 +1,8 @@
+[submodule "peer/staticfiles/js/saml-metadata-editor"]
+	path = peer/staticfiles/js/saml-metadata-editor
+	url = git://github.com/Yaco-Sistemas/saml-metadata-editor.git
+	branch = master
+[submodule "peer/staticfiles/saml-metadata-editor"]
+	path = peer/staticfiles/saml-metadata-editor
+	url = git://github.com/Yaco-Sistemas/saml-metadata-editor.git
+	branch = master
