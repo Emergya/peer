@@ -175,7 +175,7 @@
             {% if rev.previous %}
             <td>
               <a class="diff-link"
-                  href="{% url 'get_diff'  entity.id rev.previous rev.versionid %}"
+                  href="{% url 'entities:get_diff'  entity.id rev.previous rev.versionid %}"
                   title="{% trans "Diff from rev" %} {{ rev.previous }} {% trans " to rev" %} {{ rev.versionid }}">
                    Prev diff
               </a>
