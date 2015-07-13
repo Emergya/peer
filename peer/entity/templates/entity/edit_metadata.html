@@ -9,6 +9,9 @@
 {% block extracss %}
 <link type="text/css" href="{{ STATIC_URL }}css/terms-of-use.css" rel="Stylesheet" />
 <link type="text/css" href="{% url 'entities:get_pygments_css' %}" rel="Stylesheet" />
+<link type="text/css" href="{{ STATIC_URL }}saml-metadata-editor/css/normalize.css" rel="stylesheet" />
+<link type="text/css" href="{{ STATIC_URL }}saml-metadata-editor/css/foundation.min.css" rel="stylesheet" />
+<link type="text/css" href="{{ STATIC_URL }}saml-metadata-editor/css/style.css" rel="stylesheet" />
 {% endblock %}
 
 {% block content %}
@@ -20,18 +23,7 @@
     <h2>{{ entity }}</h2>
   </hgroup>
 
-  <div id="metadata-tabs">
-
-    <ul>
-      <li><a href="#text-tab">{% trans "By text editing ..." %}</a></li>
-      <li><a href="#upload-tab">{% trans "By uploading a file ..." %}</a></li>
-      <li><a href="#remote-tab">{% trans "By fetching a remote URL ..." %}</a></li>
-    </ul>
-
-    <div id="text-tab"><div>{{ text_html|safe }}</div></div>
-    <div id="upload-tab"><div>{{ file_html|safe }}</div></div>
-    <div id="remote-tab"><div>{{ remote_html|safe }}</div></div>
-  </div>
+  <div id="samlmetaeditor"></div>
 </section>
 {% endblock %}
 
@@ -39,15 +31,7 @@
 {% if needs_google_maps %}
 <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
 {% endif %}
-<script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/samlmeta.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/mdreader.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/samlmeta.xml.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/spin.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.mesh.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.form.js"></script>
-{% for plugin in samlmetajs_plugins %}
-<script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/samlmeta.plugin.{{ plugin }}.js"></script>
-{% endfor %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/require-2.1.18.min.js" data-main="{{ STATIC_URL }}saml-metadata-editor/js/main"></script>
 
 <script type="text/javascript">
 (function($) {
@@ -63,93 +47,6 @@
         };
     }
 
-    $(document).ready(function(){
-        var tabs = ['text', 'upload', 'remote'], unsaved_changes = false;
-        $("#metadata-tabs").tabs({
-            'selected': tabs.indexOf('{{ edit_mode }}')
-        });
-
-        function set_dirty () {
-            unsaved_changes = true;
-        }
-
-        if ($.browser.msie && $.browser.version <= 9) {
-            // We should be doing capability detection here but the problem
-            // with IE <= 9 parser is that it exists but its API is
-            // different and the namespaces are handled in a different way
-            // See https://github.com/UNINETT/SAMLmetaJS/issues/7
-            $("textarea#id_metadata_text").before("<p><span class='ui-icon ui-icon-alert'></span>Your browser does not support advanced XML manipulation via javascript so you can not use the advanced metadata editor. Please upgrade your browser for a better experience.</p>");
-            $("textarea#id_metadata_text").change(set_dirty)
-        } else {
-            $("textarea#id_metadata_text").SAMLmetaJS({
-                'showValidation': true,
-                'showValidationLevel': {
-                    'info': false,
-                    'ok': false,
-                    'warning': true,
-                    'error': true
-                }
-            });
-            $("form input[name=commit_changes]").click(function () {
-                $("form input[name=button_clicked]").val("commit_changes");
-                $("a[href='#rawmetadata']").click();
-                return true;
-            });
-            $("form input[name=submit_changes]").click(function () {
-                $("form input[name=button_clicked]").val("submit_changes");
-                $("a[href='#rawmetadata']").click();
-                return true;
-            });
-             $("form input[name=approve_changes]").click(function () {
-                $("form input[name=button_clicked]").val("approve_changes");
-                $("a[href='#rawmetadata']").click();
-                return true;
-            });
-            $("form input[name=discard_changes]").click(function () {
-                $("form input[name=button_clicked]").val("discard_changes");
-                $("a[href='#rawmetadata']").click();
-                return true;
-            });
-
-            // There should be an API in SAMLmetaJS for this
-            // This is just a hack until we add such API
-            $("#text_edit_form input, #text_edit_form textarea, #text_edit_form select").live('change', set_dirty);
-            $("#text_edit_form button").live('click', set_dirty);
-            $(".removename").live('click', set_dirty);
-        }
-
-        // When submitting the forms we unset the dirty flag since the changes
-        // are going to be saved
-        $(".metadataForm").submit(function () {
-            unsaved_changes = false;
-        });
-
-        // Warn the user that he may lose his changes if he navigates
-        // out of this page
-        window.onbeforeunload = function (event) {
-            var msg = "You have unsaved changes!";
-            if (unsaved_changes) {
-                if (event) {
-                    // For IE and Firefox prior to version 4
-                    event.returnValue = msg;
-                }
-                // For Safari and Firefox version 4 and later
-                return msg;
-            }
-        }
-
-        // Metadata Editor Shell (commit dialog)
-        $(".metadataForm").mesh({
-            validatingMsg: '{% trans "Validating metadata ..." %}',
-            validMetadataMsg: '{% trans "The metadata is valid!" %}',
-            invalidMetadataMsg: '{% trans "The metadata is not valid!" %}',
-            submitButtonLabel: '{% trans "Submit changes" %}',
-            closeButtonLabel: '{% trans "Cancel" %}',
-            noMessageAlert: '{% trans "Please write a commit message" %}',
-            noTOUAcceptedAlert: '{% trans "You must accept the terms of use" %}'
-        });
-
-    });
 })(jQuery);
 </script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/terms-of-use.js"></script>
