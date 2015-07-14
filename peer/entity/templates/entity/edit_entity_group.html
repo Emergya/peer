@@ -12,7 +12,7 @@
     {% endif %}
   </hgroup>
 
-  <form action="{% if entity_group %}{% url 'entity_group_edit' entity_group.id %}{% else %}{% url 'entity_group_add' %}{% endif %}" method="post">{% csrf_token %}
+  <form action="{% if entity_group %}{% url 'entities:entity_group_edit' entity_group.id %}{% else %}{% url 'entity_group_add' %}{% endif %}" method="post">{% csrf_token %}
     <fieldset>
     {{ form.as_p }}
     <p>Some tips about the query field:</p>

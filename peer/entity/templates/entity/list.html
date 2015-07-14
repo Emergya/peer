@@ -7,7 +7,7 @@
     <h1>{% trans "Entities list" %}</h1>
   </hgroup>
 
-  <a class="button" href="{% url 'entity_add' %}">{% trans "Add entity" %}</a>
+  <a class="button" href="{% url 'entities:entity_add' %}">{% trans "Add entity" %}</a>
 
   {% include "entity/listing.include.html" %}
 

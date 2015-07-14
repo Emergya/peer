@@ -7,7 +7,7 @@
   <ul id="delegate-list">
     {% for delegate in delegates %}
       <li>
-      <form action="{% url 'make_owner' entity_id %}"
+      <form action="{% url 'entities:make_owner' entity_id %}"
             method="POST"
             class="list-user-form">
           {% csrf_token %}
@@ -16,7 +16,7 @@
                  value="{{ delegate.pk }}"
                  />
           <span class="user-name">{% safefullname delegate %}</span>
-          <button type="button" id="{% url 'remove_delegate' entity_id delegate.id %}"
+          <button type="button" id="{% url 'entities:remove_delegate' entity_id delegate.id %}"
                   class="button remove-delegate-button">
             {% trans "Remove" %}
           </button>

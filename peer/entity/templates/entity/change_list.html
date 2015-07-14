@@ -40,7 +40,7 @@
         <ul class="object-tools">
           {% block object-tools-items %}
             <li>
-              {% url 'entity_add' as add_url %}
+              {% url 'entities:entity_add' as add_url %}
               <a href="{% add_preserved_filters add_url is_popup to_field %}" class="addlink">
                 {% blocktrans with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktrans %}
               </a>

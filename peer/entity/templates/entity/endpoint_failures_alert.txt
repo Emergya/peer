@@ -10,5 +10,5 @@ If you don't want to receive these messages please uncheck the box
 "Receive email alerts when any endpoint of this entity is down" for
 each entity:
 
-{% for problem in problems %}* http://{{ site }}{% url 'monitoring_prefs' problem.entity.id %}
+{% for problem in problems %}* http://{{ site }}{% url 'entities:monitoring_prefs' problem.entity.id %}
 {% endfor %}

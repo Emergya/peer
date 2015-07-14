@@ -43,7 +43,7 @@ from peer.entity.security import can_edit_entity_group
 
 
 @login_required
-def entity_group_add(request, return_view_name='entity_group_view'):
+def entity_group_add(request, return_view_name='entities:entity_group_view'):
     if request.method == 'POST':
         form = EntityGroupForm(request.POST)
         if form.is_valid():
@@ -85,7 +85,7 @@ def entity_group_view(request, entity_group_id):
 
 @login_required
 def entity_group_edit(request, entity_group_id,
-                      return_view_name='entity_group_view'):
+        return_view_name='entities:entity_group_view'):
 
     entity_group = get_object_or_404(EntityGroup, id=entity_group_id)
 
