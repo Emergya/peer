@@ -76,23 +76,18 @@ class Metadata(object):
 
     @property
     def organization(self):
-        languages = {}
-        for org_node in self.etree.findall(addns('Organization')):
-            for attr in ('name', 'displayName', 'URL'):
-                node_name = 'Organization' + attr[0].upper() + attr[1:]
-                for node in org_node.findall(addns(node_name)):
-                    lang = getlang(node)
-                    if lang is None:
-                        continue  # the lang attribute is required
-
-                    lang_dict = languages.setdefault(lang, {})
-                    lang_dict[attr] = node.text
-
-        result = []
-        for lang, data in languages.items():
-            data['lang'] = lang
-            result.append(data)
-        return result
+        org = ''
+        path = [addns('Organization'), addns('OrganizationName')]
+        organizations = self.etree.findall('/'.join(path))
+        for org_node in organizations:
+            lang = getlang(org_node)
+            if lang is None:
+                continue
+            if lang == 'en':
+                org = org_node.text
+        if org == '' and len(organizations) > 0:
+            org = organizations[0].text
+        return org
 
     @property
     def contacts(self):
@@ -173,17 +168,24 @@ class Metadata(object):
 
     @property
     def display_name(self):
-        languages = {}
-        path = [addns('SPSSODescriptor'), addns('Extensions'),
-                addns('UIInfo', MDUI_NAMESPACE),
-                addns('DisplayName', MDUI_NAMESPACE)]
-        for dn_node in self.etree.findall('/'.join(path)):
+        languages = ''
+        if self.role_descriptor == 'SP':
+            path = [addns('SPSSODescriptor'), addns('Extensions'),
+                    addns('UIInfo', MDUI_NAMESPACE),
+                    addns('DisplayName', MDUI_NAMESPACE)]
+        else:
+            path = [addns('IDPSSODescriptor'), addns('Extensions'),
+                    addns('UIInfo', MDUI_NAMESPACE),
+                    addns('DisplayName', MDUI_NAMESPACE)]
+        displays = self.etree.findall('/'.join(path))
+        for dn_node in displays:
             lang = getlang(dn_node)
             if lang is None:
                 continue  # the lang attribute is required
-
-            languages[lang] = dn_node.text
-
+            if lang == 'en':
+                languages = dn_node.text
+        if languages == '' and len(displays) > 0:
+            languages = getlang(displays[0])
         return languages
 
     @property
@@ -238,16 +240,25 @@ class Metadata(object):
         return res
 
     # aluque
+    # Puede haber varias descripciones (en distintos idiomas). Mostrar todas?
     @property
     def description(self):
-        path = [addns('SPSSODescriptor'), addns('Extensions'),
-                addns('UIInfo', MDUI_NAMESPACE),
-                addns('Description', MDUI_NAMESPACE)]
-        find_xml = self.etree.find('/'.join(path))
-        if find_xml is not None:
-            desc = find_xml.text
+        desc = ''
+        if self.role_descriptor == 'SP':
+            path = [addns('SPSSODescriptor'), addns('Extensions'),
+                    addns('UIInfo', MDUI_NAMESPACE),
+                    addns('Description', MDUI_NAMESPACE)]
         else:
-            desc = ''
+            path = [addns('IDPSSODescriptor'), addns('Extensions'),
+                    addns('UIInfo', MDUI_NAMESPACE),
+                    addns('Description', MDUI_NAMESPACE)]
+        find_xml = self.etree.findall('/'.join(path))
+        for item in find_xml:
+            if item is not None:
+                if 'en' in item.values():
+                    desc = item.text
+        if desc == '' and len(find_xml) > 0:
+            desc = find_xml[0].text
         return desc
 
     # aluque
@@ -323,12 +334,12 @@ class Entity(models.Model):
         result = unicode(self.id)
         if self.has_metadata():
             if self.display_name:
-                dn_by_langs = self.display_name
-                if 'en' in dn_by_langs:
-                    result = dn_by_langs['en']
-                else:
-                    first_lang = dn_by_langs.keys()[0]
-                    result = dn_by_langs[first_lang]
+                result = self.display_name
+                # if 'en' in dn_by_langs:
+                #     result = dn_by_langs['en']
+                # else:
+                #     first_lang = dn_by_langs.keys()[0]
+                #     result = dn_by_langs[first_lang]
             elif self.entityid:
                 result = self.entityid
             else:
@@ -561,3 +572,10 @@ class ModerationDelegation(models.Model):
     class Meta:
         verbose_name = _(u'Moderation delegation')
         verbose_name_plural = _(u'Moderation delegations')
+
+'''
+class EntityMD(models.Model):
+    entity = models.OneToOneField(Entity, verbose_name=_(u'Entity'))
+    domain = models.ForeignKey(Domain, verbose_name=_('Domain'))
+    description =
+'''
