@@ -1,6 +1,19 @@
 CHANGES
 =======
 
+0.19.1 (2015-07-14)
+-------------------
+
+- Fix bug in entities URLs
+
+0.19.0 (2015-07-03)
+-------------------
+
+- Changes in the home page
+- Use the tables in the admin site for listings of entities
+- Add table of text chunks for home page slogan, terms of use, etc.
+- Users can choose role between entities operator and metadata registrar.
+
 0.18.0 (2015-06-25)
 -------------------
 
