@@ -68,13 +68,12 @@ class PublicEntityAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         if request.user.is_authenticated():
             role = request.session.get('user-role', ENTITY_OP)
-            conditions = (Q(owner=request.user)
-                        | Q(state='published')
-                        | Q(delegates=request.user))
             if role == ENTITY_OP:
-                qs = Entity.objects.filter(conditions)
+                qs = Entity.objects.filter(Q(owner=request.user)
+                                          | Q(state='published')
+                                          | Q(delegates=request.user))
             else:
-                qs = Entity.objects.filter(conditions | Q(moderators=request.user))
+                qs = Entity.objects.filter(moderators=request.user)
             return qs
         return Entity.objects.filter(state='published')
 
