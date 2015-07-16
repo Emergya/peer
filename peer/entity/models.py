@@ -76,18 +76,34 @@ class Metadata(object):
 
     @property
     def organization(self):
-        org = ''
-        path = [addns('Organization'), addns('OrganizationName')]
-        organizations = self.etree.findall('/'.join(path))
-        for org_node in organizations:
-            lang = getlang(org_node)
-            if lang is None:
-                continue
-            if lang == 'en':
-                org = org_node.text
-        if org == '' and len(organizations) > 0:
-            org = organizations[0].text
-        return org
+        languages = {}
+        for org_node in self.etree.findall(addns('Organization')):
+            for attr in ('name', 'displayName', 'URL'):
+                node_name = 'Organization' + attr[0].upper() + attr[1:]
+                for node in org_node.findall(addns(node_name)):
+                    lang = getlang(node)
+                    if lang is None:
+                        continue  # the lang attribute is required
+
+                    lang_dict = languages.setdefault(lang, {})
+                    lang_dict[attr] = node.text
+
+        result = []
+        for lang, data in languages.items():
+            data['lang'] = lang
+            result.append(data)
+        return result
+
+    @property
+    def organization_name(self):
+        org_name = ''
+        organizations = self.organization
+        for org in organizations:
+            if org.get('lang') == 'en':
+                org_name = org.get('name')
+        if org_name == '' and len(organizations) > 0:
+            org_name = organizations[0].get('lang')
+        return org_name
 
     @property
     def contacts(self):
@@ -223,8 +239,6 @@ class Metadata(object):
 
         return result
 
-    # aluque
-    # Consideramos que siempre existe un campo IDPSSODescriptor o un campo SPSSODescriptor
     @property
     def role_descriptor(self):
         path = [addns('IDPSSODescriptor'), ]
@@ -239,8 +253,6 @@ class Metadata(object):
             res = 'IDP'
         return res
 
-    # aluque
-    # Puede haber varias descripciones (en distintos idiomas). Mostrar todas?
     @property
     def description(self):
         desc = ''
@@ -261,7 +273,6 @@ class Metadata(object):
             desc = find_xml[0].text
         return desc
 
-    # aluque
     @property
     def attributes(self):
         attrs = []
@@ -335,11 +346,6 @@ class Entity(models.Model):
         if self.has_metadata():
             if self.display_name:
                 result = self.display_name
-                # if 'en' in dn_by_langs:
-                #     result = dn_by_langs['en']
-                # else:
-                #     first_lang = dn_by_langs.keys()[0]
-                #     result = dn_by_langs[first_lang]
             elif self.entityid:
                 result = self.entityid
             else:
@@ -397,6 +403,10 @@ class Entity(models.Model):
     @property
     def valid_until(self):
         return self._load_metadata().valid_until
+
+    @property
+    def organization_name(self):
+        return self._load_metadata().organization_name
 
     @property
     def organization(self):
@@ -573,9 +583,25 @@ class ModerationDelegation(models.Model):
         verbose_name = _(u'Moderation delegation')
         verbose_name_plural = _(u'Moderation delegations')
 
-'''
+ROLE_CHOICES = (('SP', 'Service Provider'),
+                ('IDP', 'Identity Provider'),
+                ('both', 'Both'))
+
+
 class EntityMD(models.Model):
-    entity = models.OneToOneField(Entity, verbose_name=_(u'Entity'))
+    entity = models.OneToOneField(Entity, verbose_name=_(u'Entity'), primary_key=True)
     domain = models.ForeignKey(Domain, verbose_name=_('Domain'))
-    description =
-'''
+    description = models.CharField(null=True, max_length=200)
+    display_name = models.CharField(null=True, max_length=200)
+    organization = models.CharField(null=True, max_length=200)
+    role_descriptor = models.CharField(null=True,
+                                       max_length=4,
+                                       choices=ROLE_CHOICES)
+
+
+class AttributesMD(models.Model):
+    entity_md = models.ForeignKey(EntityMD, verbose_name=_(u'Entity metadata'))
+    friendly_name = models.CharField(null=True, max_length=200)
+    name = models.CharField(null=True, max_length=200)
+    name_format = models.CharField(null=True, max_length=200)
+    value = models.CharField(null=True, max_length=200)

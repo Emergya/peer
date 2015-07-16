@@ -36,7 +36,7 @@ from django.conf import settings
 
 from peer.account.templatetags.account import authorname
 from peer.customfields import TermsOfUseField, readtou
-from peer.entity.models import Entity, EntityGroup
+from peer.entity.models import Entity, EntityGroup, EntityMD, AttributesMD
 from peer.entity.validation import validate
 from peer.entity.utils import FetchError, fetch_resource
 from peer.entity.utils import write_temp_file, strip_entities_descriptor
@@ -186,6 +186,23 @@ class BaseMetadataEditForm(forms.Form):
         else:
             self.entity.metadata.save(name, content, username, commit_msg)
         self.entity.save()
+        self.store_entitymd_database(self.entity.id)
+
+    def store_entitymd_database(self, id_ent):
+        entity = Entity.objects.get(id=id_ent)
+        ent_md, created = EntityMD.objects.get_or_create(entity=entity, domain=entity.domain)
+        ent_md.description = entity.description
+        ent_md.display_name = entity.display_name
+        ent_md.organization = entity.organization_name
+        ent_md.role_descriptor = entity.role_descriptor
+        ent_md.save()
+        AttributesMD.objects.filter(entity_md=ent_md).delete()
+        for attr in entity.attributes:
+            AttributesMD.objects.create(entity_md=ent_md,
+                                        name=attr.get('Name'),
+                                        name_format=attr.get('NameFormat'),
+                                        value=attr.get('Value'),
+                                        friendly_name=attr.get('FriendlyName'))
 
 
 class MetadataTextEditForm(BaseMetadataEditForm):

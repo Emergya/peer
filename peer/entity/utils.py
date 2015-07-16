@@ -50,7 +50,6 @@ NAMESPACES = {
     'ds': 'http://www.w3.org/2000/09/xmldsig#',
     'saml': 'urn:oasis:names:tc:SAML:2.0:assertion',
     'samlp': 'urn:oasis:names:tc:SAML:2.0:protocol',
-    # aluque
     'mdattr': 'urn:oasis:names:tc:SAML:metadata:attribute',
 }
 

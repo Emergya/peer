@@ -70,7 +70,7 @@ def _get_edit_metadata_form(request, entity, edit_mode, form=None):
         elif edit_mode == 'remote':
             form = MetadataRemoteEditForm(entity, request.user)
     form_action = reverse('entities:%s_edit_metadata' % edit_mode,
-                           args=(entity.id, ))
+                          args=(entity.id, ))
 
     context_instance = RequestContext(request)
     return render_to_string('entity/simple_edit_metadata.html', {
