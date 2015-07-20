@@ -4,11 +4,15 @@
 
 {% block jspluginscss %}
 <link type="text/css" href="{{ STATIC_URL }}js/SAMLmetaJS/css/samlmetajs.css" rel="Stylesheet" />
+<link type="text/css" href="{{ STATIC_URL }}saml-metadata-editor/css/normalize.css" rel="stylesheet" />
+<link type="text/css" href="{{ STATIC_URL }}saml-metadata-editor/css/foundation.min.css" rel="stylesheet" />
+<link type="text/css" href="{{ STATIC_URL }}saml-metadata-editor/css/style.css" rel="stylesheet" />
 {% endblock %}
 
 {% block extracss %}
 <link type="text/css" href="{{ STATIC_URL }}css/terms-of-use.css" rel="Stylesheet" />
 <link type="text/css" href="{% url 'entities:get_pygments_css' %}" rel="Stylesheet" />
+
 {% endblock %}
 
 {% block content %}
@@ -39,6 +43,9 @@
 {% if needs_google_maps %}
 <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
 {% endif %}
+
+<script type="text/javascript" src="{{ STATIC_URL }}js/require-2.1.18.min.js" data-main="{{ STATIC_URL }}saml-metadata-editor/js/main"></script>
+
 <script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/samlmeta.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/mdreader.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/samlmeta.xml.js"></script>
@@ -79,9 +86,9 @@
             // different and the namespaces are handled in a different way
             // See https://github.com/UNINETT/SAMLmetaJS/issues/7
             $("textarea#id_metadata_text").before("<p><span class='ui-icon ui-icon-alert'></span>Your browser does not support advanced XML manipulation via javascript so you can not use the advanced metadata editor. Please upgrade your browser for a better experience.</p>");
-            $("textarea#id_metadata_text").change(set_dirty)
+            $("textarea#xmlcontent").change(set_dirty)
         } else {
-            $("textarea#id_metadata_text").SAMLmetaJS({
+            /*$("textarea#id_metadata_text").SAMLmetaJS({
                 'showValidation': true,
                 'showValidationLevel': {
                     'info': false,
@@ -89,7 +96,7 @@
                     'warning': true,
                     'error': true
                 }
-            });
+            });*/
             $("form input[name=commit_changes]").click(function () {
                 $("form input[name=button_clicked]").val("commit_changes");
                 $("a[href='#rawmetadata']").click();
