@@ -1,0 +1,3 @@
+[submodule "peer/staticfiles/saml-metadata-editor"]
+	path = peer/staticfiles/saml-metadata-editor
+	url = git@github.com:Emergya/saml-metadata-editor.git
