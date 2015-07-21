@@ -44,8 +44,6 @@ from peer.entity.adminsite import entities
 from peer.entity.paginator import paginated_list_of_entities
 from peer.entity.filters import get_filters
 from peer.portal.models import TextChunkModel
-from peer.entity.entity_admin import (ENTITY_OP,
-                                      MD_REGISTRAR)
 
 
 def index(request):
@@ -93,23 +91,4 @@ def explanation(request):
     return render_to_response('portal/who_can_do_what.html',
                               {'wcdw': wcdw_text},
                               context_instance=RequestContext(request))
-
-
-@login_required
-def toggle_user_role(request):
-    try:
-        role = request.session.get('user-role', ENTITY_OP)
-        new_role = 1 >> role
-        request.session['user-role'] = new_role
-        messages.success(request, _('Role changed successfully'))
-    except Exception, e:
-        if settings.ADMINS:
-            email = settings.ADMIN[0][1]
-            msg = _('There was an error, please contact '
-                             'the site operator at %s.\n%s') % (email, str(e))
-        else:
-            msg = _('There was an error:\n%s') % str(e)
-        messages.error(request, msg)
-
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse('index')))
 

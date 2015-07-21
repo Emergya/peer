@@ -29,10 +29,6 @@
 from django.conf import settings
 
 from peer.entity.models import Entity
-from peer.entity.entity_admin import (ENTITY_OP,
-                                      ENTITY_OP_LABEL,
-                                      MD_REGISTRAR,
-                                      MD_REGISTRAR_LABEL)
 
 
 DEFAULT_THEME = {
@@ -68,20 +64,3 @@ def auth(request):
         })
 
     return result
-
-
-def user_role(request):
-    if request.user.is_anonymous():
-        moderated = 0
-    else:
-        moderated = Entity.objects.filter(moderators=request.user).count()
-    role = request.session.get('user-role', None)
-    if role is None:
-        if moderated:
-            role = MD_REGISTRAR
-            request.session['user-role'] = role
-        else:
-            role = ENTITY_OP
-    role_btn_label = role and ENTITY_OP_LABEL or MD_REGISTRAR_LABEL
-    return {'is_md_registrar' : moderated,
-            'role_btn_label': role_btn_label}

@@ -37,10 +37,6 @@ from peer.entity.models import Entity
 from peer.entity import views
 from peer.entity.adminsite import entities
 
-ENTITY_OP = 0
-ENTITY_OP_LABEL = ugettext_lazy('Act as Entity operator')
-MD_REGISTRAR = 1
-MD_REGISTRAR_LABEL = ugettext_lazy('Act as MD registrar')
 
 class EntitiesChangeList(ChangeList):
 
@@ -67,13 +63,14 @@ class PublicEntityAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         if request.user.is_authenticated():
-            role = request.session.get('user-role', ENTITY_OP)
-            if role == ENTITY_OP:
-                qs = Entity.objects.filter(Q(owner=request.user)
-                                          | Q(state='published')
-                                          | Q(delegates=request.user))
+            if request.user.is_superuser:
+                qs = Entity.objects.all()
             else:
-                qs = Entity.objects.filter(moderators=request.user)
+                qs = Entity.objects.filter( Q(owner=request.user)
+                                          | Q(state='published')
+                                          | Q(delegates=request.user)
+                                          | Q(moderators=request.user)
+                                          )
             return qs
         return Entity.objects.filter(state='published')
 
