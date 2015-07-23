@@ -47,15 +47,10 @@
 <script type="text/javascript" src="{{ STATIC_URL }}js/require-2.1.18.min.js" data-main="{{ STATIC_URL }}saml-metadata-editor/js/main"></script>
 
 
-<script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/samlmeta.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/mdreader.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/samlmeta.xml.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/spin.min.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.mesh.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.form.js"></script>
-{% for plugin in samlmetajs_plugins %}
-<script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/samlmeta.plugin.{{ plugin }}.js"></script>
-{% endfor %}
+
 
 <script type="text/javascript">
 (function($) {
@@ -81,41 +76,39 @@
             unsaved_changes = true;
         }
 
+        function update_xmlcontent() {
+            if ($("#structureTab").hasClass( "active" )){
+                document.getElementById('toXML').click();
+                document.getElementById('toTree').click();
+            }
+        }
+
         if ($.browser.msie && $.browser.version <= 9) {
             // We should be doing capability detection here but the problem
             // with IE <= 9 parser is that it exists but its API is
             // different and the namespaces are handled in a different way
             // See https://github.com/UNINETT/SAMLmetaJS/issues/7
-            $("textarea#id_metadata_text").before("<p><span class='ui-icon ui-icon-alert'></span>Your browser does not support advanced XML manipulation via javascript so you can not use the advanced metadata editor. Please upgrade your browser for a better experience.</p>");
-            $("textarea#id_metadata_text").change(set_dirty)
+            $("textarea#xmlcontent").before("<p><span class='ui-icon ui-icon-alert'></span>Your browser does not support advanced XML manipulation via javascript so you can not use the advanced metadata editor. Please upgrade your browser for a better experience.</p>");
+            $("textarea#xmlcontent").change(set_dirty)
         } else {
-            // $("textarea#id_metadata_text").SAMLmetaJS({
-            //     'showValidation': true,
-            //     'showValidationLevel': {
-            //         'info': false,
-            //         'ok': false,
-            //         'warning': true,
-            //         'error': true
-            //     }
-            // });
             $("form input[name=commit_changes]").click(function () {
                 $("form input[name=button_clicked]").val("commit_changes");
-                $("a[href='#rawmetadata']").click();
+                update_xmlcontent();
                 return true;
             });
             $("form input[name=submit_changes]").click(function () {
                 $("form input[name=button_clicked]").val("submit_changes");
-                $("a[href='#rawmetadata']").click();
+                update_xmlcontent();
                 return true;
             });
              $("form input[name=approve_changes]").click(function () {
                 $("form input[name=button_clicked]").val("approve_changes");
-                $("a[href='#rawmetadata']").click();
+                update_xmlcontent();
                 return true;
             });
             $("form input[name=discard_changes]").click(function () {
                 $("form input[name=button_clicked]").val("discard_changes");
-                $("a[href='#rawmetadata']").click();
+                update_xmlcontent();
                 return true;
             });
 
@@ -164,16 +157,6 @@
 
             document.getElementById('toTree').click();
 
-            $(".actionRow").hide();
-
-            $("#toTree").bind('click', function() {
-                $(".actionRow").hide();
-            });
-
-            $("#toXML").bind('click', function() {
-                $(".actionRow").show();
-
-            });
 
             $("#xmlTab").bind("DOMSubtreeModified", function() {
                 $("textarea#xmlcontent").change();
