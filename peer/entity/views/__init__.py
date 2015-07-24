@@ -38,7 +38,7 @@ from django.utils.translation import ugettext as _
 from peer.account.templatetags.account import authorname
 from peer.domain.models import Domain
 from peer.entity.forms import EntityForm
-from peer.entity.models import Entity
+from peer.entity.models import Entity, EntityMD, AttributesMD
 from peer.entity.paginator import paginated_list_of_entities
 from peer.entity.security import can_edit_entity
 from peer.entity.utils import add_previous_revisions
@@ -69,12 +69,12 @@ def entity_add_with_domain(request, domain_name=None,
     if request.method == 'POST':
         form = EntityForm(request.user, request.POST, instance=entity)
         if form.is_valid():
-            form.save()
-            form.instance.owner = request.user
-            form.instance.save()
+            instance = form.save(commit=False)
+            instance.owner = request.user
+            instance.save()
             messages.success(request, _('Entity created succesfully'))
             if return_view_name == 'entities:edit_metadata':
-                url = reverse(return_view_name, args=[form.instance.id])
+                url = reverse(return_view_name, args=(instance.id,))
             else:
                 url = reverse(return_view_name)
             return HttpResponseRedirect(url)
@@ -116,6 +116,12 @@ def entity_remove(request, entity_id):
     if request.method == 'POST':
         username = authorname(request.user)
         commit_msg = u'entity removed'
+        try:
+            ent_md = EntityMD.objects.get(entity=entity)
+            AttributesMD.objects.filter(entity_md=ent_md).delete()
+            ent_md.delete()
+        except EntityMD.DoesNotExist:
+            pass
         entity.metadata.delete(username, commit_msg)
         entity.delete()
         messages.success(request, _('Entity removed succesfully'))

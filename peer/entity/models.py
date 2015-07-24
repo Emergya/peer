@@ -50,6 +50,8 @@ from peer.entity.nagios import send_nagios_notification
 XML_NAMESPACE = NAMESPACES['xml']
 XMLDSIG_NAMESPACE = NAMESPACES['ds']
 MDUI_NAMESPACE = NAMESPACES['mdui']
+MDATTR_NAMESPACE = NAMESPACES['mdattr']
+SAML_NAMESPACE = NAMESPACES['saml']
 
 CONNECTION_TIMEOUT = 10
 
@@ -91,6 +93,17 @@ class Metadata(object):
             data['lang'] = lang
             result.append(data)
         return result
+
+    @property
+    def organization_name(self):
+        org_name = ''
+        organizations = self.organization
+        for org in organizations:
+            if org.get('lang') == 'en':
+                org_name = org.get('name')
+        if org_name == '' and len(organizations) > 0:
+            org_name = organizations[0].get('lang')
+        return org_name
 
     @property
     def contacts(self):
@@ -171,17 +184,24 @@ class Metadata(object):
 
     @property
     def display_name(self):
-        languages = {}
-        path = [addns('SPSSODescriptor'), addns('Extensions'),
-                addns('UIInfo', MDUI_NAMESPACE),
-                addns('DisplayName', MDUI_NAMESPACE)]
-        for dn_node in self.etree.findall('/'.join(path)):
+        languages = ''
+        if self.role_descriptor == 'SP':
+            path = [addns('SPSSODescriptor'), addns('Extensions'),
+                    addns('UIInfo', MDUI_NAMESPACE),
+                    addns('DisplayName', MDUI_NAMESPACE)]
+        else:
+            path = [addns('IDPSSODescriptor'), addns('Extensions'),
+                    addns('UIInfo', MDUI_NAMESPACE),
+                    addns('DisplayName', MDUI_NAMESPACE)]
+        displays = self.etree.findall('/'.join(path))
+        for dn_node in displays:
             lang = getlang(dn_node)
             if lang is None:
                 continue  # the lang attribute is required
-
-            languages[lang] = dn_node.text
-
+            if lang == 'en':
+                languages = dn_node.text
+        if languages == '' and len(displays) > 0:
+            languages = getlang(displays[0])
         return languages
 
     @property
@@ -219,9 +239,59 @@ class Metadata(object):
 
         return result
 
+    @property
+    def role_descriptor(self):
+        path = [addns('IDPSSODescriptor'), ]
+        find_xml = self.etree.find('/'.join(path))
+        path2 = [addns('SPSSODescriptor'), ]
+        find_xml2 = self.etree.find('/'.join(path2))
+        if find_xml is not None and find_xml2 is not None:
+            res = 'Both'
+        elif find_xml is None:
+            res = 'SP'
+        else:
+            res = 'IDP'
+        return res
+
+    @property
+    def description(self):
+        desc = ''
+        if self.role_descriptor == 'SP':
+            path = [addns('SPSSODescriptor'), addns('Extensions'),
+                    addns('UIInfo', MDUI_NAMESPACE),
+                    addns('Description', MDUI_NAMESPACE)]
+        else:
+            path = [addns('IDPSSODescriptor'), addns('Extensions'),
+                    addns('UIInfo', MDUI_NAMESPACE),
+                    addns('Description', MDUI_NAMESPACE)]
+        find_xml = self.etree.findall('/'.join(path))
+        for item in find_xml:
+            if item is not None:
+                if 'en' in item.values():
+                    desc = item.text
+        if desc == '' and len(find_xml) > 0:
+            desc = find_xml[0].text
+        return desc
+
+    @property
+    def attributes(self):
+        attrs = []
+        path = [addns('Extensions'), addns('EntityAttributes', MDATTR_NAMESPACE),
+                addns('Attribute', SAML_NAMESPACE)]
+        find_xml = self.etree.findall('/'.join(path))
+        for node_attr in find_xml:
+            if node_attr is not None:
+                element = {}
+                for items in node_attr.items():
+                    element[items[0]] = items[1]
+                element['Value'] = node_attr.getchildren()[0].text
+                attrs.append(element)
+        return attrs
+
 
 class Entity(models.Model):
     app_label = 'peer.entity'
+
     class STATE:
         NEW = 'new'
         MOD = 'modified'
@@ -275,12 +345,7 @@ class Entity(models.Model):
         result = unicode(self.id)
         if self.has_metadata():
             if self.display_name:
-                dn_by_langs = self.display_name
-                if 'en' in dn_by_langs:
-                    result = dn_by_langs['en']
-                else:
-                    first_lang = dn_by_langs.keys()[0]
-                    result = dn_by_langs[first_lang]
+                result = self.display_name
             elif self.entityid:
                 result = self.entityid
             else:
@@ -340,6 +405,10 @@ class Entity(models.Model):
         return self._load_metadata().valid_until
 
     @property
+    def organization_name(self):
+        return self._load_metadata().organization_name
+
+    @property
     def organization(self):
         return self._load_metadata().organization
 
@@ -358,6 +427,18 @@ class Entity(models.Model):
     @property
     def geolocationhint(self):
         return self._load_metadata().geolocationhint
+
+    @property
+    def role_descriptor(self):
+        return self._load_metadata().role_descriptor
+
+    @property
+    def description(self):
+        return self._load_metadata().description
+
+    @property
+    def attributes(self):
+        return self._load_metadata().attributes
 
     @property
     def logos(self):
@@ -501,3 +582,26 @@ class ModerationDelegation(models.Model):
     class Meta:
         verbose_name = _(u'Moderation delegation')
         verbose_name_plural = _(u'Moderation delegations')
+
+ROLE_CHOICES = (('SP', 'Service Provider'),
+                ('IDP', 'Identity Provider'),
+                ('both', 'Both'))
+
+
+class EntityMD(models.Model):
+    entity = models.OneToOneField(Entity, verbose_name=_(u'Entity'), primary_key=True)
+    domain = models.ForeignKey(Domain, verbose_name=_('Domain'))
+    description = models.CharField(null=True, max_length=200)
+    display_name = models.CharField(null=True, max_length=200)
+    organization = models.CharField(null=True, max_length=200)
+    role_descriptor = models.CharField(null=True,
+                                       max_length=4,
+                                       choices=ROLE_CHOICES)
+
+
+class AttributesMD(models.Model):
+    entity_md = models.ForeignKey(EntityMD, verbose_name=_(u'Entity metadata'))
+    friendly_name = models.CharField(null=True, max_length=200)
+    name = models.CharField(null=True, max_length=200)
+    name_format = models.CharField(null=True, max_length=200)
+    value = models.CharField(null=True, max_length=200)
