@@ -1,11 +1,8 @@
 {% load i18n %}
-<nav class="shadow left clear peer-menu">
+<nav class="left clear peer-menu">
   {% block topMenu %}
     <div class="topMenu"><span class="hidden">{% trans "Filters" %}</span></div>
   {% endblock %}
   {% block contentMenu %}
-  {% endblock %}
-  {% block bottomMenu %}
-    <div class="bottomMenu"><span class="hidden">{% trans "Your actions" %}</span></div>
   {% endblock %}
 </nav>
