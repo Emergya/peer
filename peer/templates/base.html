@@ -1,4 +1,4 @@
-{% load i18n admin_static %}<!doctype html>
+{% load i18n admin_static session %}<!doctype html>
 <html lang="en">
 
   <head>
@@ -72,11 +72,10 @@
           {% if user.is_authenticated %}
             <li>
                 <div>
-                    <a id="user-profile" href="{% url 'account_profile' %}">{{ user }}</a>
+                    <a id="user-profile" href="{% url 'account_profile' %}">{% trans "Signed in as" %} {{ user }}</a>
                     <button id="user-menu-btn">Select an action</button>
                 </div>
             </li>
-            <li><a class="button" href="{% url 'auth_logout' %}">{% trans "Logout" %}</a></li>
           {% endif %}
         {% endblock %}
       </ul>
@@ -101,14 +100,12 @@
 
     {% if not user.is_anonymous %}
     <ul id="user-menu">
-        <li><a href="{% url 'entities:entities_list' %}">{% trans "Full list of entities" %}</a></li>
-        <li><a href="{% url 'account_profile' %}">{% trans "My domains and entities" %}</a></li>
-        <li><a href="{% url 'domain_add' %}">{% trans "Add domain" %}</a></li>
-        <li><a href="{% url 'entities:entity_add' %}">{% trans "Add entity" %}</a></li>
-        <li><a href="{% url 'entities:entity_group_add' %}">{% trans "Add entity group" %}</a></li>
-        <li><a href="{% url 'account_profile_edit' %}">{% trans "Change personal information" %}</a></li>
-        <li><a href="{% url 'password_change' %}">{% trans "Change password" %}</a></li>
-        <li><a href="{% url 'invite_friend' %}">{% trans "Invite friend" %}</a></li>
+        <li><a href="{% url 'explanation' %}">{% trans "Help" %}</a>
+        {% if_local_session %}
+          <li><a href="{% url 'account_profile_edit' %}">{% trans "Account settings" %}</a></li>
+          <li><a href="{% url 'password_change' %}">{% trans "Change password" %}</a></li>
+          <li><a href="{% url 'auth_logout' %}">{% trans "Logout" %}</a></li>
+        {% endif %}
     </ul>
     {% endif %}
 

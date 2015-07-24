@@ -297,7 +297,7 @@ class Entity(models.Model):
         MOD = 'modified'
         PUB = 'published'
 
-    state = FSMField(default=STATE.NEW, protected=True, verbose_name=_(u'Entity Metadata State'))
+    state = FSMField(default=STATE.NEW, protected=True, verbose_name=_(u'Status'))
     metadata = VersionedFileField('metadata', verbose_name=_(u'Entity metadata'),
                                   blank=True, null=True, )
     temp_metadata = models.TextField(default='', verbose_name=_(u'Metadata pending review'), blank=True, null=True)
