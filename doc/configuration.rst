@@ -343,7 +343,7 @@ Once the pemissions are specified a special migration is needed:
 
 .. code-block:: bash
 
- $ django-admin.py migrate --all; django-admin.py syncdb --all
+ $ django-admin.py migrate --all
 
 In order to manage permissions for a given user, you need to login as superuser
 in the `Django admin interface`_, browse to *Users* and pick the user whose
