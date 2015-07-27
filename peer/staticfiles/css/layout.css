@@ -811,6 +811,7 @@ div#searchusers-box {
 
 input.button,
 .ui-button-text-only .ui-button-text,
+#user-actions .button,
 #user-menu-btn > .ui-button-text {
     padding: 0.1em 0.6em;
 }
