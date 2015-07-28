@@ -679,10 +679,6 @@ ul.myEntities li a {
     width: 680px;
 }
 
-#metadata-tabs input[type=text], #metadata-tabs textarea {
-    width: 80%;
-}
-
 /* SAMLmetaJS customizations */
 div#tabs div.ui-tabs-panel {
     padding-top: 6px;
@@ -697,6 +693,19 @@ div#tabs fieldset {
 
 div#tabs fieldset legend {
     border: 0;
+}
+
+/* saml-metadata-editor customizations */
+
+#nodeDetails input,
+#nodeDetails select,
+#nodeDetails textarea,
+#nodeDetails button {
+    margin: 0;
+}
+
+#user-actions .button {
+    padding: 0.1em 0.6em;
 }
 
 /*
@@ -811,7 +820,6 @@ div#searchusers-box {
 
 input.button,
 .ui-button-text-only .ui-button-text,
-#user-actions .button,
 #user-menu-btn > .ui-button-text {
     padding: 0.1em 0.6em;
 }
