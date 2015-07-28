@@ -709,7 +709,7 @@ div#tabs fieldset legend {
 }
 
 .highlight pre {
-    font-size: 12px !important;
+    font-size: 12px;
 }
 
 /*
