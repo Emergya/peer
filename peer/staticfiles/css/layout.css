@@ -708,6 +708,10 @@ div#tabs fieldset legend {
     padding: 0.1em 0.6em;
 }
 
+.highlight pre {
+    font-size: 12px !important;
+}
+
 /*
 #metadata-tabs div#tabs input[type=text] {
     width: auto;
