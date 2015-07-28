@@ -154,9 +154,6 @@
 
             $("textarea#xmlcontent").val($("textarea#id_metadata_text").val());
 
-            //document.getElementById('toTree').click();
-
-
             $("#xmlTab").bind("DOMSubtreeModified", function() {
                 $("textarea#xmlcontent").change();
             });
