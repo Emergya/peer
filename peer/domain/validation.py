@@ -151,7 +151,7 @@ def check_superdomain_verified(domain, user=None):
         try:
             Domain.objects.get(Q(name='.'.join(segments)) &
                                Q(validated=True) &
-                               Q(Q(owner=user) | Q(moderators=user)))
+                               Q(Q(owner=user) | Q(team=user)))
         except Domain.DoesNotExist:
             segments = segments[1:]
             continue
