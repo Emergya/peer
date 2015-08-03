@@ -3,7 +3,8 @@ Installation
 
 In this part two types of installation will be covered: the standard one
 aimed for production and the development one, which target audience is
-the developer community.
+the developer community. An alternative method, using docker, is described
+`here <https://github.com/Emergya/peer-dockerfiles>`_.
 
 After these steps you should have a PEER instance up and running but
 please note that many configuration defaults will not be good for your
@@ -13,8 +14,7 @@ right after this one.
 Common prerequisites
 --------------------
 
-The minimum version of Python needed to run PEER is 2.6, but Python 2.7 is
-highly recommended.
+The version of Python needed to run PEER is 2.7.
 
 In the process of installing PEER, both in the standard installation and
 the development installation, it is necessary that some libraries already
@@ -205,7 +205,7 @@ database using the *peer* user and the password you assigned to it:
   peer=#
 
 .. note::
-  We have deliberately keep this postgresql installation super simple since
+  We have deliberately kept this postgresql installation super simple since
   we want to focus in the PEER software. If you are serious about puting
   this into production you may consider checking other Postgresql
   configuration settings to improve its performance and security.
@@ -219,7 +219,7 @@ database. This will be described with more deails in the :doc:`configuration`
 chapter.
 
 Add the following information into the
-*/var/www/peer/lib/python2.7/site-packages/peer-X.Y.Z-py2.6.egg/peer/local_settings.py* file:
+*/var/www/peer/lib/python2.7/site-packages/peer-X.Y.Z-py2.7.egg/peer/local_settings.py* file:
 
 .. code-block:: python
 
@@ -248,18 +248,25 @@ Then, activate the virtualenv:
 
   $ source /var/www/peer/bin/activate
 
-And run the Django syncdb command to create the database schema:
+And run the Django migrate command to create the database schema:
 
 .. code-block:: bash
 
-  $ django-admin.py syncdb --settings=peer.settings --migrate
+  $ django-admin.py migrate --settings=peer.settings
 
-.. note::
-  The syncdb Django command will ask you if you want to create an admin
-  user. You should answer yes to that question and write this admin's
-  username and password down. You will need them later. This administrator's
-  name should be `admin` because there are fixtures that depends on this
-  name. You can create more administrators in the future with other names.
+Creating a superuser
+~~~~~~~~~~~~~~~~~~~~
+
+After this, it is necessary to create a superuser named 'admin'. This
+administrator's name should be `admin` because there are fixtures that
+depends on this name. You can create more administrators in the future
+with other names.
+
+.. code-block:: bash
+
+  $ django-admin.py createsuperuser --settings=peer.settings --username=admin --email=admin@example.com
+
+Write this admin's username and password down. You will need them later.
 
 Collecting static files
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -296,14 +303,14 @@ following configuration into your specific virtual host section:
 
 .. code-block:: none
 
- WSGIScriptAlias / /var/www/peer/lib/python2.7/site-packages/peer-X.Y.Z-py2.6.egg/peer/peer.wsgi
- Alias /static/ /var/www/peer/lib/python2.7/site-packages/peer-X.Y.Z-py2.6.egg/peer/static/
+ WSGIScriptAlias / /var/www/peer/lib/python2.7/site-packages/peer-X.Y.Z-py2.7.egg/peer/peer.wsgi
+ Alias /static/ /var/www/peer/lib/python2.7/site-packages/peer-X.Y.Z-py2.7.egg/peer/static/
 
 
 .. note::
   Bear in mind that the exact path may be different in your case, specially
   the Python and PEER version numbers. The path
-  fragment :file:`peer-X.Y.Z-py2.6` is ficticious and will be something like
+  fragment :file:`peer-X.Y.Z-py2.7` is ficticious and will be something like
   |full_release_name| in real life.
 
 
@@ -328,15 +335,15 @@ the Git repository for the entities' metadata is created and maintained.
 .. code-block:: bash
 
   # Fedora example:
-  $ chown apache:apache /var/www/peer/lib/python2.7/site-packages/peer-X.Y.Z-py2.6.egg/peer/media
+  $ chown apache:apache /var/www/peer/lib/python2.7/site-packages/peer-X.Y.Z-py2.7.egg/peer/media
 
   # Debian/Ubuntu example:
-  $ chown www-data:www-data /var/www/peer/lib/python2.7/site-packages/peer-X.Y.Z-py2.6.egg/peer/media
+  $ chown www-data:www-data /var/www/peer/lib/python2.7/site-packages/peer-X.Y.Z-py2.7.egg/peer/media
 
 .. note::
   As mentioned before, the exact path may be different in your case, specially
   the Python and PEER version numbers. The path
-  fragment :file:`peer-X.Y.Z-py2.6` is ficticious and will be something like
+  fragment :file:`peer-X.Y.Z-py2.7` is ficticious and will be something like
   |full_release_name| in real life.
 
 
@@ -348,7 +355,7 @@ your Github username:
 
 .. code-block:: bash
 
-  $ git clone https://<username>@github.com/Yaco-Sistemas/peer.git
+  $ git clone https://<username>@github.com/Emergya/peer.git
 
 As in the standard installation we will create a virtualenv to isolate the
 system from the packages that the installation process is going to add.
@@ -398,7 +405,13 @@ finished you can populate the database to create the schema:
 
 .. code-block:: bash
 
-   $ bin/django syncdb --migrate
+   $ bin/django migrate
+
+Create a supersuser:
+
+.. code-block:: bash
+
+   $ bin/django createsuperuser --username=admin --email=admin@example.com
 
 And now you are ready to run the embedded Django server, which is perfectly
 fine for development purposes.:

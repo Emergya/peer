@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+  <div class="centerText">
+  <hgroup>
+    <h2>{% trans "The registration process has completed successfully" %}</h2>
+    </hgroup>
+
+    <p>{% trans "You can now go to the login page to identify yourself" %}</p>
+    <p><a class="button" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></p>
+  </div>
+{% endblock %}

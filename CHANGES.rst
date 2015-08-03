@@ -1,6 +1,16 @@
 CHANGES
 =======
 
+0.20.0 (2015-07-24)
+-------------------
+
+- Store some of the metadata in the db, so entities can be filtered and searched with them.
+- Users cannot choose their role.
+- fix blank page at the end of registration process.
+- Style fixes.
+- Reorganize links and buttons in the start page of authenticated users.
+- Updated documentation.
+
 0.19.1 (2015-07-14)
 -------------------
 

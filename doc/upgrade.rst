@@ -2,7 +2,9 @@ Upgrade process
 ===============
 
 Upgrading your PEER software is an easy task and your data will be safe. You
-just need to follow these steps.
+just need to follow these steps. If you installed PEER with docker, you should
+got to the documentation for
+`peer-dockerfiles <https://github.com/Emergya/peer-dockerfiles>`_.
 
 Upgrading the PEER package
 --------------------------
@@ -35,7 +37,7 @@ copy that file into the new peer directory:
 
 .. code-block:: bash
 
-  $ cp /var/www/peer/lib/python2.7/site-packages/peer-0.4.0-py2.6.egg/peer/local_settings.py /var/www/peer/lib/python2.7/site-packages/peer-0.5.0-py2.6.egg/peer/
+  $ cp /var/www/peer/lib/python2.7/site-packages/peer-0.4.0-py2.7.egg/peer/local_settings.py /var/www/peer/lib/python2.7/site-packages/peer-0.5.0-py2.7.egg/peer/
 
 In this example we are upgrading from version 0.4.0 to version 0.5.0. Adjust
 your paths according to your case.
@@ -50,7 +52,7 @@ command should be executed.
 .. code-block:: bash
 
   $ source /vaw/www/peer/bin/activate
-  $ django-admin.py syncdb --settings=peer.settings --migrate
+  $ django-admin.py migrate --settings=peer.settings
 
 It is safe to execute this command any time, even if there are no changes
 in the database schema.
@@ -81,12 +83,12 @@ For example, if you had this configuration in Apache:
 
 .. code-block:: none
 
- WSGIScriptAlias / /vaw/www/peer/lib/python2.7/site-packages/peer-0.4.0-py2.6.egg/peer/peer.wsgi
- Alias /static/ /vaw/www/peer/lib/python2.7/site-packages/peer-0.4.0-py2.6.egg/peer/static/
+ WSGIScriptAlias / /vaw/www/peer/lib/python2.7/site-packages/peer-0.4.0-py2.7.egg/peer/peer.wsgi
+ Alias /static/ /vaw/www/peer/lib/python2.7/site-packages/peer-0.4.0-py2.7.egg/peer/static/
 
 And you are upgrading to version 0.5.0, you need to change it to this:
 
 .. code-block:: none
 
- WSGIScriptAlias / /vaw/www/peer/lib/python2.7/site-packages/peer-0.5.0-py2.6.egg/peer/peer.wsgi
- Alias /static/ /vaw/www/peer/lib/python2.7/site-packages/peer-0.5.0-py2.6.egg/peer/static/
+ WSGIScriptAlias / /vaw/www/peer/lib/python2.7/site-packages/peer-0.5.0-py2.7.egg/peer/peer.wsgi
+ Alias /static/ /vaw/www/peer/lib/python2.7/site-packages/peer-0.5.0-py2.7.egg/peer/static/
