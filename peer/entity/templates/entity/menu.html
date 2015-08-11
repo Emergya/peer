@@ -6,6 +6,7 @@
 {% block contentMenu %}
     <ul>
       {% canedit entity %}
+      <li><a href="{% url 'entities:entities_list' %}">{% trans "Back to entities listing" %}</a></li>
       <li><a href="{% url 'entities:entity_view' entity.id %}">{% trans "Details" %}</a></li>
       <li><a href="{% url 'entities:edit_metadata' entity.id %}">{% trans "Edit metadata" %}</a></li>
       {% if MODERATION_ENABLED and entity.state != "published"%}
