@@ -3,7 +3,6 @@
 {% load i18n entity_permissions %}
 
 {% block jspluginscss %}
-<link type="text/css" href="{{ STATIC_URL }}js/SAMLmetaJS/css/samlmetajs.css" rel="Stylesheet" />
 <link type="text/css" href="{{ STATIC_URL }}saml-metadata-editor/css/normalize.css" rel="stylesheet" />
 <link type="text/css" href="{{ STATIC_URL }}saml-metadata-editor/css/foundation.min.css" rel="stylesheet" />
 <link type="text/css" href="{{ STATIC_URL }}saml-metadata-editor/css/style.css" rel="stylesheet" />
@@ -154,9 +153,6 @@
             document.getElementById('toXML').click();
 
             $("textarea#xmlcontent").val($("textarea#id_metadata_text").val());
-
-            document.getElementById('toTree').click();
-
 
             $("#xmlTab").bind("DOMSubtreeModified", function() {
                 $("textarea#xmlcontent").change();
