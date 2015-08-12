@@ -87,7 +87,6 @@ setup(
         'pycrypto==2.6.1',
         'django-fsm',
         'django-ckeditor==4.4.8',
-        'cryptography>=0.7<1.0',
     ],
     extras_require = {
         'PG': ['psycopg2 == 2.5.4',],
