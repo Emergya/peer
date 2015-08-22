@@ -174,7 +174,6 @@ table.orderable-initalized .order-cell, body>tr>td.order-cell {
 
 /* FILTER COLUMN */
 
-/* ALUQUE */
 #peer-changelist-filter {
     z-index: 1000;
     width: 160px;
@@ -184,18 +183,6 @@ table.orderable-initalized .order-cell, body>tr>td.order-cell {
     padding-right: 51px;
     margin-right: 12px;
 }
-
-/* old
-#peer-changelist-filter {
-    INICIO COMENTARIO position: absolute;
-    top: 0;
-    right: 0; FIN COMENTARIO
-    z-index: 1000;
-    width: 160px;
-    border-left: 1px solid #ddd;
-    background: #efefef;
-    margin: 0;
-} */
 
 #peer-changelist-filter h2 {
     font-size: 11px;
