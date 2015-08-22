@@ -59,8 +59,7 @@ def index(request):
 
     entity_admin = PublicEntityAdmin(Entity, entities,
                                      change_list_template='portal/index.html')
-    abcd = entity_admin.changelist_view(request, extra_context)
-    return abcd
+    return entity_admin.changelist_view(request, extra_context)
 
 
 @login_required
