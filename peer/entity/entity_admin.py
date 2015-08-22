@@ -34,7 +34,7 @@ from django.contrib.admin.views.main import ChangeList
 from django.utils.translation import ugettext_lazy
 
 from peer.entity.models import Entity
-from peer.entity import views
+from peer.entity import views, paginator
 from peer.entity.adminsite import entities
 
 
@@ -54,6 +54,7 @@ class PublicEntityAdmin(admin.ModelAdmin):
     list_filter = ('state', 'owner', 'domain__name', 'creation_time')
     delete_selected_confirmation_template = 'entity/delete_selected_confirmation.html'
     search_fields = ('domain__name', 'owner__username')
+    list_per_page = paginator.get_entities_per_page()
     show_full_result_count = True
 
     def __init__(self, model, admin_site,

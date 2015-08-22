@@ -358,13 +358,22 @@ header#header hgroup h2 {
     margin: 34px 0px 15px 40px;
 }
 
+/* ALUQUE */
+
+#home-content {
+    border-top: none;
+    margin-bottom: 1em;
+    margin: 20px 1px 15px 220px;
+    padding-left: 0;
+}
+/* old
 #home-content {
     clear: left;
     border-top: none;
     margin-bottom: 1em;
     margin: 20px 0px 15px 0px;
     padding-left: 0;
-}
+} */
 
 section ul {
     list-style: none;
@@ -909,4 +918,27 @@ input.ui-autocomplete-input {
     box-shadow: 1px 0 0  #b2b3b5;
     -moz-box-shadow: 1px 0 0 #b2b3b5;
     -webkit-box-shadow: 1px 0 0 #b2b3b5;
+}
+
+.result_entities{
+    overflow-x: auto;
+    margin-left: 25px;
+}
+
+/* old
+#changelist-form .results {
+  overflow-x: auto;
+}*/
+
+.pagination_entities {
+    display: block;
+    width: 98.3%;
+    position: absolute;
+    left: 25px;
+    /* padding-left: 10px; */
+    top: 0;
+}
+
+#peer-paginator {
+    position: relative;
 }
