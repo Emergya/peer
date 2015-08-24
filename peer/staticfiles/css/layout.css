@@ -359,10 +359,9 @@ header#header hgroup h2 {
 }
 
 #home-content {
-    clear: left;
     border-top: none;
     margin-bottom: 1em;
-    margin: 20px 0px 15px 0px;
+    margin: 20px 1px 15px 220px;
     padding-left: 0;
 }
 
@@ -909,4 +908,22 @@ input.ui-autocomplete-input {
     box-shadow: 1px 0 0  #b2b3b5;
     -moz-box-shadow: 1px 0 0 #b2b3b5;
     -webkit-box-shadow: 1px 0 0 #b2b3b5;
+}
+
+.result_entities{
+    overflow-x: auto;
+    margin-left: 25px;
+}
+
+.pagination_entities {
+    display: block;
+    width: 98.3%;
+    position: absolute;
+    left: 25px;
+    /* padding-left: 10px; */
+    top: 0;
+}
+
+#peer-paginator {
+    position: relative;
 }

@@ -13,6 +13,17 @@
   <div class="menus">
     <!-- your actions menu -->
     {% include "account/menu.html" %}
+
+    {% if cl.full_result_count > 0 %}
+        {% block filters %}
+            {% if cl.has_filters %}
+              <div id="peer-changelist-filter" class="clear left shadow">
+                <h2>{% trans 'Filter' %}</h2>
+                {% for spec in cl.filter_specs %}{% admin_list_filter cl spec %}{% endfor %}
+              </div>
+            {% endif %}
+        {% endblock %}
+    {% endif %}
   </div>
 
 {% endif %}
@@ -22,18 +33,9 @@
   </div>
 </div>
 
-{% if user.is_authenticated %}
+{% if user.is_authenticated and cl.full_result_count > 0 %}
     <section id="home-content" class="mainContent">
         <h1>{% trans "Entities" %}</h1>
-
-      {% block filters %}
-        {% if cl.has_filters %}
-          <div id="peer-changelist-filter" class="clear left shadow">
-            <h2>{% trans 'Filter' %}</h2>
-            {% for spec in cl.filter_specs %}{% admin_list_filter cl spec %}{% endfor %}
-          </div>
-        {% endif %}
-      {% endblock %}
 
   <div id="content-main">
     {% block object-tools %}
@@ -67,11 +69,17 @@
 
       {% block result_list %}
           {% if action_form and actions_on_top and cl.full_result_count %}{% admin_actions %}{% endif %}
-          {% result_list cl %}
+          <div class="result_entities"> 
+              {% result_list cl %}
+          </div>
           {% if action_form and actions_on_bottom and cl.full_result_count %}{% admin_actions %}{% endif %}
       {% endblock %}
       <div id="peer-paginator">
-      {% block pagination %}{% pagination cl %}{% endblock %}
+      {% block pagination %}
+          <div class="pagination_entities">
+              {% pagination cl %}
+          </div>
+      {% endblock %}
       </div>
       </form>
     </div>
