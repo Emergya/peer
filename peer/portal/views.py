@@ -53,13 +53,12 @@ def index(request):
     except TextChunkModel.DoesNotExist:
         slogan_text = ''
 
-    extra_context = {
-        'user': request.user,
-        'slogan': slogan_text,
-            }
+    extra_context = {'user': request.user,
+                     'slogan': slogan_text,
+                     }
 
     entity_admin = PublicEntityAdmin(Entity, entities,
-            change_list_template='portal/index.html')
+                                     change_list_template='portal/index.html')
     return entity_admin.changelist_view(request, extra_context)
 
 
