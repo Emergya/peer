@@ -82,7 +82,7 @@ setup(
         'dnspython==1.11.0',
         'gitdb==0.6.4',
         'djangosaml2==0.13.0',
-        'python-whois==0.2',
+        'python-whois==0.5.2',
         'publicsuffix==1.0.5',
         'pycrypto==2.6.1',
         'django-fsm',
