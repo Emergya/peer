@@ -296,6 +296,11 @@ METADATA_IMPORT_TERMS_OF_USE = os.path.join(BASEDIR,
 # Max number of entries the global RSS feed will return
 # MAX_FEED_ENTRIES = 10
 
+# Datetime format files
+FORMAT_MODULE_PATH = [
+    'peer.formats',
+]
+
 # Expiration warnings
 EXPIRATION_WARNING_TIMEDELTA = datetime.timedelta(days=1)
 
