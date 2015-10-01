@@ -122,8 +122,8 @@ def get_administrative_emails_from_whois(domain_name):
         obtained by a Whois Lookup of the domain
     """
     administrative_emails = []
-    whois_data = whois.whois(domain_name)
-    if whois_data and hasattr(whois_data, 'emails'):
+    whois_data = whois.whois(str(domain_name))
+    if whois_data and hasattr(whois_data, 'emails') and whois_data.emails is not None:
         administrative_emails = whois_data.emails
         administrative_emails = list(set(administrative_emails))
     return administrative_emails

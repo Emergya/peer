@@ -168,7 +168,7 @@ def whois_validate_domain(value):
     Check that this is a domain according to whois
     '''
     try:
-        whois.whois(value)
+        whois.whois(str(value))
     except PywhoisError:
         msg = _('%(domain)s does not seem to be a valid domain name')
         raise ValidationError(msg % {'domain': value})
