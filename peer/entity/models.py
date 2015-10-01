@@ -176,9 +176,9 @@ class Metadata(object):
                 endpoint_id = endpoint.replace(' ', '')  # remove spaces
                 path = [addns(role), addns(endpoint_id)]
                 for endpoint_node in self.etree.findall('/'.join(path)):
-                    endpoint = {'Type': endpoint}
-                    populate_endpoint(endpoint_node, endpoint)
-                    result.append(endpoint)
+                    endpoint_aux = {'Type': endpoint}
+                    populate_endpoint(endpoint_node, endpoint_aux)
+                    result.append(endpoint_aux)
 
         return result
 
