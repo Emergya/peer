@@ -43,15 +43,16 @@ class EntitiesChangeList(ChangeList):
     def url_for_result(self, result):
         pk = getattr(result, self.pk_attname)
         return reverse('entities:%s_%s_change' % (self.opts.app_label,
-                                               self.opts.model_name),
+                                                  self.opts.model_name),
                        args=(quote(pk),),
                        current_app=self.model_admin.admin_site.name)
 
 
 class PublicEntityAdmin(admin.ModelAdmin):
 
+    actions = None
     list_display = ('__unicode__', 'owner', 'domain', 'state', 'creation_time', 'modification_time')
-    list_filter = ('state', 'owner', 'domain__name', 'creation_time')
+    list_filter = ('state', 'owner', 'domain__name', 'creation_time', 'modification_time')
     delete_selected_confirmation_template = 'entity/delete_selected_confirmation.html'
     search_fields = ('domain__name', 'owner__username')
     list_per_page = paginator.get_entities_per_page()
@@ -67,11 +68,11 @@ class PublicEntityAdmin(admin.ModelAdmin):
             if request.user.is_superuser:
                 qs = Entity.objects.all()
             else:
-                qs = Entity.objects.filter( Q(owner=request.user)
-                                          | Q(state='published')
-                                          | Q(delegates=request.user)
-                                          | Q(moderators=request.user)
-                                          )
+                qs = Entity.objects.filter(Q(owner=request.user)
+                                           | Q(state='published')
+                                           | Q(delegates=request.user)
+                                           | Q(moderators=request.user)
+                                           )
             return qs
         return Entity.objects.filter(state='published')
 
