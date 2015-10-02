@@ -224,11 +224,11 @@ dl {
 
 dt {
     float: left;
-    clear: left;
+    font-weight: bold;
 }
 
 dd {
-    margin-left: 22px;
+    margin-left: 93px;
     margin-bottom: 1.5em;
     line-height: 1.5em;
 }

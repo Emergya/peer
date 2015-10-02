@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load i18n account entity_renderers %}
+{% load i18n account entity_renderers short_binding_endpoints %}
 
 {% block extralinks %}
 <link href="{% url 'entities:changes_feed' entity.id %}" rel="alternate" type="application/rss+xml" title="{% trans "Changes feed" %}" />
@@ -42,17 +42,20 @@
   {% if entity.has_metadata %}
     <dl>
       {% if entity.entityid %}
-      <dt class="ui-icon ui-icon-comment" title="{% trans "EntityID" %}">{% trans "EntityID" %}</dt>
-      <dd>{{ entity.entityid }}</dd>
+      <!-- Bold label -->
+      <dt>{% trans "EntityID" %}</dt>
+      <dd>{{ entity.entityid }} </dd>
       {% endif %}
 
       {% if entity.valid_until %}
-      <dt class="ui-icon ui-icon-calendar" title="{% trans "Valid until" %}">{% trans "Valid until" %}</dt>
+      <!-- Bold label -->
+      <dt>{% trans "Valid until" %}</dt>
       <dd>{% if entity.is_expired %}<strong class="expired">{{ entity.valid_until }} ({% trans "Expired!" %})</strong>{% else %}{{ entity.valid_until }}{% endif %}</dd>
       {% endif %}
 
       {% if entity.logos %}
-      <dt class="ui-icon ui-icon-image" title="{% trans "Logo" %}">{% trans "Logo" %}</dt>
+      <!-- Bold label -->
+      <dt>{% trans "Logo" %}</dt>
       <dd>
         <table>
           <tbody>
@@ -72,14 +75,19 @@
       {% endif %}
 
       {% if entity.endpoints %}
+      {% comment %}
+      ESTE ICONO LO USAREMOS PARA LA COLUMNA 4
       <dt class="ui-icon ui-icon-link" title="{% trans "Endpoints" %}">{% trans "Endpoints" %}</dt>
+      {% endcomment %}
       <dd>
         <table>
           <tbody>
           {% for endpoint in entity.endpoints %}
           <tr>
-            <td><a href="{{ endpoint.Location }}">{{ endpoint.Location }}</a></td>
             <td>({{ endpoint.Type }})</td>
+            <td>{{ endpoint.Binding|get_binding_short }}</td>
+            <td><a href="{{ endpoint.Location }}">{{ endpoint.Location }}</a></td>
+            <td>{{endpoint}}</td>
           </tr>
           {% endfor %}
           </tbody>
@@ -88,7 +96,8 @@
       {% endif %}
 
       {% if entity.contacts %}
-      <dt class="ui-icon ui-icon-person" title="{% trans "Contacts" %}">{% trans "Contacts" %}</dt>
+      <!-- Bold label -->
+      <dt>{% trans "Contacts" %}</dt>
       <dd>
         <table>
           <tbody>
@@ -104,7 +113,8 @@
       {% endif %}
 
       {% if entity.organization %}
-      <dt class="ui-icon ui-icon-suitcase" title="{% trans "Organization" %} {{ l10n_org.lang }}">{% trans "Organization" %} {{ l10n_org.lang }}</dt>
+      <!-- Bold label -->
+      <dt>{% trans "Organization" %} {{ l10n_org.lang }}</dt>
       <dd>
         <table>
           <tbody>
@@ -125,7 +135,8 @@
       {% endif %}
 
       {% if entity.certificates %}
-      <dt class="ui-icon ui-icon-key" title="{% trans "Certificates" %}">{% trans "Certificates" %}</dt>
+      <!-- Bold label -->
+      <dt>{% trans "Certificates" %}</dt>
       <dd>
         <table>
           <tbody>
@@ -139,8 +150,8 @@
         </table>
       </dd>
       {% endif %}
-
-      <dt class="ui-icon ui-icon-signal-diag" title="{% trans "Changes feed" %}">{% trans "Changes feed" %}</dt>
+      <!-- Bold label -->
+      <dt>{% trans "Changes feed" %}</dt>
       <dd><a href="{% url 'entities:changes_feed' entity.id %}">{% trans "Changes feed" %}</a></dd>
     </dl>
 
