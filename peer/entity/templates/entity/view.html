@@ -87,7 +87,12 @@
             <td>({{ endpoint.Type }})</td>
             <td>{{ endpoint.Binding|get_binding_short }}</td>
             <td><a href="{{ endpoint.Location }}">{{ endpoint.Location }}</a></td>
-            <td>{{endpoint}}</td>
+            <td>
+              <a class="endP">KQWDQWD</a>
+              <span style="display:none">
+                {{endpoint}}
+              </span>
+            </td>
           </tr>
           {% endfor %}
           </tbody>
@@ -213,6 +218,7 @@
 {% endblock %}
 
 {% block extrajs %}
+  <script type="text/javascript" src="{{ STATIC_URL }}js/toggle_data.js"></script>
   {% if entity.has_metadata %}
   <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.entitymd.js"></script>
   {% if entity.geolocationhint %}
