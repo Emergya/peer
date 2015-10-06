@@ -948,7 +948,8 @@ input.ui-autocomplete-input {
     padding-bottom: 10px;
     padding-left: 50px;
     padding-right: 50px;
-    border: outset;
+    border: groove;
+    border-radius: 5px;
 }
 
 .button_css:hover {
@@ -959,5 +960,6 @@ input.ui-autocomplete-input {
     padding-bottom: 10px;
     padding-left: 50px;
     padding-right: 50px;
-    border: outset;
+    border: groove;
+    border-radius: 5px;
 }
