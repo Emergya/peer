@@ -938,3 +938,26 @@ input.ui-autocomplete-input {
 #peer-paginator {
     position: relative;
 }
+
+.button_css {
+    background-color: #dddddd;
+    color: #000000;
+    font-weight: bold;
+    font-size: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 50px;
+    padding-right: 50px;
+    border: outset;
+}
+
+.button_css:hover {
+    background-color: #333333;
+    color: #ffffff;
+    font-weight: bold;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 50px;
+    padding-right: 50px;
+    border: outset;
+}

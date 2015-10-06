@@ -21,7 +21,7 @@
   </hgroup>
 
   {% if entity.has_metadata %}
-  <a class="button right" href="{% url 'entities:get_latest_metadata' entity.id %}">{% trans "Get latest version of the metadata" %}</a>
+  <a class="button_css right" href="{% url 'entities:get_latest_metadata' entity.id %}">{% trans "Download XML" %}</a>
   {% endif %}
 
   {% if entity.owner %}
