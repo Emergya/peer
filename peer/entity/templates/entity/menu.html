@@ -1,5 +1,5 @@
 {% extends "portal/base_menu.html" %}
-{% load i18n entity_permissions %}
+{% load i18n entity_permissions split_strings %}
 
 {% block topMenu %}{% endblock %}
 
@@ -7,7 +7,9 @@
     <ul>
       {% canedit entity %}
       <li><a href="{% url 'entities:entities_list' %}">{% trans "Back to entities listing" %}</a></li>
-      <li><a href="{% url 'entities:entity_view' entity.id %}">{% trans "Details" %}</a></li>
+      {% if request.path|get_path != 'view' and request.path|get_path != 'detail' %}
+        <li><a href="{% url 'entities:entity_view' entity.id %}">{% trans "Details" %}</a></li>
+      {% endif %}
       <li><a href="{% url 'entities:edit_metadata' entity.id %}">{% trans "Edit metadata" %}</a></li>
       {% if MODERATION_ENABLED and entity.state != "published"%}
             {% canapprove entity %}

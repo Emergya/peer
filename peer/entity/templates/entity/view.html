@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load i18n account entity_renderers short_binding_endpoints %}
+{% load i18n account entity_renderers split_strings %}
 
 {% block extralinks %}
 <link href="{% url 'entities:changes_feed' entity.id %}" rel="alternate" type="application/rss+xml" title="{% trans "Changes feed" %}" />
@@ -17,7 +17,11 @@
 
   <hgroup>
     <h1>{% trans "Entity details" %}</h1>
-    <h2>{{ entity }}</h2>
+    {% if MODERATION_ENABLED and entity.state != "published" %}
+      <h2>{{ entity }} ({{ entity.state }})</h2>
+    {% else %}
+      <h2>{{ entity }}</h2>
+    {% endif %}
   </hgroup>
 
   {% if entity.has_metadata %}
