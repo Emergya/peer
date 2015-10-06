@@ -150,7 +150,7 @@ def text_edit_metadata(request, entity_id):
         else:
             if not can_edit_entity(request.user, entity):
                         raise PermissionDenied
-        result = _handle_metadata_post(request, form, 'entities:text_edit_metadata')
+        result = _handle_metadata_post(request, form, 'entities:entity_view')
         if result is not None:
             return result
     else:
@@ -179,7 +179,7 @@ def file_edit_metadata(request, entity_id):
         else:
             if not can_edit_entity(request.user, entity):
                         raise PermissionDenied
-        result = _handle_metadata_post(request, form, 'entities:file_edit_metadata')
+        result = _handle_metadata_post(request, form, 'entities:entity_view')
         if result is not None:
             return result
     else:
@@ -207,7 +207,7 @@ def remote_edit_metadata(request, entity_id):
         else:
             if not can_edit_entity(request.user, entity):
                         raise PermissionDenied
-        result = _handle_metadata_post(request, form, 'entities:remote_edit_metadata')
+        result = _handle_metadata_post(request, form, 'entities:entity_view')
         if result is not None:
             return result
     else:
