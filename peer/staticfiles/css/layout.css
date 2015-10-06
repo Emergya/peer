@@ -34,13 +34,11 @@ body {
     font-family: 'HelveticaNeue-Light', 'Helvetica Neue Light', 'Helvetica Neue', Arial, Helvetica, sans-serif;
     font-size: 12px;
     font-weight: 300;
-    background-image: url(../images/light_content_bg.png), url(../images/body_bg.png);
     background-position: center 90px, left top;
     background-repeat: no-repeat, repeat;
 }
 
 #header {
-    background: url(../images/header_bg.png) left top no-repeat;
     width: 100%;
     height: 105px;
 }

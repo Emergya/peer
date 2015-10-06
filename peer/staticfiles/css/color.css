@@ -1,6 +1,6 @@
 body {
-    color: #7d7d7d;
-    background-color: #e6e6e4;
+    color: #000000;
+    background-color: #eee;
 }
 
 h1 {
@@ -43,7 +43,7 @@ nav ul li {
 }
 
 nav ul li a {
-    color: #6e6e6e;
+    color: #3e3e3e;
 }
 
 nav ul li a:hover {
