@@ -75,10 +75,6 @@
       {% endif %}
 
       {% if entity.endpoints %}
-      {% comment %}
-      ESTE ICONO LO USAREMOS PARA LA COLUMNA 4
-      <dt class="ui-icon ui-icon-link" title="{% trans "Endpoints" %}">{% trans "Endpoints" %}</dt>
-      {% endcomment %}
       <dd>
         <table>
           <tbody>
@@ -87,8 +83,8 @@
             <td>({{ endpoint.Type }})</td>
             <td>{{ endpoint.Binding|get_binding_short }}</td>
             <td><a href="{{ endpoint.Location }}">{{ endpoint.Location }}</a></td>
-            <td>
-              <a class="endP">KQWDQWD</a>
+            <td class="no_resizable">
+              <dt class="ui-icon ui-icon-link endP" title="{% trans "Endpoints" %}">{% trans "Endpoints" %}</dt>
               <span style="display:none">
                 {{endpoint}}
               </span>

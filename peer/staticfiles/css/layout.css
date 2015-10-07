@@ -940,3 +940,11 @@ input.ui-autocomplete-input {
 #peer-paginator {
     position: relative;
 }
+
+.no_resizable {
+    width: 100px!important;
+}
+
+.endP {
+    cursor: pointer;
+}
