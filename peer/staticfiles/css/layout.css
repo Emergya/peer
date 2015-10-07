@@ -958,3 +958,12 @@ input.ui-autocomplete-input {
     border: groove;
     border-radius: 5px;
 }
+
+.certificate {
+    cursor: pointer;
+}
+
+.certificate:hover {
+    cursor: pointer;
+    color: #000055;
+}
