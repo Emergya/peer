@@ -35,6 +35,7 @@ from django.utils.importlib import import_module
 from peer.entity.models import Metadata
 from peer.entity.utils import NAMESPACES, expand_settings_permissions
 from peer.entity.utils import compare_elements, load_schema
+from peer.domain.validation import check_superdomain_verified
 
 
 def validate(entity, doc, user=None):
@@ -94,13 +95,16 @@ def validate_domain_in_endpoints(entity, doc, user=None):
         return errors
 
     domain = entity.domain.name
+    if user is None:
+        user = entity.domain.owner
 
     for endpoint in metadata.endpoints:
         if 'Location' in endpoint:
             url = urlparse.urlparse(endpoint['Location'])
-            if url.hostname.lower() != domain.lower():
+            if not check_superdomain_verified(url.hostname.lower(), user=user):
                 errors.append(
-                    u'The endpoint at %s does not belong to the domain %s' %
+                    u'The endpoint at %s does not belong to the domain %s'
+                    u' or to any of its subdomains.' %
                     (endpoint['Location'], domain))
 
     return errors
@@ -115,11 +119,14 @@ def validate_domain_in_entityid(entity, doc, user=None):
         return errors
 
     domain = entity.domain.name
+    if user is None:
+        user = entity.domain.owner
 
     url = urlparse.urlparse(metadata.entityid)
-    if url.netloc.lower() != domain.lower():
+    if not check_superdomain_verified(url.netloc.lower(), user=user):
         errors.append(
-            u'The entityid does not belong to the domain %s' % domain)
+            u'The entityid does not belong to the domain %s'
+            u' or to any of its subdomains.' % domain)
 
     return errors
 

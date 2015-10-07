@@ -37,6 +37,7 @@ from dns.exception import DNSException, Timeout
 from publicsuffix import PublicSuffixList
 
 from django.contrib import messages
+from django.db.models import Q
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ValidationError
 
@@ -135,18 +136,22 @@ def check_domain_token(domain_name, token):
     return valid_token
 
 
-def check_superdomain_verified(domain):
+def check_superdomain_verified(domain, user=None):
     '''
     True if some superdomain of the given domain is already
     verified and has the same owner as the given domain.
     False otherwise.
     '''
-    segments = domain.name.split('.')
+    if user is None:
+        assert isinstance(domain, Domain)
+        user = domain.owner
+        domain = domain.name
+    segments = domain.split('.')
     while segments:
         try:
-            Domain.objects.get(name='.'.join(segments),
-                               validated=True,
-                               owner=domain.owner)
+            Domain.objects.get(Q(name='.'.join(segments)) &
+                               Q(validated=True) &
+                               Q(Q(owner=user) | Q(team=user)))
         except Domain.DoesNotExist:
             segments = segments[1:]
             continue
