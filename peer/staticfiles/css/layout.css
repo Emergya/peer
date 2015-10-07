@@ -943,11 +943,10 @@ input.ui-autocomplete-input {
     background-color: #dddddd;
     color: #000000;
     font-weight: bold;
-    font-size: 15px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    padding-left: 50px;
-    padding-right: 50px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 35px;
+    padding-right: 35px;
     border: groove;
     border-radius: 5px;
 }
@@ -956,10 +955,6 @@ input.ui-autocomplete-input {
     background-color: #333333;
     color: #ffffff;
     font-weight: bold;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    padding-left: 50px;
-    padding-right: 50px;
     border: groove;
     border-radius: 5px;
 }
