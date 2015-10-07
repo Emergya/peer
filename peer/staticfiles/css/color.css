@@ -292,14 +292,6 @@ strong.expired {
     color: #ff5555;
 }
 
-.history h2 {
-    background: #d0d2cf;
-    border-bottom: 1px solid #a5a6a4;
-    box-shadow: 0px 1px 0 white;
-    -moz-box-shadow: 0px 1px 0 white;
-    -webkit-box-shadow: 0px 1px 0 white;
-}
-
 .history h2 a {
     color: #ff7b33;
 }

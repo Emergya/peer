@@ -672,7 +672,8 @@ ul.myEntities li a {
 /* Metadata edit view */
 #metadata-tabs {
     float: left;
-    width: 680px;
+    width: 100%;
+    margin-bottom: 25px;
 }
 
 /* SAMLmetaJS customizations */
@@ -974,4 +975,19 @@ input.ui-autocomplete-input {
 
 .endP {
     cursor: pointer;
+}
+
+.actionRowMD {
+    clear: left;
+    padding: 1em 0;
+    text-align: center;
+    margin: 0px;
+}
+
+.dd_metadata {
+    margin-left: 25%
+}
+
+.metadataForm {
+    margin-bottom: 0px;
 }
