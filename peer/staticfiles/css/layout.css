@@ -967,3 +967,11 @@ input.ui-autocomplete-input {
     cursor: pointer;
     color: #000055;
 }
+
+.no_resizable {
+    width: 100px!important;
+}
+
+.endP {
+    cursor: pointer;
+}

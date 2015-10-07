@@ -79,10 +79,6 @@
       {% endif %}
 
       {% if entity.endpoints %}
-      {% comment %}
-      ESTE ICONO LO USAREMOS PARA LA COLUMNA 4
-      <dt class="ui-icon ui-icon-link" title="{% trans "Endpoints" %}">{% trans "Endpoints" %}</dt>
-      {% endcomment %}
       <dd>
         <table>
           <tbody>
@@ -91,7 +87,12 @@
             <td>({{ endpoint.Type }})</td>
             <td>{{ endpoint.Binding|get_binding_short }}</td>
             <td><a href="{{ endpoint.Location }}">{{ endpoint.Location }}</a></td>
-            <td>{{endpoint}}</td>
+            <td class="no_resizable">
+              <dt class="ui-icon ui-icon-link endP" title="{% trans "Endpoints" %}">{% trans "Endpoints" %}</dt>
+              <span style="display:none">
+                {{endpoint}}
+              </span>
+            </td>
           </tr>
           {% endfor %}
           </tbody>
@@ -220,7 +221,8 @@
 {% endblock %}
 
 {% block extrajs %}
-  <script type="text/javascript" src="{{ STATIC_URL }}js/toggle_data.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/toggle_endpoint.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/toggle_certificates.js"></script>
   {% if entity.has_metadata %}
   <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.entitymd.js"></script>
   {% if entity.geolocationhint %}
