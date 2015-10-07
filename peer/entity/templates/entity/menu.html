@@ -24,6 +24,8 @@
         <li><a href="{% url 'entities:metarefresh_edit' entity.id %}">{% trans "Metarefresh" %}</a></li>
       {% endif %}
       {% endcanedit %}
-      <li><a href="{% url 'entities:monitoring_prefs' entity.id %}">{% trans "Monitor endpoints" %}</a></li>
+      {% if request.path|get_path != 'monitoring_prefs' %}
+        <li><a href="{% url 'entities:monitoring_prefs' entity.id %}">{% trans "Monitor endpoints" %}</a></li>
+      {% endif %}
     </ul>
 {% endblock %}
