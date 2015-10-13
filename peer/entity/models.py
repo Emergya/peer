@@ -591,9 +591,9 @@ ROLE_CHOICES = (('SP', 'Service Provider'),
 class EntityMD(models.Model):
     entity = models.OneToOneField(Entity, verbose_name=_(u'Entity'), primary_key=True)
     domain = models.ForeignKey(Domain, verbose_name=_('Domain'))
-    description = models.CharField(null=True, max_length=200)
-    display_name = models.CharField(null=True, max_length=200)
-    organization = models.CharField(null=True, max_length=200)
+    description = models.TextField(null=True)
+    display_name = models.CharField(null=True, max_length=250)
+    organization = models.CharField(null=True, max_length=250)
     role_descriptor = models.CharField(null=True,
                                        max_length=4,
                                        choices=ROLE_CHOICES)
@@ -601,7 +601,7 @@ class EntityMD(models.Model):
 
 class AttributesMD(models.Model):
     entity_md = models.ForeignKey(EntityMD, verbose_name=_(u'Entity metadata'))
-    friendly_name = models.CharField(null=True, max_length=200)
-    name = models.CharField(null=True, max_length=200)
-    name_format = models.CharField(null=True, max_length=200)
-    value = models.CharField(null=True, max_length=200)
+    friendly_name = models.CharField(null=True, max_length=250)
+    name = models.CharField(null=True, max_length=250)
+    name_format = models.CharField(null=True, max_length=250)
+    value = models.CharField(null=True, max_length=250)
