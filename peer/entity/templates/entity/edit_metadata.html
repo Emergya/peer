@@ -3,12 +3,15 @@
 {% load i18n entity_permissions %}
 
 {% block jspluginscss %}
-<link type="text/css" href="{{ STATIC_URL }}js/SAMLmetaJS/css/samlmetajs.css" rel="Stylesheet" />
+<link type="text/css" href="{{ STATIC_URL }}saml-metadata-editor/css/normalize.css" rel="stylesheet" />
+<link type="text/css" href="{{ STATIC_URL }}saml-metadata-editor/css/foundation.min.css" rel="stylesheet" />
+<link type="text/css" href="{{ STATIC_URL }}saml-metadata-editor/css/style.css" rel="stylesheet" />
 {% endblock %}
 
 {% block extracss %}
 <link type="text/css" href="{{ STATIC_URL }}css/terms-of-use.css" rel="Stylesheet" />
 <link type="text/css" href="{% url 'entities:get_pygments_css' %}" rel="Stylesheet" />
+
 {% endblock %}
 
 {% block content %}
@@ -39,15 +42,14 @@
 {% if needs_google_maps %}
 <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
 {% endif %}
-<script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/samlmeta.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/mdreader.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/samlmeta.xml.js"></script>
+
+<script type="text/javascript" src="{{ STATIC_URL }}js/require-2.1.18.min.js" data-main="{{ STATIC_URL }}saml-metadata-editor/js/main"></script>
+
+
 <script type="text/javascript" src="{{ STATIC_URL }}js/spin.min.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.mesh.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.form.js"></script>
-{% for plugin in samlmetajs_plugins %}
-<script type="text/javascript" src="{{ STATIC_URL }}js/SAMLmetaJS/samlmeta.plugin.{{ plugin }}.js"></script>
-{% endfor %}
+
 
 <script type="text/javascript">
 (function($) {
@@ -73,41 +75,39 @@
             unsaved_changes = true;
         }
 
+        function update_xmlcontent() {
+            if ($("#structureTab").hasClass( "active" )){
+                document.getElementById('toXML').click();
+                document.getElementById('toTree').click();
+            }
+        }
+
         if ($.browser.msie && $.browser.version <= 9) {
             // We should be doing capability detection here but the problem
             // with IE <= 9 parser is that it exists but its API is
             // different and the namespaces are handled in a different way
             // See https://github.com/UNINETT/SAMLmetaJS/issues/7
-            $("textarea#id_metadata_text").before("<p><span class='ui-icon ui-icon-alert'></span>Your browser does not support advanced XML manipulation via javascript so you can not use the advanced metadata editor. Please upgrade your browser for a better experience.</p>");
-            $("textarea#id_metadata_text").change(set_dirty)
+            $("textarea#xmlcontent").before("<p><span class='ui-icon ui-icon-alert'></span>Your browser does not support advanced XML manipulation via javascript so you can not use the advanced metadata editor. Please upgrade your browser for a better experience.</p>");
+            $("textarea#xmlcontent").change(set_dirty)
         } else {
-            $("textarea#id_metadata_text").SAMLmetaJS({
-                'showValidation': true,
-                'showValidationLevel': {
-                    'info': false,
-                    'ok': false,
-                    'warning': true,
-                    'error': true
-                }
-            });
             $("form input[name=commit_changes]").click(function () {
                 $("form input[name=button_clicked]").val("commit_changes");
-                $("a[href='#rawmetadata']").click();
+                update_xmlcontent();
                 return true;
             });
             $("form input[name=submit_changes]").click(function () {
                 $("form input[name=button_clicked]").val("submit_changes");
-                $("a[href='#rawmetadata']").click();
+                update_xmlcontent();
                 return true;
             });
              $("form input[name=approve_changes]").click(function () {
                 $("form input[name=button_clicked]").val("approve_changes");
-                $("a[href='#rawmetadata']").click();
+                update_xmlcontent();
                 return true;
             });
             $("form input[name=discard_changes]").click(function () {
                 $("form input[name=button_clicked]").val("discard_changes");
-                $("a[href='#rawmetadata']").click();
+                update_xmlcontent();
                 return true;
             });
 
@@ -147,6 +147,21 @@
             closeButtonLabel: '{% trans "Cancel" %}',
             noMessageAlert: '{% trans "Please write a commit message" %}',
             noTOUAcceptedAlert: '{% trans "You must accept the terms of use" %}'
+        });
+
+        $("#samlmetaeditor").bind('customSamlEditor', function() {
+            document.getElementById('toXML').click();
+
+            $("textarea#xmlcontent").val($("textarea#id_metadata_text").val());
+
+            $("#xmlTab").bind("DOMSubtreeModified", function() {
+                $("textarea#xmlcontent").change();
+            });
+
+            $("textarea#xmlcontent").bind('change', function() {
+                $("#id_metadata_text").val($("textarea#xmlcontent").val());
+            });
+
         });
 
     });

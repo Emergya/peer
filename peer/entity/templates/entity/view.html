@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load i18n account entity_renderers %}
+{% load i18n account entity_renderers split_strings %}
 
 {% block extralinks %}
 <link href="{% url 'entities:changes_feed' entity.id %}" rel="alternate" type="application/rss+xml" title="{% trans "Changes feed" %}" />
@@ -17,11 +17,15 @@
 
   <hgroup>
     <h1>{% trans "Entity details" %}</h1>
-    <h2>{{ entity }}</h2>
+    {% if MODERATION_ENABLED and entity.state != "published" %}
+      <h2>{{ entity }} ({{ entity.state }})</h2>
+    {% else %}
+      <h2>{{ entity }}</h2>
+    {% endif %}
   </hgroup>
 
   {% if entity.has_metadata %}
-  <a class="button right" href="{% url 'entities:get_latest_metadata' entity.id %}">{% trans "Get latest version of the metadata" %}</a>
+  <a class="button_css right" href="{% url 'entities:get_latest_metadata' entity.id %}">{% trans "Download XML" %}</a>
   {% endif %}
 
   {% if entity.owner %}
@@ -42,17 +46,20 @@
   {% if entity.has_metadata %}
     <dl>
       {% if entity.entityid %}
-      <dt class="ui-icon ui-icon-comment" title="{% trans "EntityID" %}">{% trans "EntityID" %}</dt>
-      <dd>{{ entity.entityid }}</dd>
+      <!-- Bold label -->
+      <dt>{% trans "EntityID" %}</dt>
+      <dd>{{ entity.entityid }} </dd>
       {% endif %}
 
       {% if entity.valid_until %}
-      <dt class="ui-icon ui-icon-calendar" title="{% trans "Valid until" %}">{% trans "Valid until" %}</dt>
+      <!-- Bold label -->
+      <dt>{% trans "Valid until" %}</dt>
       <dd>{% if entity.is_expired %}<strong class="expired">{{ entity.valid_until }} ({% trans "Expired!" %})</strong>{% else %}{{ entity.valid_until }}{% endif %}</dd>
       {% endif %}
 
       {% if entity.logos %}
-      <dt class="ui-icon ui-icon-image" title="{% trans "Logo" %}">{% trans "Logo" %}</dt>
+      <!-- Bold label -->
+      <dt>{% trans "Logo" %}</dt>
       <dd>
         <table>
           <tbody>
@@ -72,14 +79,20 @@
       {% endif %}
 
       {% if entity.endpoints %}
-      <dt class="ui-icon ui-icon-link" title="{% trans "Endpoints" %}">{% trans "Endpoints" %}</dt>
       <dd>
         <table>
           <tbody>
           {% for endpoint in entity.endpoints %}
           <tr>
-            <td><a href="{{ endpoint.Location }}">{{ endpoint.Location }}</a></td>
             <td>({{ endpoint.Type }})</td>
+            <td>{{ endpoint.Binding|get_binding_short }}</td>
+            <td><a href="{{ endpoint.Location }}">{{ endpoint.Location }}</a></td>
+            <td class="no_resizable">
+              <dt class="ui-icon ui-icon-link endP" title="{% trans "Endpoints" %}">{% trans "Endpoints" %}</dt>
+              <span style="display:none">
+                {{endpoint}}
+              </span>
+            </td>
           </tr>
           {% endfor %}
           </tbody>
@@ -88,7 +101,8 @@
       {% endif %}
 
       {% if entity.contacts %}
-      <dt class="ui-icon ui-icon-person" title="{% trans "Contacts" %}">{% trans "Contacts" %}</dt>
+      <!-- Bold label -->
+      <dt>{% trans "Contacts" %}</dt>
       <dd>
         <table>
           <tbody>
@@ -104,7 +118,8 @@
       {% endif %}
 
       {% if entity.organization %}
-      <dt class="ui-icon ui-icon-suitcase" title="{% trans "Organization" %} {{ l10n_org.lang }}">{% trans "Organization" %} {{ l10n_org.lang }}</dt>
+      <!-- Bold label -->
+      <dt>{% trans "Organization" %} {{ l10n_org.lang }}</dt>
       <dd>
         <table>
           <tbody>
@@ -125,13 +140,17 @@
       {% endif %}
 
       {% if entity.certificates %}
-      <dt class="ui-icon ui-icon-key" title="{% trans "Certificates" %}">{% trans "Certificates" %}</dt>
+      <!-- Bold label -->
+      <dt>{% trans "Certificates" %}</dt>
       <dd>
         <table>
           <tbody>
           {% for certificate in entity.certificates %}
           <tr>
-            <td><pre>{{ certificate.text|letterwrap:64 }}</pre></td>
+            <td>
+              <pre class="certificate">{{ certificate.text|truncatechars:9 }}</pre>
+              <pre class="certificate" style="display:none" >{{ certificate.text|letterwrap:64 }}</pre>
+            </td>
             <td>{% trans "Used for" %} {{ certificate.use }}</td>
           </tr>
           {% endfor %}
@@ -139,8 +158,8 @@
         </table>
       </dd>
       {% endif %}
-
-      <dt class="ui-icon ui-icon-signal-diag" title="{% trans "Changes feed" %}">{% trans "Changes feed" %}</dt>
+      <!-- Bold label -->
+      <dt>{% trans "Changes feed" %}</dt>
       <dd><a href="{% url 'entities:changes_feed' entity.id %}">{% trans "Changes feed" %}</a></dd>
     </dl>
 
@@ -202,6 +221,8 @@
 {% endblock %}
 
 {% block extrajs %}
+  <script type="text/javascript" src="{{ STATIC_URL }}js/toggle_endpoint.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/toggle_certificates.js"></script>
   {% if entity.has_metadata %}
   <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.entitymd.js"></script>
   {% if entity.geolocationhint %}

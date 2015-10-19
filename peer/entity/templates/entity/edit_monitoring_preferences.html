@@ -7,7 +7,11 @@
 <section class="mainContent">
   <hgroup>
     <h1>{% trans "Edit monitoring preferences" %}</h1>
-    <h2>{{ entity }}</h2>
+    {% if MODERATION_ENABLED and entity.state != "published" %}
+      <h2>{{ entity }} ({{ entity.state }})</h2>
+    {% else %}
+      <h2>{{ entity }}</h2>
+    {% endif %}
   </hgroup>
 
   <p>{% blocktrans %}We monitor each entity in this PEER instance to check if any of its

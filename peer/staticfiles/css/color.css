@@ -1,6 +1,6 @@
 body {
-    color: #7d7d7d;
-    background-color: #e6e6e4;
+    color: #000000;
+    background-color: #eee;
 }
 
 h1 {
@@ -43,7 +43,7 @@ nav ul li {
 }
 
 nav ul li a {
-    color: #6e6e6e;
+    color: #3e3e3e;
 }
 
 nav ul li a:hover {
@@ -290,14 +290,6 @@ dl {
 
 strong.expired {
     color: #ff5555;
-}
-
-.history h2 {
-    background: #d0d2cf;
-    border-bottom: 1px solid #a5a6a4;
-    box-shadow: 0px 1px 0 white;
-    -moz-box-shadow: 0px 1px 0 white;
-    -webkit-box-shadow: 0px 1px 0 white;
 }
 
 .history h2 a {
