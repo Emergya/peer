@@ -66,13 +66,22 @@
     }
 
     $(document).ready(function(){
-        var tabs = ['text', 'upload', 'remote'], unsaved_changes = false;
+        var tabs = ['text', 'upload', 'remote'],
+            unsaved_changes = false,
+            initial_text = '';
         $("#metadata-tabs").tabs({
             'selected': tabs.indexOf('{{ edit_mode }}')
         });
 
         function set_dirty () {
-            unsaved_changes = true;
+            var current_text = '';
+            update_xmlcontent();
+            current_text = $('#xmlcontent').val();
+            if (current_text.replace( /[\s\n\r]*/g, '' ) !== initial_text) {
+                unsaved_changes = true;
+            } else {
+                unsaved_changes = false;
+            }
         }
 
         function update_xmlcontent() {
@@ -161,7 +170,8 @@
             $("textarea#xmlcontent").bind('change', function() {
                 $("#id_metadata_text").val($("textarea#xmlcontent").val());
             });
-
+            initial_text = $('#xmlcontent').val();
+            initial_text = initial_text.replace( /[\s\n\r]*/g, '' );
         });
 
     });
