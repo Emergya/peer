@@ -137,10 +137,6 @@ nav.right {
     position: relative;
 }
 
-nav ul li {
-    padding: 8px 0;
-}
-
 nav ul li:last-child {
     border-bottom: none;
     padding-bottom: 0;
@@ -148,6 +144,7 @@ nav ul li:last-child {
 
 nav ul li a {
     text-decoration: none;
+    font-size: 12px;
 }
 
 nav #filters ul li {
