@@ -86,7 +86,7 @@
   </div>
 
     </section>
-{% else %}
+{% elif not user.is_authenticated %}
   <div class="centerText">
     <p><a class="button" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></p>
   </div>
