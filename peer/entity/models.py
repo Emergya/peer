@@ -79,7 +79,7 @@ class Metadata(object):
         languages = {}
         for org_node in self.etree.findall(addns('Organization')):
             for attr in ('name', 'displayName', 'URL'):
-                node_name = 'Organization' + attr[0].upper() + attr[1:]
+                node_name = 'Organization' + attr.title()
                 for node in org_node.findall(addns(node_name)):
                     lang = getlang(node)
                     if lang is None:
@@ -201,7 +201,7 @@ class Metadata(object):
             if lang == 'en':
                 languages = dn_node.text
         if languages == '' and len(displays) > 0:
-            languages = getlang(displays[0])
+            languages = displays[0].text
         return languages
 
     @property
