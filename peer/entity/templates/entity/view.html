@@ -11,8 +11,11 @@
 <link type="text/css" href="{% url 'entities:get_pygments_css' %}" rel="Stylesheet" />
 {% endblock %}
 
-{% block content %}
+{% block extra_menu %}
 {% include "entity/menu.html" %}
+{% endblock %}
+
+{% block content %}
 <section class="mainContent">
 
   <hgroup>

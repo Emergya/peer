@@ -2,8 +2,11 @@
 
 {% load i18n %}
 
-{% block content %}
+{% block extra_menu %}
 {% include "entity/menu.html" %}
+{% endblock %}
+
+{% block content %}
 <section class="mainContent">
   <hgroup>
     <h1>{% trans "Edit monitoring preferences" %}</h1>

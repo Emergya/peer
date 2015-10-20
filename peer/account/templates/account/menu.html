@@ -1,9 +1,5 @@
-{% extends "portal/base_menu.html" %}
 {% load i18n session %}
 
-{% block topMenu %}{% endblock %}
-
-{% block contentMenu %}
     <ul>
       <li><a href="{% url 'account_profile' %}">{% trans "Domains" %}</a></li>
       <li><a href="{% url 'domain_add' %}">{% trans "Add domain" %}</a></li>
@@ -15,4 +11,3 @@
       <li><a href="{% url 'manage_admin_team' %}">{% trans "Manage admin team" %}</a></li>
       {% endif %}
     </ul>
-{% endblock %}

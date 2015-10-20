@@ -1,16 +1,12 @@
-{% extends "portal/base_menu.html" %}
 {% load i18n entity_permissions split_strings %}
 
-{% block topMenu %}{% endblock %}
-
-{% block contentMenu %}
     <ul>
       {% canedit entity %}
-      <li><a href="{% url 'entities:entities_list' %}">{% trans "Back to entities listing" %}</a></li>
       {% if request.path|get_path != 'view' and request.path|get_path != 'detail' %}
-        <li><a href="{% url 'entities:entity_view' entity.id %}">{% trans "Details" %}</a></li>
-      {% endif %}
+        <li><a href="{% url 'entities:entity_view' entity.id %}">{% trans "Entity Details" %}</a></li>
+      {% else %}
       <li><a href="{% url 'entities:edit_metadata' entity.id %}">{% trans "Edit metadata" %}</a></li>
+      {% endif %}
       {% if MODERATION_ENABLED and entity.state != "published"%}
             {% canapprove entity %}
       <li><a href="{% url 'entities:edit_metadata' entity.id %}">{% trans "Approve/Reject metadata changes" %}</a></li>
@@ -28,4 +24,3 @@
         <li><a href="{% url 'entities:monitoring_prefs' entity.id %}">{% trans "Monitor endpoints" %}</a></li>
       {% endif %}
     </ul>
-{% endblock %}

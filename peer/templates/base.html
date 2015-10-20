@@ -86,6 +86,15 @@
     {% include "messages.html" %}
 
     <section>
+    {% block menu %}
+      {% if not user.is_anonymous %}
+        <nav class="left clear peer-menu">
+        {% include "account/menu.html" %}
+        {% block extra_menu %}
+        {% endblock %}
+        </nav>
+      {% endif %}
+    {% endblock %}
     {% block content %}
     {% endblock %}
     </section>

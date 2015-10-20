@@ -12,7 +12,6 @@
 {% if user.is_authenticated %}
   <div class="menus">
     <!-- your actions menu -->
-    {% include "account/menu.html" %}
 
     {% if cl.full_result_count > 0 %}
         {% block filters %}
