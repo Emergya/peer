@@ -112,6 +112,8 @@ nav ul {
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
     list-style: none;
+    font-size: 12px !important;
+    line-height: 1;
 }
 
 input[type="checkbox"] {
@@ -135,6 +137,10 @@ div.bottomMenu:after {
 
 nav.right {
     position: relative;
+}
+
+nav ul li {
+    padding: 8px 0;
 }
 
 nav ul li:last-child {
