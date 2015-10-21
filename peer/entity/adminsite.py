@@ -27,6 +27,18 @@ class PublicAdminSite(AdminSite):
                 name='entities_list'),
             url(r'^new/$', views.entity_add, name='entity_add'),
             url(r'^add/$', views.entity_add, name='entity_entity_add'),
+
+            # Group Views
+            url(r'^group/add$',
+                'peer.entity.views.group.entity_group_add', name='entity_group_add'),
+            url(r'^group/(?P<entity_group_id>\d+)$',
+                'peer.entity.views.group.entity_group_view', name='entity_group_view'),
+            url(r'^group/(?P<entity_group_id>\d+)/edit$',
+                'peer.entity.views.group.entity_group_edit', name='entity_group_edit'),
+            url(r'^group/(?P<entity_group_id>\d+)/remove$',
+                'peer.entity.views.group.entity_group_remove', name='entity_group_remove'),
+
+            # More entity basic views
             url(r'^(?P<entity_id>\d+)/delete/$', views.entity_remove,
                 name='entity_remove'),
             url(r'^(?P<entity_id>\d+)/view/$', views.entity_view,
@@ -41,16 +53,6 @@ class PublicAdminSite(AdminSite):
 
             # Search view
             url(r'^search$', 'peer.entity.views.search.search_entities', name='search_entities'),
-
-            # Group Views
-            url(r'^group/add$',
-                'peer.entity.views.group.entity_group_add', name='entity_group_add'),
-            url(r'^group/(?P<entity_group_id>\d+)$',
-                'peer.entity.views.group.entity_group_view', name='entity_group_view'),
-            url(r'^group/(?P<entity_group_id>\d+)/edit$',
-                'peer.entity.views.group.entity_group_edit', name='entity_group_edit'),
-            url(r'^group/(?P<entity_group_id>\d+)/remove$',
-                'peer.entity.views.group.entity_group_remove', name='entity_group_remove'),
 
             # Metadata views
             url(r'^(?P<entity_id>\d+)/edit_metadata/$',
