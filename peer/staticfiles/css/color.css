@@ -32,21 +32,21 @@ fieldset {
     border-top: 1px solid #BFC7ED;
 }
 
-nav ul,
+nav ul.nav-menu,
 #filters {
     border: 1px solid #d3d3d3;
     background-color: #ffffff;
 }
 
-nav ul li {
+nav ul.nav-menu li {
     border-bottom: 1px solid #E0E0E0;
 }
 
-nav ul li a {
+nav ul.nav-menu li a {
     color: #3e3e3e;
 }
 
-nav ul li a:hover {
+nav ul.nav-menu li a:hover {
     color: #e56e2e;
 }
 

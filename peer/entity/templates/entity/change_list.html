@@ -6,13 +6,10 @@
 <link href="{% url 'entities:entities_feed' %}" rel="alternate" type="application/rss+xml" title="{% trans "Entities feed" %}" />
 {% endblock %}
 
-{% block content %}
-<div id="home-meta">
-
+{% block extra_menu %}
 {% if user.is_authenticated %}
   <div class="menus">
     <!-- your actions menu -->
-
     {% if cl.full_result_count > 0 %}
         {% block filters %}
             {% if cl.has_filters %}
@@ -24,8 +21,11 @@
         {% endblock %}
     {% endif %}
   </div>
-
 {% endif %}
+{% endblock %}
+
+{% block content %}
+<div id="home-meta">
 
 <section id="home-content" class="mainContent">
     <h1>{% trans "Entities" %}</h1>

@@ -75,7 +75,6 @@ h3 {
 }
 
 section {
-    clear: both;
     padding-bottom: 10px;
     margin: 34px 40px 0 40px;
 }
@@ -105,7 +104,7 @@ nav {
     margin: 0;
 }
 
-nav ul {
+nav ul.nav-menu {
     padding: 10px 10px 20px;
     width: 200px;
     border-radius: 4px;
@@ -139,30 +138,30 @@ nav.right {
     position: relative;
 }
 
-nav ul li {
+nav ul.nav-menu li {
     padding: 8px 0;
 }
 
-nav ul li:last-child {
+nav ul.nav-menu li:last-child {
     border-bottom: none;
     padding-bottom: 0;
 }
 
-nav ul li a {
+nav ul.nav-menu li a {
     text-decoration: none;
     font-size: 12px;
 }
 
-nav #filters ul li {
+nav #filters ul.nav-menu li {
     border: 0;
     line-height: 1.5em;
 }
 
-nav #filters ul li a {
+nav #filters ul.nav-menu li a {
     border: 0;
 }
 
-nav #filters ul li a:hover {
+nav #filters ul.nav-menu li a:hover {
     border-radius: 0;
     text-decoration: underline;
 }
@@ -352,9 +351,12 @@ header#header hgroup h2 {
     width: 390px;
 }
 
+div#content {
+    margin-left: 250px;
+}
+
 .mainContent {
     clear: right;
-    padding-left: 250px;
     border: none;
     margin: 34px 0px 15px 40px;
 }
@@ -362,7 +364,7 @@ header#header hgroup h2 {
 #home-content {
     border-top: none;
     margin-bottom: 1em;
-    margin: 20px 1px 15px 220px;
+    margin: 20px 1px 15px 0;
     padding-left: 0;
 }
 
