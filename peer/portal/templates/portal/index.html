@@ -6,8 +6,7 @@
 <link href="{% url 'entities:entities_feed' %}" rel="alternate" type="application/rss+xml" title="{% trans "Entities feed" %}" />
 {% endblock %}
 
-{% block content %}
-<div id="home-meta">
+{% block extra_menu %}
 
 {% if user.is_authenticated %}
   <div class="menus">
@@ -26,6 +25,10 @@
   </div>
 
 {% endif %}
+{% endblock %}
+
+{% block content %}
+<div id="home-meta">
 
 <div class="{% if user.is_authenticated %}slogan{% else %}slogan-anon{% endif %}">
     {{ slogan|safe }}
