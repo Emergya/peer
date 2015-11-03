@@ -577,7 +577,7 @@ class ModerationDelegation(models.Model):
 
     def __unicode__(self):
         return ugettext(
-            u'%(user)s delegates moderation for %(entity)s entity') % {'entity': unicode(self.entity), 'user': unicode(self.moderator.username)}
+            u'Moderation for %(entity)s delegated to %(user)s') % {'entity': unicode(self.entity), 'user': unicode(self.moderator.username)}
 
     class Meta:
         verbose_name = _(u'Moderation delegation')
