@@ -78,15 +78,17 @@ class Metadata(object):
     def organization(self):
         languages = {}
         for org_node in self.etree.findall(addns('Organization')):
-            for attr in ('name', 'displayName', 'URL'):
-                node_name = 'Organization' + attr.title()
+            for attr in (('name', 'Name'),
+                         ('displayName', 'DisplayName'),
+                         ('URL', 'URL')):
+                node_name = 'Organization' + attr[1]
                 for node in org_node.findall(addns(node_name)):
                     lang = getlang(node)
                     if lang is None:
                         continue  # the lang attribute is required
 
                     lang_dict = languages.setdefault(lang, {})
-                    lang_dict[attr] = node.text
+                    lang_dict[attr[0]] = node.text
 
         result = []
         for lang, data in languages.items():
