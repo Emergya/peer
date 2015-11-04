@@ -192,7 +192,7 @@ class BaseMetadataEditForm(forms.Form):
     def store_entitymd_database(self, id_ent):
         entity = Entity.objects.get(id=id_ent)
         ent_md, created = EntityMD.objects.get_or_create(entity=entity, domain=entity.domain)
-        ent_md.entity_id = entity.entityid
+        ent_md.entityid = entity.entityid
         ent_md.description = entity.description
         ent_md.display_name = entity.display_name
         ent_md.organization = entity.organization_name

@@ -212,6 +212,8 @@ def validate_unique_entityid(entity, doc, user=None):
 
     entityid = entity.entityid
     prev = EntityMD.objects.filter(entityid=entityid)
+    if entity.pk is not None:
+        prev = prev.exclude(pk=entity.pk)
     if prev.count() > 0:
         errors.append(
             u'There is already an en entity with the'
