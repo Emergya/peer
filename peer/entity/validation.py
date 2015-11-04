@@ -32,7 +32,7 @@ import urlparse
 from django.conf import settings
 from django.utils.importlib import import_module
 
-from peer.entity.models import Metadata
+from peer.entity.models import Metadata, EntityMD
 from peer.entity.utils import NAMESPACES, expand_settings_permissions
 from peer.entity.utils import compare_elements, load_schema
 from peer.domain.validation import check_superdomain_verified
@@ -198,5 +198,23 @@ def validate_schema(entity, doc, user=None):
         for error in schema.error_log:
             if error.type_name != "SCHEMAP_WARN_SKIP_SCHEMA":
                 errors.append(unicode(error))
+
+    return errors
+
+
+def validate_unique_entityid(entity, doc, user=None):
+    """
+    Makes sure the entityid url belongs to the domain of the entity
+    """
+    errors, metadata = _parse_metadata(doc)
+    if errors:
+        return errors
+
+    entityid = entity.entityid
+    prev = EntityMD.objects.filter(entityid=entityid)
+    if prev.count() > 0:
+        errors.append(
+            u'There is already an en entity with the'
+            u' provided EntityID: %s' % entityid)
 
     return errors
