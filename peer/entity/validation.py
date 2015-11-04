@@ -210,7 +210,7 @@ def validate_unique_entityid(entity, doc, user=None):
     if errors:
         return errors
 
-    entityid = entity.entityid
+    entityid = metadata.etree.attrib['entityID']
     prev = EntityMD.objects.filter(entityid=entityid)
     if entity.pk is not None:
         prev = prev.exclude(pk=entity.pk)
