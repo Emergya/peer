@@ -189,7 +189,7 @@ class BaseMetadataEditForm(forms.Form):
             self.entity.metadata.save(name, content, username, commit_msg)
         self.entity.save()
         self.store_entitymd_database(self.entity.id)
-        mail_owner = True if self.entity.owner == self.user else False
+        mail_owner = True if self.entity.owner != self.user else False
         if mail_owner:
             if not settings.MODERATION_ENABLED:
                 action = 'modified'
