@@ -29,6 +29,7 @@
 import difflib
 
 from django import forms
+from django.core.mail import send_mail
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext as U
@@ -188,6 +189,25 @@ class BaseMetadataEditForm(forms.Form):
             self.entity.metadata.save(name, content, username, commit_msg)
         self.entity.save()
         self.store_entitymd_database(self.entity.id)
+        mail_owner = True if self.entity.owner == self.user else False
+        if mail_owner:
+            if not settings.MODERATION_ENABLED:
+                action = 'modified'
+            else:
+                if action == 'submit_changes':
+                    action = 'submitted changes for'
+                if action == 'approve_changes':
+                    action = 'approved changes for'
+                if action == 'discard_changes':
+                    action = 'discarded changes for'
+            msg = ('Dear {owner},\n{moderator} has {action} the entity '
+                    'with EntityID {entityid}.'.format(
+                        owner=unicode(self.entity.owner),
+                        moderator=unicode(self.user),
+                        action=action.replace('_', ' '),
+                        entityid=self.entity.entityid))
+            send_mail('Entity modified', msg, settings.DEFAULT_FROM_EMAIL,
+                    [self.entity.owner.email])
 
     def store_entitymd_database(self, id_ent):
         entity = Entity.objects.get(id=id_ent)
