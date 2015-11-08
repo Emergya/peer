@@ -39,6 +39,7 @@ from peer.account.templatetags.account import authorname
 from peer.customfields import TermsOfUseField, readtou
 from peer.entity.models import Entity, EntityGroup, EntityMD, AttributesMD
 from peer.entity.validation import validate
+from peer.domain.validation import get_superdomain_verified
 from peer.entity.widgets import MetadataWidget
 from peer.entity.utils import FetchError, fetch_resource
 from peer.entity.utils import write_temp_file, strip_entities_descriptor
