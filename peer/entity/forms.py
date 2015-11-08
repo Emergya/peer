@@ -218,7 +218,7 @@ class BaseMetadataEditForm(forms.Form):
         ent_md.display_name = entity.display_name
         ent_md.organization = entity.organization_name
         ent_md.role_descriptor = entity.role_descriptor
-        ent_md.superdomain = get_superdomain_verified(domain.name)
+        ent_md.superdomain = get_superdomain_verified(entity.domain.name)
         ent_md.save()
         AttributesMD.objects.filter(entity_md=ent_md).delete()
         for attr in entity.attributes:
