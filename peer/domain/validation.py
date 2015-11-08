@@ -167,9 +167,9 @@ def get_superdomain_verified(domain):
     segments = domain.split('.')
     n = 2
     while len(segments) > n:
-        superdomain = segments[-n:]
+        superdomain = '.'.join(segments[-n:])
         try:
-            sup = Domain.objects.one(Q(name=superdomain) & Q(validated=True))
+            sup = Domain.objects.get(Q(name=superdomain) & Q(validated=True))
         except Domain.DoesNotExist:
             nsegments +=1
             continue
