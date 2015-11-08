@@ -159,6 +159,24 @@ def check_superdomain_verified(domain, user=None):
     return False
 
 
+def get_superdomain_verified(domain):
+    '''
+    Get some superdomain of the given domain which is already
+    verified. False otherwise.
+    '''
+    segments = domain.split('.')
+    n = 2
+    while len(segments) > n:
+        superdomain = segments[-n:]
+        try:
+            sup = Domain.objects.one(Q(name=superdomain) & Q(validated=True))
+        except Domain.DoesNotExist:
+            nsegments +=1
+            continue
+        return sup
+    return False
+
+
 def validate_non_public_suffix(value):
     '''
     check that value is not a public suffix

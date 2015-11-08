@@ -594,6 +594,7 @@ class EntityMD(models.Model):
     entity = models.OneToOneField(Entity, verbose_name=_(u'Entity'), primary_key=True)
     entityid = models.CharField(null=True, max_length=250)
     domain = models.ForeignKey(Domain, verbose_name=_('Domain'))
+    superdomain = models.ForeignKey(Domain, verbose_name=_('Superdomain'))
     description = models.TextField(null=True)
     display_name = models.CharField(null=True, max_length=250)
     organization = models.CharField(null=True, max_length=250)
