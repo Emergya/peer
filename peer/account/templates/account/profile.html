@@ -16,9 +16,8 @@
   <ul class="fancyList">
     {% for domain in domains %}
     <li class="{% if domain.validated %}{% if user.is_superuser %}notValidated{% else %}validated{% endif %}{% else%}notValidated{% endif %}">
-      <span class="ui-icon ui-icon-link"></span>
       <a href="{% url 'manage_domain' domain.id %}">{{ domain }}</a>
-      <a class="removeButton" href="{% url 'domain_remove' domain.id %}">{% trans "Remove domain" %}</a>
+      <a class="button" href="{% url 'domain_remove' domain.id %}">{% trans "Remove domain" %}</a>
       {% if not domain.validated %}
         <a class="button" href="{% url 'domain_verify' domain.id %}">{% trans "Verify Ownership" %}</a>
         <p class="helptext">{% trans "You must verify the ownership of this domain in order to add entities associated with it" %}</p>
