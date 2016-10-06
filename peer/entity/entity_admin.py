@@ -53,9 +53,8 @@ class PublicEntityAdmin(admin.ModelAdmin):
     actions = None
     list_display = ('__unicode__', 'owner', 'domain', 'state',
                     'creation_time', 'modification_time')
-    list_filter = ('state', 'entitymd__role_descriptor', 'owner',
-                   'entitymd__superdomain__name', 'creation_time',
-                   'modification_time')
+    list_filter = ('state', 'entitymd__role_descriptor',
+                   'creation_time', 'modification_time')
     delete_selected_confirmation_template = 'entity/delete_selected_confirmation.html'
     search_fields = ('domain__name', 'owner__username',
                      'entitymd__display_name', 'entitymd__description',
