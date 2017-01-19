@@ -210,13 +210,18 @@ def validate_unique_entityid(entity, doc, user=None):
     if errors:
         return errors
 
-    entityid = metadata.etree.attrib['entityID']
-    prev = EntityMD.objects.filter(entityid=entityid)
-    if entity.pk is not None:
-        prev = prev.exclude(pk=entity.pk)
-    if prev.count() > 0:
-        errors.append(
-            u'There is already an en entity with the'
-            u' provided EntityID: %s' % entityid)
+    try:
+        entityids = [metadata.etree.attrib['entityID']]
+    except KeyError:
+        entities = metadata.etree.getchildren()
+        entityids = [md.attrib['EntityID'] for md in entities]
+    for entityid in entityids:
+        prev = EntityMD.objects.filter(entityid=entityid)
+        if entity.pk is not None:
+            prev = prev.exclude(pk=entity.pk)
+        if prev.count() > 0:
+            errors.append(
+                u'There is already an en entity with the'
+                u' provided EntityID: %s' % entityid)
 
     return errors
