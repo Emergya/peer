@@ -214,7 +214,7 @@ def validate_unique_entityid(entity, doc, user=None):
         entityids = [metadata.etree.attrib['entityID']]
     except KeyError:
         entities = metadata.etree.getchildren()
-        entityids = [md.attrib['EntityID'] for md in entities]
+        entityids = [md.attrib['entityID'] for md in entities]
     for entityid in entityids:
         prev = EntityMD.objects.filter(entityid=entityid)
         if entity.pk is not None:
