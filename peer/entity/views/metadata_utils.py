@@ -55,7 +55,7 @@ def metarefresh_edit(request, entity_id):
                 form.cleaned_data['metarefresh_frequency']
             entity.save()
             messages.success(request, _('Metarefresh edited succesfully'))
-            return HttpResponseRedirect(reverse('metarefresh_edit',
+            return HttpResponseRedirect(reverse('entities:metarefresh_edit',
                                                 args=(entity_id,)))
         else:
             messages.error(request, _('Please correct the errors'
