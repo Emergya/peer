@@ -72,8 +72,8 @@ setup(
     },
     zip_safe=False,
     install_requires=[
-        'Django==1.8.2',
-        'django-registration-redux==1.1',
+        'Django==1.8.17',
+        'django-registration-redux==1.2',
         'django-recaptcha==1.0.2',
         'fudge==1.0.3',
         'django-vff==0.2b3',
