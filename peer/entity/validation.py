@@ -70,7 +70,7 @@ def _parse_metadata(doc):
         doc = doc.encode('utf-8', 'ignore')
     try:
         metadata = Metadata(etree.XML(doc))
-    except etree.XMLSyntaxError, e:
+    except etree.XMLSyntaxError as e:
         # XXX sin traducir (como traducimos e.msg?)
         error = e.msg or 'Unknown error, perhaps an empty doc?'
         return [u'XML syntax error: ' + error], None
@@ -127,6 +127,28 @@ def validate_domain_in_entityid(entity, doc, user=None):
         errors.append(
             u'The entityid does not belong to the domain %s'
             u' or to any of its subdomains.' % domain)
+
+    return errors
+
+
+def validate_url_scheme_in_entityid(entity, doc, user=None):
+    """
+    Makes sure the entityid url conforms to the configured scheme
+    """
+    errors, metadata = _parse_metadata(doc)
+    if errors:
+        return errors
+
+    try:
+        scheme = settings.ENTITYID_URL_SCHEME
+    except AttributeError:
+        return errors
+
+    url = urlparse.urlparse(metadata.entityid)
+    if url.scheme.lower() !=  scheme.lower():
+        errors.append(
+            u'The scheme of the entityid ({!r}) does not conform'
+            u' to the  configured scheme ({!r}).'.format(url.schema, schema))
 
     return errors
 
