@@ -344,6 +344,8 @@ REMOTE_USER_ENABLED = False
 # Moderation
 MODERATION_ENABLED = True
 
+ALLOW_LOCAL_LOGINS = True
+
 try:
     from local_settings import *
 except ImportError:

@@ -7,6 +7,7 @@
     <h1>{% trans "Sign in" %}</h1>
   </hgroup>
 
+  {% if settings.LOCAL_LOGIN_ENABLED %}
   <div class="left block">
     <h2>{% trans "Local sign in" %}</h2>
     <form id="sing-in-from" action="." method="post">{% csrf_token %}
@@ -23,6 +24,8 @@
       <a href="{% url 'auth_password_reset' %}">{% trans "Forgot Password?" %}</a>
     </p>
   </div>
+
+  {% endif %}
 
   {% if SAML_ENABLED %}
   {% load idplist mailtoadmins %}
@@ -72,9 +75,11 @@
       </fieldset>
     </form>
   </div>
-
   {% endif %}
+
+  {% if settings.LOCAL_LOGIN_ENABLED %}
   <div class="centerText clear">
     <a class="button" href="{% url 'registration_register' %}">{% trans "Sign up" %}</a>
   </div>
+  {% endif %}
 {% endblock %}
