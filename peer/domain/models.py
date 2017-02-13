@@ -112,6 +112,24 @@ class DomainTeamMembership(models.Model):
             'user': self.member.username, 'domain': self.domain.name}
 
 
+class DomainTeamMembershipRequest(models.Model):
+    domain = models.ForeignKey(Domain, verbose_name=_(u'Domain'),
+                               related_name='membership_requests')
+    requester = models.ForeignKey(User, verbose_name=_('Requester'),
+                               related_name='domain_membership_requests')
+    date = models.DateTimeField(_(u'Request date'),
+                                default=datetime.now)
+
+    class Meta:
+        verbose_name = _(u'Domain team membership request')
+        verbose_name_plural = _(u'Domain team membership requests')
+
+    def __unicode__(self):
+        return ugettext(
+            u'%(user)s is requesting membership on domain %(domain)s') % {
+            'user': self.member.username, 'domain': self.domain.name}
+
+
 class DomainModeratorsTeamMembership(models.Model):
     domain = models.ForeignKey(Domain, verbose_name=_(u'Domain'))
     member = models.ForeignKey(User, verbose_name=_('Member'),
