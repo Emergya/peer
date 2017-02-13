@@ -48,4 +48,6 @@ urlpatterns = patterns(
         'add_delegate', name='add_domain_delegate'),
     url(r'^(?P<domain_id>\d+)/remove_delegate/(?P<username>.+)$',
         'remove_delegate', name='remove_domain_delegate'),
+    url(r'^(?P<domain_id>\d+)/request-membership/(?P<username>.+)$',
+        'request_membership', name='request_domain_team_membership'),
 )

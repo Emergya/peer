@@ -35,6 +35,21 @@
   <a href="{% url 'domain_add' %}">{% trans "Do you want to create one?" %}</a></p>
   {% endif %}
 
+  <h2 class="separator">{% trans "Other domains" %}</h2>
+
+  {% if other_domains %}
+  <ul class="fancyList">
+    {% for domain in other_domains %}
+      {% if domain.validated %}
+      <li class="validated">
+        {{ domain }}
+        <a class="button" href="{% url 'request_domain_team_membership' domain_id=domain.id username=user.username %}">{% trans "Request access" %}</a>
+      </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+  {% endif %}
+
   {% if permission_delegations %}
   <h2 class="separator">{% trans "Entities you can manage" %}</h2>
   <ul class="simpleList">
