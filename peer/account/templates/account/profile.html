@@ -37,15 +37,21 @@
 
   <h2 class="separator">{% trans "Other domains" %}</h2>
 
-  {% if other_domains %}
+  {% if requested or non_requested %}
   <ul class="fancyList">
-    {% for domain in other_domains %}
+    {% for domain in non_requested %}
       {% if domain.validated %}
       <li class="validated">
         {{ domain }}
         <a class="button" href="{% url 'request_domain_team_membership' domain_id=domain.id username=user.username %}">{% trans "Request access" %}</a>
       </li>
       {% endif %}
+    {% endfor %}
+    {% for domain in requested %}
+      <li class="validated">
+        {{ domain.domain__name }}
+        {% trans "Access already requested" %}
+      </li>
     {% endfor %}
   </ul>
   {% endif %}

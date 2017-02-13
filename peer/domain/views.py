@@ -41,6 +41,7 @@ from django.utils.translation import ugettext as _
 
 from peer.domain.forms import DomainForm
 from peer.domain.models import Domain, DomainTeamMembership, DomainToken
+from peer.domain.models import DomainTeamMembershipRequest
 from peer.entity.models import Entity
 from peer.domain.utils import (send_mail_for_validation,
                                send_notification_mail_to_domain_owner,
@@ -233,8 +234,11 @@ def manage_domain_team(request, domain_id):
 
 @login_required
 def request_membership(request, domain_id, username):
-
-    return 'OK'
+    domain = Domain.objects.get(pk=domain_id)
+    user = User.objects.get(username=username)
+    member_request = DomainTeamMembershipRequest(domain=domain, requester=user)
+    member_request.save()
+    return HttpResponseRedirect(reverse('account_profile'))
 
 
 @login_required
