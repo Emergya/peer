@@ -46,7 +46,8 @@ from peer.entity.models import Entity
 from peer.domain.utils import (send_mail_for_validation,
                                send_notification_mail_to_domain_owner,
                                get_administrative_emails_from_settings,
-                               get_administrative_emails_from_whois)
+                               get_administrative_emails_from_whois,
+                               send_mail)
 from peer.domain.validation import (http_validate_ownership,
                                     dns_validate_ownership,
                                     email_validate_ownership,
@@ -238,6 +239,10 @@ def request_membership(request, domain_id, username):
     user = User.objects.get(username=username)
     member_request = DomainTeamMembershipRequest(domain=domain, requester=user)
     member_request.save()
+    subject = _('Domain team membership request')
+    data = {'username': user.username, 'domain_name': domain.name}
+    admin_emails = [a[1] for a in settings.ADMINS]
+    send_mail(subject, data, 'membership_request', admin_emails)
     return HttpResponseRedirect(reverse('account_profile'))
 
 

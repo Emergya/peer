@@ -1,0 +1,7 @@
+{% load i18n %}
+
+{% trans "Domain team membership request" %}
+
+{% trans "For domain" %}: {{ domain_name }}
+
+{% trans "By" %}: {{ username }}
