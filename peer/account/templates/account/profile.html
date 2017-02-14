@@ -35,9 +35,23 @@
   <a href="{% url 'domain_add' %}">{% trans "Do you want to create one?" %}</a></p>
   {% endif %}
 
-  <h2 class="separator">{% trans "Other domains" %}</h2>
+
+  <h2 class="separator">{% trans "Domains you can use" %}</h2>
+
+  {% if delegated_domains %}
+  <ul class="fancyList">
+    {% for domain in delegated_domains %}
+    <li class="validated">
+      {{ domain }}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
 
   {% if requested or non_requested %}
+
+  <h2 class="separator">{% trans "Other domains" %}</h2>
+
   <ul class="fancyList">
     {% for domain in non_requested %}
       {% if domain.validated %}
@@ -50,7 +64,7 @@
     {% for domain in requested %}
       <li class="validated">
         {{ domain.domain__name }}
-        {% trans "Access already requested" %}
+        <span class="right strong">{% trans "Access already requested" %}</span>
       </li>
     {% endfor %}
   </ul>

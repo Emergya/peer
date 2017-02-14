@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% load i18n account verification_tags %}
+
+{% block content %}
+
+<section class="mainContent">
+
+  <hgroup>
+    <h1>{% trans "Domain Team Membership Requests" %}</h1>
+  </hgroup>
+
+  {% if membership_requests %}
+  <ul class="fancyList">
+    {% for req in membership_requests %}
+    <li class="validated">
+      <strong><span>{% blocktrans with user=req.requester.username domain=req.domain.name %}User {{ user }} requests access to domain {{ domain }}{% endblocktrans %}</span></strong>
+      <a class="button" href="{% url 'accept_membership_request' req.domain.id req.requester.username %}">{% trans "grant access" %}</a>
+      <a class="button" href="{% url 'reject_membership_request' req.domain.id req.requester.username %}">{% trans "deny access" %}</a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>{% trans "There are no outstanding membership requests." %}
+  {% endif %}
+
+</section>
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript">
+    (function ($) {
+        $(document).ready(function () {
+        });
+    }(jQuery));
+</script>
+{% endblock %}
+

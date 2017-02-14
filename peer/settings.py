@@ -340,6 +340,9 @@ REMOTE_USER_ENABLED = False
 # Moderation
 MODERATION_ENABLED = True
 
+# membership requests ttl in days
+MEMBERSHIP_REQUEST_TTL = 7
+
 try:
     from local_settings import *
 except ImportError:

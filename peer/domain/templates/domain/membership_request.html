@@ -1,8 +1,10 @@
 
 {% load i18n %}
 
-<h1>{% trans "Domain team membership request" %}</h1>
+<h2>{% trans "Domain team membership request" %}</h2>
 
-<h2>{% trans "For domain" %}: {{ domain_name }}</h2>
+<p>{% blocktrans %}The user {{ username }} is requesting membership for the team of the domain {{ domain_name }}{% endblocktrans %}.</p>
 
-<p>{% trans "By" %}: {{ username }}</p>
+<p>{% trans "You can grant or deny the request following the link below:" %}</p>
+
+<p>{{ url }}</p>

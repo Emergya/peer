@@ -63,12 +63,14 @@ from peer.entity.models import EntityGroup
 @login_required
 def profile(request):
     domains = Domain.objects.filter(owner=request.user)
+    delegated_domains = Domain.objects.filter(team_memberships__member=request.user)
     requested = DomainTeamMembershipRequest.objects.filter(requester=request.user).values('domain__name')
-    non_requested = Domain.objects.exclude(owner=request.user).exclude(name__in=requested)
+    non_requested = Domain.objects.filter(owner__is_superuser=True).exclude(owner=request.user).exclude(team_memberships__member=request.user).exclude(name__in=requested)
     owned_group_entities = EntityGroup.objects.filter(owner=request.user)
     delegations = PermissionDelegation.objects.filter(delegate=request.user)
     return render_to_response('account/profile.html', {
         'domains': domains,
+        'delegated_domains': delegated_domains,
         'requested': requested,
         'non_requested': non_requested,
         'permission_delegations': delegations,
