@@ -232,6 +232,12 @@ def manage_domain_team(request, domain_id):
 
 
 @login_required
+def request_membership(request, domain_id, username):
+
+    return 'OK'
+
+
+@login_required
 def list_delegates(request, domain_id):
     domain = get_object_or_404(Domain, id=domain_id)
     if not can_share_domain(request.user, domain):

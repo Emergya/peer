@@ -64,10 +64,12 @@ from peer.entity.models import EntityGroup
 @login_required
 def profile(request):
     domains = Domain.objects.filter(owner=request.user)
+    other_domains = Domain.objects.exclude(owner=request.user)
     owned_group_entities = EntityGroup.objects.filter(owner=request.user)
     delegations = PermissionDelegation.objects.filter(delegate=request.user)
     return render_to_response('account/profile.html', {
         'domains': domains,
+        'other_domains': other_domains,
         'permission_delegations': delegations,
         'owned_group_entities': owned_group_entities,
     }, context_instance=RequestContext(request))
