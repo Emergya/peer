@@ -1,0 +1,6 @@
+
+{% load i18n %}
+
+{% trans "Domain team membership request" %}
+
+{% blocktrans %}Your request for access to the domain {{ domain_name }} has been accepted.{% endblocktrans %}.

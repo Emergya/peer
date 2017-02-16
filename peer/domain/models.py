@@ -41,7 +41,7 @@ from peer.domain.utils import generate_validation_key
 class Domain(models.Model):
     name = SafeCharField(_(u'Domain name'), max_length=100, unique=True)
     owner = models.ForeignKey(User, verbose_name=_('Identified domain owner'),
-                              blank=True, null=True)
+                              related_name='domains', blank=True, null=True)
     validated = models.BooleanField(
         _(u'Validated'), default=False,
         help_text=_(u'Used to know if the owner actual owns the domain'))
@@ -96,7 +96,8 @@ signals.post_save.connect(pre_save_handler, sender=Domain)
 
 
 class DomainTeamMembership(models.Model):
-    domain = models.ForeignKey(Domain, verbose_name=_(u'Domain'))
+    domain = models.ForeignKey(Domain, verbose_name=_(u'Domain'),
+                                           related_name="team_memberships")
     member = models.ForeignKey(User, verbose_name=_('Member'),
                                related_name='domain_teams')
     date = models.DateTimeField(_(u'Membership date'),

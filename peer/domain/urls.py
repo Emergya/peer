@@ -50,4 +50,10 @@ urlpatterns = patterns(
         'remove_delegate', name='remove_domain_delegate'),
     url(r'^(?P<domain_id>\d+)/request-membership/(?P<username>.+)$',
         'request_membership', name='request_domain_team_membership'),
+    url(r'^list-membership-requests$',
+        'list_membership_requests', name='list_membership_requests'),
+    url(r'^(?P<domain_id>\d+)/accept-membership/(?P<username>.+)$',
+        'accept_membership_request', name='accept_membership_request'),
+    url(r'^(?P<domain_id>\d+)/reject-membership/(?P<username>.+)$',
+        'reject_membership_request', name='reject_membership_request'),
 )

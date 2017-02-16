@@ -55,7 +55,7 @@ from peer.account.forms import PersonalInformationForm
 from peer.account.forms import FriendInvitationForm
 from peer.account.forms import RegistrationFormCaptchaTOU
 from peer.account.templatetags.account import safefullname
-from peer.domain.models import Domain
+from peer.domain.models import Domain, DomainTeamMembershipRequest
 from peer.entity.models import Entity
 from peer.entity.models import PermissionDelegation
 from peer.entity.models import EntityGroup
@@ -64,12 +64,16 @@ from peer.entity.models import EntityGroup
 @login_required
 def profile(request):
     domains = Domain.objects.filter(owner=request.user)
-    other_domains = Domain.objects.exclude(owner=request.user)
+    delegated_domains = Domain.objects.filter(team_memberships__member=request.user)
+    requested = DomainTeamMembershipRequest.objects.filter(requester=request.user).values('domain__name')
+    non_requested = Domain.objects.filter(owner__is_superuser=True).exclude(owner=request.user).exclude(team_memberships__member=request.user).exclude(name__in=requested)
     owned_group_entities = EntityGroup.objects.filter(owner=request.user)
     delegations = PermissionDelegation.objects.filter(delegate=request.user)
     return render_to_response('account/profile.html', {
         'domains': domains,
-        'other_domains': other_domains,
+        'delegated_domains': delegated_domains,
+        'requested': requested,
+        'non_requested': non_requested,
         'permission_delegations': delegations,
         'owned_group_entities': owned_group_entities,
     }, context_instance=RequestContext(request))
