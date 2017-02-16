@@ -26,14 +26,24 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Terena.
 
+from django.conf import settings
 from django.conf.urls import patterns, url, include
 from django.contrib.auth import views as auth_views
 
 from peer.account.views import RegistrationCaptchaView
 
+
 urlpatterns = patterns(
     '',
-
+    url(r'^profile/$', 'peer.account.views.profile',
+        name='account_profile'),
+    url(r'^profile/edit/$', 'peer.account.views.profile_edit',
+        name='account_profile_edit'),
+    url(r'^password_change/$',
+        'django.contrib.auth.views.password_change',
+        name='password_change'),
+    url(r'^accounts/logout/$',
+        'peer.account.views.logout', name='auth_logout'),
     # override the default urls
     url(r'^password/change/$',
         auth_views.password_change,
@@ -53,8 +63,6 @@ urlpatterns = patterns(
     url(r'^password/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
         auth_views.password_reset_confirm,
         name='password_reset_confirm'),
-
-    # customize the registration form
     url(r'^register/$',
         RegistrationCaptchaView.as_view(),
         name='registration_register'),

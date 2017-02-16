@@ -39,6 +39,7 @@ from django.core.urlresolvers import reverse
 from django.core.mail import send_mail
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
+from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -76,6 +77,8 @@ def profile(request):
 
 @login_required
 def profile_edit(request):
+    if not settings.LOCAL_LOGIN_ENABLED:
+        raise HttpResponseBadRequest()
     if request.method == 'POST':
         form = PersonalInformationForm(request.POST, instance=request.user)
         if form.is_valid():

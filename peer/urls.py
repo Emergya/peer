@@ -45,18 +45,10 @@ urlpatterns = patterns(
     url(r'^', include('peer.portal.urls')),
     url(r'^admin/', include(admin.site.urls)),
 
-    url(r'^accounts/profile/$', 'peer.account.views.profile',
-        name='account_profile'),
-    url(r'^accounts/profile/edit/$', 'peer.account.views.profile_edit',
-        name='account_profile_edit'),
-    url(r'^accounts/password_change/$',
-        'django.contrib.auth.views.password_change', name='password_change'),
     url(r'^accounts/invite_friend/$',
         'peer.account.views.invite_friend', name='invite_friend'),
     url(r'^accounts/search_users_auto/$',
         'peer.account.views.search_users_auto', name='search_users_auto'),
-    url(r'^accounts/logout/$',
-        'peer.account.views.logout', name='auth_logout'),
     url(r'^accounts/manage_admin_team/$',
         'peer.account.views.manage_admin_team', name='manage_admin_team'),
     url(r'^accounts/list_superusers/$',
@@ -65,7 +57,6 @@ urlpatterns = patterns(
         'peer.account.views.add_superuser', name='add_superuser'),
     url(r'^accounts/remove_superuser/(?P<username>.+)$',
         'peer.account.views.remove_superuser', name='remove_superuser'),
-    url(r'^accounts/', include('peer.account.urls')),
 
     url(r'^saml2/ls/$', 'djangosaml2.views.logout_service', {
         'next_page': '/accounts/logout/',
@@ -76,6 +67,12 @@ urlpatterns = patterns(
     url(r'^entity/', include(entities.urls)),
     url(r'^ckeditor/', include('ckeditor.urls')),
 )
+
+if settings.LOCAL_LOGIN_ENABLED:
+    urlpatterns += patterns(
+        url(r'^accounts/', include('peer.account.urls')),
+    )
+
 
 if settings.DEBUG:
     urlpatterns += patterns(
