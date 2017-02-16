@@ -27,6 +27,7 @@
 # policies, either expressed or implied, of Terena.
 
 import uuid
+import datetime
 
 from django.conf import settings
 from django.contrib import messages
@@ -41,11 +42,13 @@ from django.utils.translation import ugettext as _
 
 from peer.domain.forms import DomainForm
 from peer.domain.models import Domain, DomainTeamMembership, DomainToken
+from peer.domain.models import DomainTeamMembershipRequest
 from peer.entity.models import Entity
 from peer.domain.utils import (send_mail_for_validation,
                                send_notification_mail_to_domain_owner,
                                get_administrative_emails_from_settings,
-                               get_administrative_emails_from_whois)
+                               get_administrative_emails_from_whois,
+                               send_mail)
 from peer.domain.validation import (http_validate_ownership,
                                     dns_validate_ownership,
                                     email_validate_ownership,
@@ -233,8 +236,73 @@ def manage_domain_team(request, domain_id):
 
 @login_required
 def request_membership(request, domain_id, username):
+    domain = Domain.objects.get(pk=domain_id)
+    user = User.objects.get(username=username)
+    member_request = DomainTeamMembershipRequest(domain=domain, requester=user)
+    member_request.save()
+    url = request.build_absolute_uri(reverse('list_membership_requests'))
+    subject = _('Domain team membership request')
+    data = {'username': user.username, 'domain_name': domain.name, 'url': url}
+    admins = User.objects.filter(is_superuser=True, domains=domain)
+    admin_emails = [admin.email for admin in admins]
+    send_mail(subject, data, 'membership_request', admin_emails)
+    return HttpResponseRedirect(reverse('account_profile'))
 
-    return 'OK'
+
+@login_required
+def list_membership_requests(request):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
+    # first remove stale entries
+    timeout = settings.MEMBERSHIP_REQUEST_TTL
+    now = datetime.datetime.now()
+    delta = datetime.timedelta(days=timeout)
+    expired = now - delta
+    DomainTeamMembershipRequest.objects.filter(date__lte=expired).delete()
+
+    # then show remaining
+    membership_requests = DomainTeamMembershipRequest.objects.filter(domain__owner=request.user)
+    return render_to_response('domain/list_membership_requests.html', {
+        'membership_requests': membership_requests,
+    }, context_instance=RequestContext(request))
+
+
+@login_required
+def accept_membership_request(request, domain_id, username):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
+    _add_delegate(request, domain_id, username)
+    DomainTeamMembershipRequest.objects.filter(domain=domain,
+                                             requester=requester).delete()
+
+    domain = Domain.objects.get(pk=domain_id)
+    requester = User.objects.get(username=username)
+    email = requester.email
+    subject = _('Domain team membership request ACCEPTED')
+    data = {'domain_name': domain.name}
+    send_mail(subject, data, 'membership_request_accepted', [email])
+
+    return HttpResponseRedirect(reverse('list_membership_requests'))
+
+
+@login_required
+def reject_membership_request(request, domain_id, username):
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
+    domain = Domain.objects.get(pk=domain_id)
+    requester = User.objects.get(username=username)
+    DomainTeamMembershipRequest.objects.filter(domain=domain,
+                                             requester=requester).delete()
+
+    email = requester.email
+    subject = _('Domain team membership request REJECTED')
+    data = {'domain_name': domain.name}
+    send_mail(subject, data, 'membership_request_rejected', [email])
+
+    return HttpResponseRedirect(reverse('list_membership_requests'))
 
 
 @login_required
@@ -249,8 +317,7 @@ def list_delegates(request, domain_id):
     }, context_instance=RequestContext(request))
 
 
-@login_required
-def add_delegate(request, domain_id, username):
+def _add_delegate(request, domain_id, username):
     domain = get_object_or_404(Domain, id=domain_id)
     if not can_share_domain(request.user, domain):
         raise PermissionDenied
@@ -263,6 +330,9 @@ def add_delegate(request, domain_id, username):
             membership = DomainTeamMembership(domain=domain, member=user)
             membership.save()
 
+@login_required
+def add_delegate(request, domain_id, username):
+    _add_delegate(request, domain_id, username)
     return list_delegates(request, domain_id)
 
 

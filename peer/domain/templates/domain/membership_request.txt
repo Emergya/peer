@@ -1,0 +1,10 @@
+
+{% load i18n %}
+
+{% trans "Domain team membership request" %}
+
+{% blocktrans %}The user {{ username }} is requesting membership for the team of the domain {{ domain_name }}{% endblocktrans %}.
+
+{% trans "You can grant or deny the request following the link below:" %}
+
+{{ url }}

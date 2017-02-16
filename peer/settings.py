@@ -346,6 +346,9 @@ MODERATION_ENABLED = True
 
 ALLOW_LOCAL_LOGINS = True
 
+# membership requests ttl in days
+MEMBERSHIP_REQUEST_TTL = 7
+
 try:
     from local_settings import *
 except ImportError:

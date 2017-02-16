@@ -90,8 +90,9 @@ def send_mail(subject, data, template_name, mailto):
     htmly = get_template("domain/%s.html" % template_name)
     text_content = plaintext.render(data)
     html_content = htmly.render(data)
-
-    msg = EmailMultiAlternatives(subject, text_content, settings.DEFAULT_FROM_EMAIL, [mailto])
+    if not isinstance(mailto, list):
+        mailto = [mailto]
+    msg = EmailMultiAlternatives(subject, text_content, settings.DEFAULT_FROM_EMAIL, mailto)
     msg.attach_alternative(html_content, "text/html")
     msg.send()
 
