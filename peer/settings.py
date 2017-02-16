@@ -245,6 +245,9 @@ LOGGING = {
     }
 }
 
+# Restrict the allowed schemes in entityID's. Can be multiple values separated by |
+ENTITYID_URL_SCHEME = 'http|https'
+
 # ENTITY METADATA VALIDATION
 METADATA_VALIDATORS = (
     'peer.entity.validation.validate_xml_syntax',
@@ -252,6 +255,7 @@ METADATA_VALIDATORS = (
     'peer.entity.validation.validate_metadata_permissions',
     # 'peer.entity.validation.validate_domain_in_entityid',
     'peer.entity.validation.validate_schema',
+    'peer.entity.validation.validate_url_scheme_in_entityid',
     'peer.entity.validation.validate_unique_entityid',
 )
 
