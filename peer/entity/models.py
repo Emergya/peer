@@ -488,7 +488,7 @@ class Entity(models.Model):
 
                 if text is None:
                     return 'Unknown error while fetching the url'
-        except FetchError, e:
+        except FetchError as e:
             return str(e)
 
         if not text:
@@ -516,6 +516,23 @@ class Entity(models.Model):
     @transition(field=state, source=STATE.MOD, target=STATE.PUB)
     def reject(self):
         self.temp_metadata = ''
+
+
+class SPEntityCategory(models.Model):
+    entity = models.ForeignKey(Entity, verbose_name=_(u'Entity'))
+    research_and_scholarship = models.BooleanField(_('REFEDS Research and Scholarship'),
+                                                                default=False)
+    code_of_conduct = models.BooleanField(_('GEANT Code of Conduct'), default=False)
+    coc_priv_statement_url = models.URLField(_('Privacy Statement URL'), null=True, blank=True)
+    research_and_education = models.BooleanField(_('SWAMID Research and Education'),
+                                                                default=False)
+    swamid_sfs = models.BooleanField(_('SWAMID SFS'), default=False)
+    rae_hei_service =  models.BooleanField(_('SWAMID HEI Service'), default=False)
+    rae_nren_service =  models.BooleanField(_('SWAMID NREN Service'), default=False)
+    rae_eu_protection =  models.BooleanField(_('SWAMID EU Adequate Protection'), default=False)
+    sirtfi_id_assurance =  models.BooleanField(_('REFEDS SIRTFI Identity Assurance Certification'),
+                                                                 default=False)
+    security_contact_email = models.EmailField(_('Security Contact Email'), null=True, blank=True)
 
 
 def handler_entity_pre_save(sender, instance, **kwargs):

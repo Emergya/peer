@@ -38,6 +38,7 @@ from django.conf import settings
 from peer.account.templatetags.account import authorname
 from peer.customfields import TermsOfUseField, readtou
 from peer.entity.models import Entity, EntityGroup, EntityMD, AttributesMD
+from peer.entity.models import SPEntityCategory
 from peer.entity.validation import validate
 from peer.domain.validation import get_superdomain_verified
 from peer.entity.widgets import MetadataWidget
@@ -315,3 +316,9 @@ class EditMonitoringPreferencesForm(forms.Form):
         label=_('Receive email alerts when any endpoint of this entity is down'),
         required=False,  # to allow falsy values
     )
+
+
+class SPEntityCategoryForm(forms.ModelForm):
+    class Meta:
+        model = SPEntityCategory
+        fields = '__all__'
