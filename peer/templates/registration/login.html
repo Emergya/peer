@@ -7,7 +7,7 @@
     <h1>{% trans "Sign in" %}</h1>
   </hgroup>
 
-  {% if settings.LOCAL_LOGIN_ENABLED %}
+  {% if LOCAL_LOGIN_ENABLED %}
   <div class="left block">
     <h2>{% trans "Local sign in" %}</h2>
     <form id="sing-in-from" action="." method="post">{% csrf_token %}
@@ -30,7 +30,7 @@
   {% if SAML_ENABLED %}
   {% load idplist mailtoadmins %}
 
-  {% if settings.LOCAL_LOGIN_ENABLED %}
+  {% if LOCAL_LOGIN_ENABLED %}
   <div class="right block">
   {% else %}
   <div class="left block">
@@ -81,7 +81,7 @@
   </div>
   {% endif %}
 
-  {% if settings.LOCAL_LOGIN_ENABLED %}
+  {% if LOCAL_LOGIN_ENABLED %}
   <div class="centerText clear">
     <a class="button" href="{% url 'registration_register' %}">{% trans "Sign up" %}</a>
   </div>

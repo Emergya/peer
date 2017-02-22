@@ -90,7 +90,7 @@
     </section>
 {% elif not user.is_authenticated %}
   <div class="centerText">
-  {% if settings.LOCAL_LOGIN_ENABLED %}
+  {% if LOCAL_LOGIN_ENABLED %}
     <p><a class="button" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></p>
   {% else %}
     <p><a class="button" href="{% url 'auth_login' %}">{% trans "Sign in" %}</a></p>
