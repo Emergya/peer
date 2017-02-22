@@ -66,12 +66,8 @@ urlpatterns = patterns(
     url(r'^domain/', include('peer.domain.urls')),
     url(r'^entity/', include(entities.urls)),
     url(r'^ckeditor/', include('ckeditor.urls')),
+    url(r'^accounts/', include('peer.account.urls')),
 )
-
-if settings.LOCAL_LOGIN_ENABLED:
-    urlpatterns += patterns(
-        url(r'^accounts/', include('peer.account.urls')),
-    )
 
 
 if settings.DEBUG:

@@ -55,6 +55,7 @@ def auth(request):
     result = {
         'SAML_ENABLED': getattr(settings, 'SAML_ENABLED', False),
         'REMOTE_USER_ENABLED': getattr(settings, 'REMOTE_USER_ENABLED', False),
+        'LOCAL_LOGIN_ENABLED': getattr(settings, 'LOCAL_LOGIN_ENABLED', True),
     }
 
     if result['SAML_ENABLED']:

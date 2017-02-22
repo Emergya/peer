@@ -344,7 +344,7 @@ REMOTE_USER_ENABLED = False
 # Moderation
 MODERATION_ENABLED = True
 
-ALLOW_LOCAL_LOGINS = True
+LOCAL_LOGIN_ENABLED = True
 
 # membership requests ttl in days
 MEMBERSHIP_REQUEST_TTL = 7
