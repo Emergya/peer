@@ -95,7 +95,7 @@ class PublicAdminSite(AdminSite):
 
             # SP entity categories
             url(r'^(?P<entity_id>\d+)/sp-categories/$',
-                'peer.entity.views.categories.manage_categories', name='manage_categories'),
+                'peer.entity.views.sp_categories.manage_categories', name='manage_categories'),
 
             # CSS with highlight colors
             url(r'^pygments.css$', 'peer.entity.views.revisions.get_pygments_css',
