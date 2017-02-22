@@ -1,16 +1,23 @@
 
 from django.forms import modelformset_factory
-from django.shortcuts import render
-from peer.entity.models import SPEntityCategory
+from django.shortcuts import render, get_object_or_404
+from peer.entity.models import Entity, SPEntityCategory
+from peer.entity.forms import SPEntityCategoryForm
 
 
-def manage_categories(request):
-    CategoryFormSet = modelformset_factory(SPEntityCategory, fields='__all__')
+def manage_categories(request, entity_id):
+    entity = get_object_or_404(Entity, id=entity_id)
     if request.method == 'POST':
-        formset = CategoryFormSet(request.POST)
-        if formset.is_valid():
-            formset.save()
+        form = SPEntityCategoryForm(request.POST)
+        form.save(commit=False)
+        form.entity = entity
+        if form.is_valid():
+            form.save()
             # do something.
     else:
-        formset = CategoryFormSet()
-    return render(request, 'manage_categories.html', {'formset': formset})
+        form = SPEntityCategoryForm({'entity': entity_id})
+    context = {
+            'form': form,
+            'entity': entity
+            }
+    return render(request, 'entity/manage_categories.html', context)

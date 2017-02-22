@@ -321,4 +321,14 @@ class EditMonitoringPreferencesForm(forms.Form):
 class SPEntityCategoryForm(forms.ModelForm):
     class Meta:
         model = SPEntityCategory
-        fields = '__all__'
+        fields = (
+            'entity', 'research_and_scholarship',
+            'code_of_conduct', 'coc_priv_statement_url',
+            'research_and_education', 'rae_eu_protection',
+            'rae_hei_service', 'rae_nren_service',
+            'swamid_sfs', 'sirtfi_id_assurance',
+            'security_contact_email',
+            )
+        widgets = {
+                'entity': forms.HiddenInput()
+                }
