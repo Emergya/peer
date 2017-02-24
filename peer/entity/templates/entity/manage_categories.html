@@ -49,13 +49,13 @@
               $('#id_code_of_conduct').click(function (e) {
                   $('#id_coc_priv_statement_url').parent().toggle(e.target.checked);
                   if ( ! e.target.checked ) {
-                      $('#id_coc_priv_statement_url').attr('checked', false);
+                      $('#id_coc_priv_statement_url').val('');
                   }
               });
               $('#id_sirtfi_id_assurance').click(function (e) {
                   $('#id_security_contact_email').parent().toggle(e.target.checked);
                   if ( ! e.target.checked ) {
-                      $('#id_security_contact_email').attr('checked', false);
+                      $('#id_security_contact_email').val('');
                   }
               });
           });

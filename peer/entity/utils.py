@@ -51,6 +51,18 @@ NAMESPACES = {
     'saml': 'urn:oasis:names:tc:SAML:2.0:assertion',
     'samlp': 'urn:oasis:names:tc:SAML:2.0:protocol',
     'mdattr': 'urn:oasis:names:tc:SAML:metadata:attribute',
+    'remd': "http://refeds.org/metadata",
+}
+
+SP_CATEGORIES = {
+    'R&S': 'http://refeds.org/category/research-and-scholarship',
+    'CoCo': 'http://www.geant.net/uri/dataprotection-code-of-conduct/v1',
+    'R&E': 'http://www.swamid.se/category/research-and-education',
+    'SFS': 'http://www.swamid.se/category/sfs-1993-1153',
+    'HEI': 'http://www.swamid.se/category/hei-service',
+    'NREN': 'http://www.swamid.se/category/nren-service',
+    'EU': 'http://www.swamid.se/category/eu-adequate-protection',
+    'SIRTFI': 'http://refeds.org/sirtfi',
 }
 
 SAML_METADATA_NAMESPACE = NAMESPACES['md']
@@ -144,9 +156,9 @@ class FetchError(Exception):
 def fetch_resource(url, decode=True):
     try:
         resp = urllib2.urlopen(url, None, CONNECTION_TIMEOUT)
-    except urllib2.URLError, e:
+    except urllib2.URLError as e:
         raise FetchError('URL Error: ' + str(e))
-    except urllib2.HTTPError, e:
+    except urllib2.HTTPError as e:
         raise FetchError('HTTP Error: ' + str(e))
     except:
         return None
@@ -265,9 +277,72 @@ def load_schema():
         schema_stream = pkg_resources.resource_stream(__name__, "schema/schema.xsd")
         st = etree.parse(schema_stream, parser)
         schema = etree.XMLSchema(st)
-    except etree.XMLSchemaParseError, ex:
+    except etree.XMLSchemaParseError as ex:
         error_lines = ["%s" % e for e in ex.error_log if ":WARNING:" not in e]
         logger.error('\n'.join(error_lines))
         raise ex
 
     return schema
+
+
+def get_or_create_categories_el(tree):
+    extensions = addns('Extensions', NAMESPACES['md'])
+    extensions_el = tree.find(extensions)
+    if extensions_el is None:
+        extensions_el = etree.SubElement(tree, extensions)
+    entity_attrs = addns('EntityAttrributes', NAMESPACES['mdattr'])
+    entity_attrs_el = extensions_el.find(entity_attrs)
+    if entity_attrs_el is None:
+        entity_attrs_el = etree.SubElement(extensions_el, entity_attrs)
+    categories_attr = addns('Attribute', NAMESPACES['saml'])
+    path = '{!s}[@Name="http://macedir.org/entity-category"]'.format(categories_attr)
+    categories_attr_el = entity_attrs_el.xpath(path)
+    if not categories_attr_el:
+        NSMAP = {None: NAMESPACES['saml']}
+        categories_attr_el = etree.SubElement(entity_attrs_el,
+                addns('Attribute', NAMESPACES['saml']),
+                NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                Name="http://macedir.org/entity-category",
+                nsmap=NSMAP)
+    return categories_attr_el
+
+
+def add_sp_categories(categories_attr_el, categories):
+    '''
+    example with categories = ['http://example.org/category/dog', 'urn:oid:1.3.6.1.4.1.21829']:
+
+      <md:Extensions>
+        <mdattr:EntityAttributes
+            xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute">
+          <Attribute xmlns="urn:oasis:names:tc:SAML:2.0:assertion"
+              NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"
+              Name="http://macedir.org/entity-category">
+            <AttributeValue>http://example.org/category/dog</AttributeValue>
+            <AttributeValue>urn:oid:1.3.6.1.4.1.21829</AttributeValue>
+          </Attribute>
+        </mdattr:EntityAttributes>
+      </md:Extensions>
+    '''
+    for category in categories:
+        cat = etree.SubElement(categories_attr_el,
+                    addns('AttributeValue',
+                    NAMESPACES['saml']))
+        cat.text = category
+
+
+def add_security_contact_person(tree, email):
+    NSMAP = {
+            None: NAMESPACES['md'],
+            'remd': NAMESPACES['remd']
+            }
+    contact_person_tag = addns('ContactPerson', NAMESPACES['md'])
+    contact_type_attr = addns('contactType', NAMESPACES['remd'])
+    contact_person_el = etree.Element(contact_person_tag, **{
+        contact_type_attr: 'http://refeds.org/metadata/contactType/security',
+        'nsmap': NSMAP
+        })
+    email_tag = addns('EmailAddress', NAMESPACES['md'])
+    email_el = etree.SubElement(contact_person_el, email_tag)
+    email_el.text = 'mailto:{!s}'.format(email)
+    tree.append(contact_person_el)
+    return contact_person_el

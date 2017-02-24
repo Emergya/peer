@@ -45,12 +45,16 @@ from peer.entity.utils import NAMESPACES, addns, delns, getlang
 from peer.entity.utils import expand_settings_permissions
 from peer.entity.utils import FetchError, fetch_resource
 from peer.entity.utils import write_temp_file
+from peer.entity.utils import SP_CATEGORIES
+from peer.entity.utils import get_or_create_categories_el
+from peer.entity.utils import add_sp_categories
 from peer.entity.nagios import send_nagios_notification
 
 XML_NAMESPACE = NAMESPACES['xml']
 XMLDSIG_NAMESPACE = NAMESPACES['ds']
 MDUI_NAMESPACE = NAMESPACES['mdui']
 MDATTR_NAMESPACE = NAMESPACES['mdattr']
+MD_NAMESPACE = NAMESPACES['md']
 SAML_NAMESPACE = NAMESPACES['saml']
 
 CONNECTION_TIMEOUT = 10
@@ -290,6 +294,22 @@ class Metadata(object):
                 attrs.append(element)
         return attrs
 
+    @property
+    def sp_categories(self):
+        categories = []
+        path_segments = [addns('Extensions'),
+                         addns('EntityAttributes', MDATTR_NAMESPACE),
+                         addns('Attribute', SAML_NAMESPACE)]
+        path = '/'.join(path_segments)
+        xpath = '{!s}[@Name="http://macedir.org/entity-category"]'.format(path)
+        find_xml = self.etree.xpath(xpath)
+        if find_xml:
+            categories_el = find_xml[0]
+            if categories_el is not None:
+                for category_el in categories_el.getchildren():
+                    categories.append(category_el.text)
+        return categories
+
 
 class Entity(models.Model):
     app_label = 'peer.entity'
@@ -366,6 +386,34 @@ class Entity(models.Model):
         ordering = ('-creation_time', )
         permissions = expand_settings_permissions(include_xpath=False)
 
+
+    def _add_sp_categories(self):
+        if self.sp_categories:
+            categories = []
+            if self.sp_categories.research_and_scholarship:
+                categories.append(SP_CATEGORIES['R&S'])
+            if self.sp_categories.code_of_conduct:
+                categories.append(SP_CATEGORIES['CoCo'])
+            if self.sp_categories.research_and_education:
+                categories.append(SP_CATEGORIES['R&E'])
+                if self.sp_categories.rae_hei_service:
+                    categories.append(SP_CATEGORIES['HEI'])
+                if self.sp_categories.rae_nren_service:
+                    categories.append(SP_CATEGORIES['NREN'])
+                if self.sp_categories.rae_eu_service:
+                    categories.append(SP_CATEGORIES['EU'])
+            if self.sp_categories.swamid_sfs:
+                categories.append(SP_CATEGORIES['SFS'])
+            if self.sp_categories.sirtfi_id_assurance:
+                categories.append(SP_CATEGORIES['SIRTFI'])
+            tree = self._parsed_metadata
+            categories_el = get_or_create_categories_el(tree)
+            add_sp_categories(categories_el, categories)
+            if self.sp_categories.sirtfi_id_assurance:
+                add_security_contact_person(tree, 
+                        self.sp_categories.security_contact_email)
+
+
     def _load_metadata(self):
         if not hasattr(self, '_parsed_metadata'):
             if settings.MODERATION_ENABLED:
@@ -383,6 +431,8 @@ class Entity(models.Model):
                 self._parsed_metadata = etree.XML(data)
             except etree.XMLSyntaxError:
                 raise ValueError('invalid metadata XML')
+
+            self._add_sp_categories()
 
         return Metadata(self._parsed_metadata)
 
@@ -445,6 +495,10 @@ class Entity(models.Model):
     @property
     def logos(self):
         return self._load_metadata().logos
+
+    @property
+    def sp_categorization(self):
+        return self._load_metadata().sp_categories
 
     @property
     def metadata_etree(self):
@@ -519,7 +573,10 @@ class Entity(models.Model):
 
 
 class SPEntityCategory(models.Model):
-    entity = models.ForeignKey(Entity, verbose_name=_(u'Entity'))
+    entity = models.OneToOneField(Entity,
+                                  verbose_name=_(u'Entity'),
+                                  related_name='sp_categories',
+                                  primary_key=True)
     research_and_scholarship = models.BooleanField(_('REFEDS Research and Scholarship'),
                                                                 default=False)
     code_of_conduct = models.BooleanField(_('GEANT Code of Conduct'), default=False)

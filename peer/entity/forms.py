@@ -332,3 +332,23 @@ class SPEntityCategoryForm(forms.ModelForm):
         widgets = {
                 'entity': forms.HiddenInput()
                 }
+
+    def clean(self):
+        super(SPEntityCategoryForm, self).clean()
+        if not self.code_of_conduct:
+            if self.coc_priv_statement_url:
+                raise ValidationError(U('Providing a privacy statement '
+                    'requires that you check GEANT Code of Conduct'))
+        if not self.research_and_education:
+            if (self.rae_hei_service or
+                    self.rae_nren_service or
+                    self.rae_eu_protection):
+                raise ValidationError(U('You must check SWAMID research and '
+                    'education if you want to also check EU adecuate '
+                    'protection, or the NREN or HEI services'))
+        if not self.sirtfi_id_assurance:
+            if self.security_contact_email:
+                raise ValidationError(U('You must check the SIRTFI Identity '
+                    'assurance certification if you want to provide a '
+                    'security contact'))
+
