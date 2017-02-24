@@ -339,6 +339,9 @@ class SPEntityCategoryForm(forms.ModelForm):
             if self.coc_priv_statement_url:
                 raise ValidationError(U('Providing a privacy statement '
                     'requires that you check GEANT Code of Conduct'))
+        elif not self.coc_priv_statement_url:
+            raise ValidationError(U('Checking GEANT Code of Conduct '
+                'requires that you providing a privacy statement URL'))
         if not self.research_and_education:
             if (self.rae_hei_service or
                     self.rae_nren_service or
@@ -351,4 +354,7 @@ class SPEntityCategoryForm(forms.ModelForm):
                 raise ValidationError(U('You must check the SIRTFI Identity '
                     'assurance certification if you want to provide a '
                     'security contact'))
-
+        elif not self.security_contact_email:
+            raise ValidationError(U('If you check the SIRTFI Identity '
+                'assurance certification, you must provide a '
+                'security contact'))
