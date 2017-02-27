@@ -285,11 +285,21 @@ def load_schema():
     return schema
 
 
-def get_or_create_categories_el(tree):
-    extensions = addns('Extensions', NAMESPACES['md'])
-    extensions_el = tree.find(extensions)
+def get_or_create_extensions_el(md):
+    if md.role_descriptor == 'SP':
+        descriptor_tag = addns('SPSSODescriptor')
+    else:
+        descriptor_tag = addns('IDPSSODescriptor')
+    descriptor_el = md.etree.find(path)
+    extensions_tag = addns('Extensions', NAMESPACES['md'])
+    extensions_el = descriptor_el.find(extensions_tag)
     if extensions_el is None:
-        extensions_el = etree.SubElement(tree, extensions)
+        extensions_el = etree.SubElement(descriptor_el, extensions_tag)
+    return extensions_el
+
+
+def get_or_create_categories_el(md):
+    extensions_el = get_or_create_extensions_el(md)
     entity_attrs = addns('EntityAttrributes', NAMESPACES['mdattr'])
     entity_attrs_el = extensions_el.find(entity_attrs)
     if entity_attrs_el is None:
@@ -305,6 +315,15 @@ def get_or_create_categories_el(tree):
                 Name="http://macedir.org/entity-category",
                 nsmap=NSMAP)
     return categories_attr_el
+
+
+def get_or_create_uiinfo_el(md):
+    extensions_el = get_or_create_extensions_el(md)
+    uiinfo_tag = addns('UIInfo', NAMESPACES['mdui'])
+    uiinfo_el = extensions_el.find(uiinfo_tag)
+    if uiinfo_el is None:
+        uiinfo_el = etree.SubElement(extensions_el, uiinfo_tag)
+    return  uiinfo_el
 
 
 def add_sp_categories(categories_attr_el, categories):
@@ -346,3 +365,14 @@ def add_security_contact_person(tree, email):
     email_el.text = 'mailto:{!s}'.format(email)
     tree.append(contact_person_el)
     return contact_person_el
+
+
+def add_privacy_statement_url(md, url):
+    uiinfo_el = get_or_create_uiinfo_el(md)
+    psu_tag = addns('PrivacyStatementURL', NAMESPACES['mdui'])
+    lang_attr = addns('lang', NAMESPACES['xml'])
+    psu_el = etree.SubElement(uiinfo_el, psu_tag, **{
+        lang_attr: 'en'
+        })
+    psu_el.text = url
+    return psu_el

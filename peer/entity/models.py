@@ -48,6 +48,7 @@ from peer.entity.utils import write_temp_file
 from peer.entity.utils import SP_CATEGORIES
 from peer.entity.utils import get_or_create_categories_el
 from peer.entity.utils import add_sp_categories
+from peer.entity.utils import add_privacy_statement_url
 from peer.entity.nagios import send_nagios_notification
 
 XML_NAMESPACE = NAMESPACES['xml']
@@ -389,11 +390,14 @@ class Entity(models.Model):
 
     def _add_sp_categories(self):
         if self.sp_categories:
+            md = self._load_metadata()
             categories = []
             if self.sp_categories.research_and_scholarship:
                 categories.append(SP_CATEGORIES['R&S'])
             if self.sp_categories.code_of_conduct:
                 categories.append(SP_CATEGORIES['CoCo'])
+                add_privacy_statement_url(md,
+                        self.sp_categories.coc_priv_statement_url)
             if self.sp_categories.research_and_education:
                 categories.append(SP_CATEGORIES['R&E'])
                 if self.sp_categories.rae_hei_service:
@@ -407,7 +411,7 @@ class Entity(models.Model):
             if self.sp_categories.sirtfi_id_assurance:
                 categories.append(SP_CATEGORIES['SIRTFI'])
             tree = self._parsed_metadata
-            categories_el = get_or_create_categories_el(tree)
+            categories_el = get_or_create_categories_el(md)
             add_sp_categories(categories_el, categories)
             if self.sp_categories.sirtfi_id_assurance:
                 add_security_contact_person(tree, 

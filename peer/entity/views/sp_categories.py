@@ -13,7 +13,6 @@ def manage_categories(request, entity_id):
         form.entity = entity
         if form.is_valid():
             form.save()
-            # do something.
     else:
         form = SPEntityCategoryForm({'entity': entity_id})
     context = {
