@@ -30,33 +30,36 @@
 <script type="text/javascript" lang="javascript">
       (function ($) {
           $(document).ready(function () {
-              $('#id_coc_priv_statement_url').parent().css('margin-left', '20px').hide();
-              $('#id_rae_hei_service').parent().css('margin-left', '20px').hide();
-              $('#id_rae_nren_service').parent().css('margin-left', '20px').hide();
-              $('#id_rae_eu_protection').parent().css('margin-left', '20px').hide();
-              $('#id_security_contact_email').parent().css('margin-left', '20px').hide();
-
+              $('#id_coc_priv_statement_url').parent().css('margin-left', '20px');
+              $('#id_rae_hei_service').parent().css('margin-left', '20px');
+              $('#id_rae_nren_service').parent().css('margin-left', '20px');
+              $('#id_rae_eu_protection').parent().css('margin-left', '20px');
+              $('#id_security_contact_email').parent().css('margin-left', '20px');
+              if ($('#id_coc_priv_statement_url').val() === '') {
+                  $('#id_coc_priv_statement_url').parent().css('margin-left', '20px').hide();
+              }
+              if ($('#id_rae_hei_service').val() === false) {
+                  $('#id_rae_hei_service').parent().css('margin-left', '20px').hide();
+              }
+              if ($('#id_rae_nren_service').val() === false) {
+                  $('#id_rae_nren_service').parent().css('margin-left', '20px').hide();
+              }
+              if ($('#id_rae_eu_protection').val() === false) {
+                  $('#id_rae_eu_protection').parent().css('margin-left', '20px').hide();
+              }
+              if ($('#id_security_contact_email').val() === '') {
+                  $('#id_security_contact_email').parent().css('margin-left', '20px').hide();
+              }
               $('#id_research_and_education').click(function (e) {
-                  $('#id_rae_hei_service').parent().toggle(e.target.checked);
-                  $('#id_rae_nren_service').parent().toggle(e.target.checked);
-                  $('#id_rae_eu_protection').parent().toggle(e.target.checked);
-                  if ( ! e.target.checked ) {
-                      $('#id_rae_hei_service').attr('checked', false);
-                      $('#id_rae_nren_service').attr('checked', false);
-                      $('#id_rae_eu_protection').attr('checked', false);
-                  }
+                  $('#id_rae_hei_service').parent().show(e.target.checked);
+                  $('#id_rae_nren_service').parent().show(e.target.checked);
+                  $('#id_rae_eu_protection').parent().show(e.target.checked);
               });
               $('#id_code_of_conduct').click(function (e) {
-                  $('#id_coc_priv_statement_url').parent().toggle(e.target.checked);
-                  if ( ! e.target.checked ) {
-                      $('#id_coc_priv_statement_url').val('');
-                  }
+                  $('#id_coc_priv_statement_url').parent().show(e.target.checked);
               });
               $('#id_sirtfi_id_assurance').click(function (e) {
-                  $('#id_security_contact_email').parent().toggle(e.target.checked);
-                  if ( ! e.target.checked ) {
-                      $('#id_security_contact_email').val('');
-                  }
+                  $('#id_security_contact_email').parent().show(e.target.checked);
               });
           });
       }(jQuery));

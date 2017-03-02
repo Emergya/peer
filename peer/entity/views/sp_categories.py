@@ -7,14 +7,19 @@ from peer.entity.forms import SPEntityCategoryForm
 
 def manage_categories(request, entity_id):
     entity = get_object_or_404(Entity, id=entity_id)
+    try:
+        sp_categories = entity.sp_categories
+    except SPEntityCategory.DoesNotExist:
+        sp_categories = SPEntityCategory(entity=self)
+        self.sp_categories = sp_categories
+        sp_categories.save()
     if request.method == 'POST':
-        form = SPEntityCategoryForm(request.POST)
-        form.save(commit=False)
-        form.entity = entity
+        form = SPEntityCategoryForm(request.POST,
+                instance=sp_categories)
         if form.is_valid():
             form.save()
     else:
-        form = SPEntityCategoryForm({'entity': entity_id})
+        form = SPEntityCategoryForm(instance=sp_categories)
     context = {
             'form': form,
             'entity': entity

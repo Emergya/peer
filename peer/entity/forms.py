@@ -44,6 +44,7 @@ from peer.domain.validation import get_superdomain_verified
 from peer.entity.widgets import MetadataWidget
 from peer.entity.utils import FetchError, fetch_resource
 from peer.entity.utils import write_temp_file, strip_entities_descriptor
+from peer.entity.models import SP_CATEGORIES
 
 
 class EntityForm(forms.ModelForm):
@@ -153,7 +154,7 @@ class BaseMetadataEditForm(forms.Form):
 
         try:
             metadata = strip_entities_descriptor(metadata)
-        except ValueError, e:
+        except ValueError as e:
             raise forms.ValidationError(unicode(e))
 
         self.metadata = metadata
@@ -191,6 +192,7 @@ class BaseMetadataEditForm(forms.Form):
             self.entity.metadata.save(name, content, username, commit_msg)
         self.entity.save()
         self.store_entitymd_database(self.entity.id)
+        self.store_spcategory_database(self.entity.id)
         mail_owner = True if self.entity.owner != self.user else False
         if mail_owner:
             if not settings.MODERATION_ENABLED:
@@ -230,6 +232,39 @@ class BaseMetadataEditForm(forms.Form):
                                         name_format=attr.get('NameFormat'),
                                         value=attr.get('Value'),
                                         friendly_name=attr.get('FriendlyName'))
+
+    def store_spcategory_database(self, id_ent):
+        entity = Entity.objects.get(id=id_ent)
+        sp_cats, created = SPEntityCategory.objects.get_or_create(entity=entity)
+        categories = entity.sp_categorization
+        sp_cats.research_and_scholarship = SP_CATEGORIES['R&S'] in categories
+        sp_cats.code_of_conduct = SP_CATEGORIES['CoCo'] in categories
+        sp_cats.research_and_education = SP_CATEGORIES['R&E'] in categories
+        sp_cats.rae_hei_service = SP_CATEGORIES['HEI'] in categories
+        sp_cats.rae_nren_service = SP_CATEGORIES['NREN'] in categories
+        sp_cats.rae_eu_protection = SP_CATEGORIES['EU'] in categories
+        sp_cats.swamid_sfs = SP_CATEGORIES['SFS'] in categories
+        sp_cats.sirtfi_id_assurance = SP_CATEGORIES['SIRTFI'] in categories
+        if (not sp_cats.research_and_education) and (sp_cats.rae_hei_service or
+                sp_cats.rae_hei_service or sp_cats.rae_eu_protection):
+            raise forms.ValidationError(_('To categorize the entity with the '
+                'HEI service, NREN service, or EU protection categories, '
+                'you also need to categorize it for Research & Education'))
+        if sp_cats.code_of_conduct:
+            psu = entity.privacy_statement_url
+            if psu is None:
+                raise forms.ValidationError(_('To categorize an entity with the '
+                    'GEANT Code of Conduct category, you must provide a '
+                    'privacy statement URL'))
+            sp_cats.coc_priv_statement_url = psu
+        if sp_cats.sirtfi_id_assurance:
+            sce = entity.security_contact_email
+            if sce is None:
+                raise forms.ValidationError(_('To categorize an entity with the '
+                    'SIRTFI identity assurance category, you must provide a '
+                    'security contact email'))
+            sp_cats.security_contact_email = sce
+        sp_cats.save()
 
 
 class MetadataTextEditForm(BaseMetadataEditForm):
@@ -291,7 +326,7 @@ class MetadataRemoteEditForm(BaseMetadataEditForm):
 
                 if data is None:
                     raise forms.ValidationError('Unknown error while fetching the url')
-        except FetchError, e:
+        except FetchError as e:
             raise forms.ValidationError(str(e))
 
         return data
@@ -335,26 +370,26 @@ class SPEntityCategoryForm(forms.ModelForm):
 
     def clean(self):
         super(SPEntityCategoryForm, self).clean()
-        if not self.code_of_conduct:
-            if self.coc_priv_statement_url:
-                raise ValidationError(U('Providing a privacy statement '
+        if not self.cleaned_data['code_of_conduct']:
+            if self.cleaned_data['coc_priv_statement_url']:
+                raise forms.ValidationError(U('Providing a privacy statement '
                     'requires that you check GEANT Code of Conduct'))
-        elif not self.coc_priv_statement_url:
-            raise ValidationError(U('Checking GEANT Code of Conduct '
-                'requires that you providing a privacy statement URL'))
-        if not self.research_and_education:
-            if (self.rae_hei_service or
-                    self.rae_nren_service or
-                    self.rae_eu_protection):
-                raise ValidationError(U('You must check SWAMID research and '
+        elif not self.cleaned_data['coc_priv_statement_url']:
+            raise forms.ValidationError(U('Checking GEANT Code of Conduct '
+                'requires that you provide a privacy statement URL'))
+        if not self.cleaned_data['research_and_education']:
+            if (self.cleaned_data['rae_hei_service'] or
+                    self.cleaned_data['rae_nren_service'] or
+                    self.cleaned_data['rae_eu_protection']):
+                raise forms.ValidationError(U('You must check SWAMID research and '
                     'education if you want to also check EU adecuate '
                     'protection, or the NREN or HEI services'))
-        if not self.sirtfi_id_assurance:
-            if self.security_contact_email:
-                raise ValidationError(U('You must check the SIRTFI Identity '
+        if not self.cleaned_data['sirtfi_id_assurance']:
+            if self.cleaned_data['security_contact_email']:
+                raise forms.ValidationError(U('You must check the SIRTFI Identity '
                     'assurance certification if you want to provide a '
                     'security contact'))
-        elif not self.security_contact_email:
-            raise ValidationError(U('If you check the SIRTFI Identity '
+        elif not self.cleaned_data['security_contact_email']:
+            raise forms.ValidationError(U('If you check the SIRTFI Identity '
                 'assurance certification, you must provide a '
                 'security contact'))

@@ -45,10 +45,6 @@ from peer.entity.utils import NAMESPACES, addns, delns, getlang
 from peer.entity.utils import expand_settings_permissions
 from peer.entity.utils import FetchError, fetch_resource
 from peer.entity.utils import write_temp_file
-from peer.entity.utils import SP_CATEGORIES
-from peer.entity.utils import get_or_create_categories_el
-from peer.entity.utils import add_sp_categories
-from peer.entity.utils import add_privacy_statement_url
 from peer.entity.nagios import send_nagios_notification
 
 XML_NAMESPACE = NAMESPACES['xml']
@@ -57,6 +53,17 @@ MDUI_NAMESPACE = NAMESPACES['mdui']
 MDATTR_NAMESPACE = NAMESPACES['mdattr']
 MD_NAMESPACE = NAMESPACES['md']
 SAML_NAMESPACE = NAMESPACES['saml']
+
+SP_CATEGORIES = {
+    'R&S': 'http://refeds.org/category/research-and-scholarship',
+    'CoCo': 'http://www.geant.net/uri/dataprotection-code-of-conduct/v1',
+    'R&E': 'http://www.swamid.se/category/research-and-education',
+    'SFS': 'http://www.swamid.se/category/sfs-1993-1153',
+    'HEI': 'http://www.swamid.se/category/hei-service',
+    'NREN': 'http://www.swamid.se/category/nren-service',
+    'EU': 'http://www.swamid.se/category/eu-adequate-protection',
+    'SIRTFI': 'http://refeds.org/sirtfi',
+}
 
 CONNECTION_TIMEOUT = 10
 
@@ -283,7 +290,12 @@ class Metadata(object):
     @property
     def attributes(self):
         attrs = []
-        path = [addns('Extensions'), addns('EntityAttributes', MDATTR_NAMESPACE),
+        if self.role_descriptor == 'SP':
+            first_segment = addns('SPSSODescriptor')
+        else:
+            first_segment = addns('IDPSSODescriptor')
+        path = [first_segment, addns('Extensions'),
+                addns('EntityAttributes', MDATTR_NAMESPACE),
                 addns('Attribute', SAML_NAMESPACE)]
         find_xml = self.etree.findall('/'.join(path))
         for node_attr in find_xml:
@@ -296,20 +308,182 @@ class Metadata(object):
         return attrs
 
     @property
+    def security_contact_people(self):
+        contact_person_tag = addns('ContactPerson', 'md')
+        contact_type_attr = addns('contactType', 'remd')
+        path = '//{!s}[@{!s} = "http://refeds.org/metadata/contactType/security"]'
+        path = path.format(contact_person_tag, contact_type_attr)
+        return self.etree.xpath(path, namespaces=NAMESPACES)
+
+    @property
+    def security_contact_email(self):
+        people = self.security_contact_people
+        email_tag = addns('EmailAddress', NAMESPACES['md'])
+        for person in people:
+            email_el = person.find(email_tag)
+            if email_el is not None:
+                email = email_el.text
+                if email.startswith('mailto:'):
+                    email = email[7:]
+                return email
+
+    @property
+    def privacy_statement_url(self):
+        uiinfo_el = self.get_or_create_uiinfo_el()
+        psu_tag = addns('PrivacyStatementURL', NAMESPACES['mdui'])
+        psu_el = uiinfo_el.find(psu_tag)
+        if psu_el:
+            return psu_el.text
+
+    @property
     def sp_categories(self):
         categories = []
-        path_segments = [addns('Extensions'),
-                         addns('EntityAttributes', MDATTR_NAMESPACE),
-                         addns('Attribute', SAML_NAMESPACE)]
+        if self.role_descriptor == 'SP':
+            first_segment = 'md:SPSSODescriptor'
+        else:
+            first_segment = 'md:IDPSSODescriptor'
+        path_segments = [first_segment, 'md:Extensions',
+                'mdattr:EntityAttributes', 'saml:Attribute']
         path = '/'.join(path_segments)
-        xpath = '{!s}[@Name="http://macedir.org/entity-category"]'.format(path)
-        find_xml = self.etree.xpath(xpath)
+        xpath = '{!s}[@md:Name="http://macedir.org/entity-category"]'.format(path)
+        find_xml = self.etree.xpath(xpath, namespaces=NAMESPACES)
         if find_xml:
             categories_el = find_xml[0]
             if categories_el is not None:
                 for category_el in categories_el.getchildren():
                     categories.append(category_el.text)
         return categories
+
+    def add_sp_categories(self, sp_categories):
+        categories, rm_categories = [], []
+        if sp_categories.research_and_scholarship:
+            categories.append(SP_CATEGORIES['R&S'])
+        if sp_categories.code_of_conduct:
+            categories.append(SP_CATEGORIES['CoCo'])
+            self.add_privacy_statement_url(sp_categories.coc_priv_statement_url)
+#        else:
+#            self.rm_privacy_statement_url()
+        if sp_categories.research_and_education:
+            categories.append(SP_CATEGORIES['R&E'])
+            if sp_categories.rae_hei_service:
+                categories.append(SP_CATEGORIES['HEI'])
+            if sp_categories.rae_nren_service:
+                categories.append(SP_CATEGORIES['NREN'])
+            if sp_categories.rae_eu_protection:
+                categories.append(SP_CATEGORIES['EU'])
+        if sp_categories.swamid_sfs:
+            categories.append(SP_CATEGORIES['SFS'])
+        if sp_categories.sirtfi_id_assurance:
+            categories.append(SP_CATEGORIES['SIRTFI'])
+            self.add_security_contact_person(sp_categories.security_contact_email)
+#        else:
+#            self.rm_security_contact_person()
+        categories_el = self.get_or_create_categories_el()
+
+        for category in categories:
+            cat = etree.SubElement(categories_el,
+                        addns('AttributeValue', NAMESPACES['saml']))
+            cat.text = category
+
+        for category in SP_CATEGORIES.values():
+            if category not in categories:
+                path = 'saml:AttributeValue[. = "{!s}"]'.format(category)
+                attr_values = categories_el.xpath(path, namespaces=NAMESPACES)
+                for val in attr_values:
+                    val.getparent().remove(val)
+
+    def get_or_create_extensions_el(self):
+        if self.role_descriptor == 'SP':
+            descriptor_tag = addns('SPSSODescriptor')
+        else:
+            descriptor_tag = addns('IDPSSODescriptor')
+        descriptor_el = self.etree.find(descriptor_tag)
+        extensions_tag = addns('Extensions', NAMESPACES['md'])
+        extensions_el = descriptor_el.find(extensions_tag)
+        if extensions_el is None:
+            extensions_el = etree.SubElement(descriptor_el, extensions_tag)
+        return extensions_el
+
+    def get_or_create_categories_el(self):
+        extensions_el = self.get_or_create_extensions_el()
+        entity_attrs = addns('EntityAttrributes', NAMESPACES['mdattr'])
+        entity_attrs_el = extensions_el.find(entity_attrs)
+        if entity_attrs_el is None:
+            entity_attrs_el = etree.SubElement(extensions_el, entity_attrs)
+        path = 'saml:Attribute[@Name="http://macedir.org/entity-category"]'
+        categories_attr_el = entity_attrs_el.xpath(path, namespaces=NAMESPACES)
+        if not categories_attr_el:
+            NSMAP = {None: NAMESPACES['saml']}
+            categories_attr_el = etree.SubElement(entity_attrs_el,
+                    addns('Attribute', NAMESPACES['saml']),
+                    NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+                    Name="http://macedir.org/entity-category",
+                    nsmap=NSMAP)
+        else:
+            categories_attr_el = categories_attr_el[0]
+        return categories_attr_el
+
+    def get_or_create_uiinfo_el(self):
+        extensions_el = self.get_or_create_extensions_el()
+        uiinfo_tag = addns('UIInfo', NAMESPACES['mdui'])
+        uiinfo_el = extensions_el.find(uiinfo_tag)
+        if uiinfo_el is None:
+            uiinfo_el = etree.SubElement(extensions_el, uiinfo_tag)
+        return  uiinfo_el
+
+    def add_security_contact_person(self, email):
+        if email == self.security_person_email:
+            return
+        NSMAP = {
+                None: NAMESPACES['md'],
+                'remd': NAMESPACES['remd']
+                }
+        contact_person_tag = addns('ContactPerson', NAMESPACES['md'])
+        contact_type_attr = addns('contactType', NAMESPACES['remd'])
+        contact_person_el = etree.Element(contact_person_tag, **{
+            contact_type_attr: 'http://refeds.org/metadata/contactType/security',
+            'nsmap': NSMAP
+            })
+        email_tag = addns('EmailAddress', NAMESPACES['md'])
+        email_el = etree.SubElement(contact_person_el, email_tag)
+        email_el.text = 'mailto:{!s}'.format(email)
+        self.etree.append(contact_person_el)
+        return contact_person_el
+
+    def rm_security_contact_person(self):
+        NSMAP = {
+                None: NAMESPACES['md'],
+                'remd': NAMESPACES['remd']
+                }
+        contact_person_tag = addns('ContactPerson', NAMESPACES['md'])
+        contact_type_attr = addns('contactType', NAMESPACES['remd'])
+        contact_person_el = etree.Element(contact_person_tag, **{
+            contact_type_attr: 'http://refeds.org/metadata/contactType/security',
+            'nsmap': NSMAP
+            })
+        email_tag = addns('EmailAddress', NAMESPACES['md'])
+        email_el = etree.SubElement(contact_person_el, email_tag)
+        email_el.text = 'mailto:{!s}'.format(email)
+        self.etree.append(contact_person_el)
+        return contact_person_el
+
+    def add_privacy_statement_url(self, url):
+        if self.privacy_statement_url == url:
+            return
+        uiinfo_el = self.get_or_create_uiinfo_el()
+        psu_tag = addns('PrivacyStatementURL', NAMESPACES['mdui'])
+        lang_attr = addns('lang', NAMESPACES['xml'])
+        psu_el = etree.SubElement(uiinfo_el, psu_tag, **{
+            lang_attr: 'en'
+            })
+        psu_el.text = url
+        return psu_el
+
+    def rm_privacy_statement_url(self):
+        uiinfo_el = self.get_or_create_uiinfo_el()
+        psu_tag = addns('PrivacyStatementURL', NAMESPACES['mdui'])
+        psu_el = uiinfo_el.find(psu_tag)
+        uiinfo_el.remove(psu_el)
 
 
 class Entity(models.Model):
@@ -388,38 +562,9 @@ class Entity(models.Model):
         permissions = expand_settings_permissions(include_xpath=False)
 
 
-    def _add_sp_categories(self):
-        if self.sp_categories:
-            md = self._load_metadata()
-            categories = []
-            if self.sp_categories.research_and_scholarship:
-                categories.append(SP_CATEGORIES['R&S'])
-            if self.sp_categories.code_of_conduct:
-                categories.append(SP_CATEGORIES['CoCo'])
-                add_privacy_statement_url(md,
-                        self.sp_categories.coc_priv_statement_url)
-            if self.sp_categories.research_and_education:
-                categories.append(SP_CATEGORIES['R&E'])
-                if self.sp_categories.rae_hei_service:
-                    categories.append(SP_CATEGORIES['HEI'])
-                if self.sp_categories.rae_nren_service:
-                    categories.append(SP_CATEGORIES['NREN'])
-                if self.sp_categories.rae_eu_service:
-                    categories.append(SP_CATEGORIES['EU'])
-            if self.sp_categories.swamid_sfs:
-                categories.append(SP_CATEGORIES['SFS'])
-            if self.sp_categories.sirtfi_id_assurance:
-                categories.append(SP_CATEGORIES['SIRTFI'])
-            tree = self._parsed_metadata
-            categories_el = get_or_create_categories_el(md)
-            add_sp_categories(categories_el, categories)
-            if self.sp_categories.sirtfi_id_assurance:
-                add_security_contact_person(tree, 
-                        self.sp_categories.security_contact_email)
-
-
     def _load_metadata(self):
-        if not hasattr(self, '_parsed_metadata'):
+        if ((not hasattr(self, '_parsed_metadata')) or
+                self._parsed_metadata is None):
             if settings.MODERATION_ENABLED:
                 if self.temp_metadata != '' and self.state != 'published':
                     data = self.temp_metadata
@@ -432,11 +577,21 @@ class Entity(models.Model):
             if type(data) == unicode:
                 data = data.encode('utf-8')
             try:
-                self._parsed_metadata = etree.XML(data)
+                metadata_tree = etree.XML(data)
             except etree.XMLSyntaxError:
                 raise ValueError('invalid metadata XML')
 
-            self._add_sp_categories()
+            md = Metadata(metadata_tree)
+            try:
+                sp_categories = self.sp_categories
+            except SPEntityCategory.DoesNotExist:
+                sp_categories = SPEntityCategory(entity=self)
+                self.sp_categories = sp_categories
+                sp_categories.save()
+            md.add_sp_categories(sp_categories)
+
+            self._parsed_metadata = md.etree
+            return md
 
         return Metadata(self._parsed_metadata)
 
@@ -503,6 +658,14 @@ class Entity(models.Model):
     @property
     def sp_categorization(self):
         return self._load_metadata().sp_categories
+
+    @property
+    def privacy_statement_url(self):
+        return self._load_metadata().privacy_statement_url
+
+    @property
+    def security_contact_email(self):
+        return self._load_metadata().security_contact_email
 
     @property
     def metadata_etree(self):
@@ -576,26 +739,6 @@ class Entity(models.Model):
         self.temp_metadata = ''
 
 
-class SPEntityCategory(models.Model):
-    entity = models.OneToOneField(Entity,
-                                  verbose_name=_(u'Entity'),
-                                  related_name='sp_categories',
-                                  primary_key=True)
-    research_and_scholarship = models.BooleanField(_('REFEDS Research and Scholarship'),
-                                                                default=False)
-    code_of_conduct = models.BooleanField(_('GEANT Code of Conduct'), default=False)
-    coc_priv_statement_url = models.URLField(_('Privacy Statement URL'), null=True, blank=True)
-    research_and_education = models.BooleanField(_('SWAMID Research and Education'),
-                                                                default=False)
-    swamid_sfs = models.BooleanField(_('SWAMID SFS'), default=False)
-    rae_hei_service =  models.BooleanField(_('SWAMID HEI Service'), default=False)
-    rae_nren_service =  models.BooleanField(_('SWAMID NREN Service'), default=False)
-    rae_eu_protection =  models.BooleanField(_('SWAMID EU Adequate Protection'), default=False)
-    sirtfi_id_assurance =  models.BooleanField(_('REFEDS SIRTFI Identity Assurance Certification'),
-                                                                 default=False)
-    security_contact_email = models.EmailField(_('Security Contact Email'), null=True, blank=True)
-
-
 def handler_entity_pre_save(sender, instance, **kwargs):
     if not instance.is_metarefreshable:
         instance.metarefresh_frequency = 'N'  # Never
@@ -616,6 +759,41 @@ def handler_entity_post_delete(sender, instance, **kwargs):
 if hasattr(settings, 'NSCA_COMMAND') and settings.NSCA_COMMAND:
     models.signals.post_save.connect(handler_entity_post_save, sender=Entity)
     models.signals.post_delete.connect(handler_entity_post_delete, sender=Entity)
+
+
+class SPEntityCategory(models.Model):
+    entity = models.OneToOneField(Entity,
+                                  verbose_name=_(u'Entity'),
+                                  related_name='sp_categories',
+                                  primary_key=True)
+    research_and_scholarship = models.BooleanField(_('REFEDS Research and Scholarship'),
+                                                                default=False)
+    code_of_conduct = models.BooleanField(_('GEANT Code of Conduct'), default=False)
+    coc_priv_statement_url = models.URLField(_('Privacy Statement URL'), null=True, blank=True)
+    research_and_education = models.BooleanField(_('SWAMID Research and Education'),
+                                                                default=False)
+    swamid_sfs = models.BooleanField(_('SWAMID SFS'), default=False)
+    rae_hei_service =  models.BooleanField(_('SWAMID HEI Service'), default=False)
+    rae_nren_service =  models.BooleanField(_('SWAMID NREN Service'), default=False)
+    rae_eu_protection =  models.BooleanField(_('SWAMID EU Adequate Protection'), default=False)
+    sirtfi_id_assurance =  models.BooleanField(_('REFEDS SIRTFI Identity Assurance Certification'),
+                                                                 default=False)
+    security_contact_email = models.EmailField(_('Security Contact Email'), null=True, blank=True)
+
+
+def handler_sp_entity_category_post_save(sender, instance, created, **kwargs):
+    entity = instance.entity
+    if entity.state == Entity.STATE.PUB:
+        entity.modify(etree.tostring(entity._load_metadata().etree))
+    else:
+        old_metadata_str = entity.temp_metadata
+        old_metadata_tree = etree.XML(old_metadata_str)
+        old_metadata = Metadata(old_metadata_tree)
+        old_metadata.add_sp_categories(instance)
+        entity.temp_metadata = etree.tostring(old_metadata.etree)
+    entity.save()
+
+models.signals.post_save.connect(handler_sp_entity_category_post_save, sender=SPEntityCategory)
 
 
 class EntityGroup(models.Model):
