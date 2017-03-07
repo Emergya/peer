@@ -395,7 +395,8 @@ class Metadata(object):
         extensions_tag = addns('Extensions', NAMESPACES['md'])
         extensions_el = self.etree.find(extensions_tag)
         if extensions_el is None:
-            extensions_el = etree.SubElement(self.etree, extensions_tag)
+            extensions_el = etree.Element(extensions_tag)
+            self.etree.insert(0, extensions_el)
         return extensions_el
 
     def get_or_create_descriptor_extensions_el(self):
@@ -407,7 +408,8 @@ class Metadata(object):
         extensions_tag = addns('Extensions', NAMESPACES['md'])
         extensions_el = descriptor_el.find(extensions_tag)
         if extensions_el is None:
-            extensions_el = etree.SubElement(descriptor_el, extensions_tag)
+            extensions_el = etree.Element(extensions_tag)
+            descriptor_el.insert(0, extensions_el)
         return extensions_el
 
     def get_or_create_categories_el(self):
