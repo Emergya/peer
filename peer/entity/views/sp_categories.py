@@ -1,6 +1,11 @@
 
+from django.contrib import messages
 from django.forms import modelformset_factory
 from django.shortcuts import render, get_object_or_404
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from django.utils.translation import ugettext as _
+
 from peer.entity.models import Entity, SPEntityCategory
 from peer.entity.forms import SPEntityCategoryForm
 
@@ -18,6 +23,10 @@ def manage_categories(request, entity_id):
                 instance=sp_categories)
         if form.is_valid():
             form.save()
+            msg = _('SP categories successfully changed')
+            messages.success(request, msg)
+            return HttpResponseRedirect(reverse('entities:entity_view',
+                                         args=(entity_id,)))
     else:
         form = SPEntityCategoryForm(instance=sp_categories)
     context = {
