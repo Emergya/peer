@@ -804,21 +804,6 @@ class SPEntityCategory(models.Model):
     security_contact_email = models.EmailField(_('Security Contact Email'), null=True, blank=True)
 
 
-def handler_sp_entity_category_post_save(sender, instance, created, **kwargs):
-    entity = instance.entity
-    if entity.state == Entity.STATE.PUB:
-        entity.temp_metadata = etree.tostring(entity._load_metadata().etree)
-    else:
-        old_metadata_str = entity.temp_metadata
-        old_metadata_tree = etree.XML(old_metadata_str.encode('utf-8'))
-        old_metadata = Metadata(old_metadata_tree)
-        old_metadata.add_sp_categories(instance)
-        entity.temp_metadata = etree.tostring(old_metadata.etree)
-    entity.save()
-
-models.signals.post_save.connect(handler_sp_entity_category_post_save, sender=SPEntityCategory)
-
-
 class EntityGroup(models.Model):
     app_label = 'peer.entity'
     name = SafeCharField(_(u'Name of the group'), max_length=200)
