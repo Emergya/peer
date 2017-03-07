@@ -236,8 +236,10 @@ class BaseMetadataEditForm(forms.Form):
 
     def store_spcategory_database(self, id_ent):
         entity = Entity.objects.get(id=id_ent)
-        if entity._load_metadata().has_categories_el():
+        if (entity._load_metadata().has_categories_el() or
+                entity._load_metadata().has_assurance_certification_el()):
             sp_cats, created = SPEntityCategory.objects.get_or_create(entity=entity)
+        if entity._load_metadata().has_categories_el():
             categories = entity.sp_categorization
             sp_cats.research_and_scholarship = SP_CATEGORIES['R&S'] in categories
             sp_cats.code_of_conduct = SP_CATEGORIES['CoCo'] in categories
@@ -246,7 +248,6 @@ class BaseMetadataEditForm(forms.Form):
             sp_cats.rae_nren_service = SP_CATEGORIES['NREN'] in categories
             sp_cats.rae_eu_protection = SP_CATEGORIES['EU'] in categories
             sp_cats.swamid_sfs = SP_CATEGORIES['SFS'] in categories
-            sp_cats.sirtfi_id_assurance = SP_CATEGORIES['SIRTFI'] in categories
             if (not sp_cats.research_and_education) and (sp_cats.rae_hei_service or
                     sp_cats.rae_hei_service or sp_cats.rae_eu_protection):
                 raise forms.ValidationError(_('To categorize the entity with the '
@@ -259,6 +260,9 @@ class BaseMetadataEditForm(forms.Form):
                         'GEANT Code of Conduct category, you must provide a '
                         'privacy statement URL'))
                 sp_cats.coc_priv_statement_url = psu
+        if entity._load_metadata().has_assurance_certification_el():
+            certifications = entity.certifications
+            sp_cats.sirtfi_id_assurance = SP_CATEGORIES['SIRTFI'] in certifications
             if sp_cats.sirtfi_id_assurance:
                 sce = entity.security_contact_email
                 if sce is None:

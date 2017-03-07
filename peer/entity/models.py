@@ -351,6 +351,20 @@ class Metadata(object):
                     categories.append(category_el.text)
         return categories
 
+    @property
+    def certifications(self):
+        certifications = []
+        path_segments = ['md:Extensions', 'mdattr:EntityAttributes', 'saml:Attribute']
+        path = '/'.join(path_segments)
+        xpath = '{!s}[@Name="urn:oasis:names:tc:SAML:attribute:assurance-certification"]'.format(path)
+        find_xml = self.etree.xpath(xpath, namespaces=NAMESPACES)
+        if find_xml:
+            certifications_el = find_xml[0]
+            if certifications_el is not None:
+                for certification_el in certifications_el.getchildren():
+                    certifications.append(certification_el.text)
+        return certifications
+
     def add_sp_categories(self, sp_categories):
         categories = []
         if sp_categories.research_and_scholarship:
@@ -358,8 +372,6 @@ class Metadata(object):
         if sp_categories.code_of_conduct:
             categories.append(SP_CATEGORIES['CoCo'])
             self.add_privacy_statement_url(sp_categories.coc_priv_statement_url)
-#        else:
-#            self.rm_privacy_statement_url()
         if sp_categories.research_and_education:
             categories.append(SP_CATEGORIES['R&E'])
             if sp_categories.rae_hei_service:
@@ -371,10 +383,10 @@ class Metadata(object):
         if sp_categories.swamid_sfs:
             categories.append(SP_CATEGORIES['SFS'])
         if sp_categories.sirtfi_id_assurance:
-            categories.append(SP_CATEGORIES['SIRTFI'])
+            self.add_sirtfi_id_assurance()
             self.add_security_contact_person(sp_categories.security_contact_email)
-#        else:
-#            self.rm_security_contact_person()
+        else:
+            self.rm_sirtfi_id_assurance()
         categories_el = self.get_or_create_categories_el()
         prev_categories = self.sp_categories
 
@@ -412,26 +424,42 @@ class Metadata(object):
             descriptor_el.insert(0, extensions_el)
         return extensions_el
 
-    def get_or_create_categories_el(self):
+    def get_or_create_entity_attrs_el(self):
         extensions_el = self.get_or_create_entity_extensions_el()
         entity_attrs = addns('EntityAttributes', NAMESPACES['mdattr'])
         entity_attrs_el = extensions_el.find(entity_attrs)
         if entity_attrs_el is None:
             entity_attrs_el = etree.SubElement(extensions_el, entity_attrs)
-        path = 'saml:Attribute[@Name="http://macedir.org/entity-category"]'
+        return entity_attrs_el
+
+    def _get_or_create_categories_el(self, attr_name):
+        entity_attrs_el = self.get_or_create_entity_attrs_el()
+        path = 'saml:Attribute[@Name="{!s}"]'.format(attr_name)
         categories_attr_el = entity_attrs_el.xpath(path, namespaces=NAMESPACES)
         if not categories_attr_el:
             NSMAP = {None: NAMESPACES['saml']}
             categories_attr_el = etree.SubElement(entity_attrs_el,
                     addns('Attribute', NAMESPACES['saml']),
                     NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
-                    Name="http://macedir.org/entity-category",
+                    Name=attr_name,
                     nsmap=NSMAP)
         else:
             categories_attr_el = categories_attr_el[0]
         return categories_attr_el
 
-    def has_categories_el(self):
+    def get_or_create_categories_el(self):
+        attr_name = "http://macedir.org/entity-category"
+        return self._get_or_create_categories_el(attr_name)
+
+    def get_or_create_categories_support_el(self):
+        attr_name = "http://macedir.org/entity-category-support"
+        return self._get_or_create_categories_el(attr_name)
+
+    def get_or_create_assurance_certification_el(self):
+        attr_name = "urn:oasis:names:tc:SAML:attribute:assurance-certification"
+        return self._get_or_create_categories_el(attr_name)
+
+    def _has_categories_el(self, attr_name):
         extensions_tag = addns('Extensions', NAMESPACES['md'])
         extensions_el = self.etree.find(extensions_tag)
         if extensions_el is None:
@@ -440,11 +468,23 @@ class Metadata(object):
         entity_attrs_el = extensions_el.find(entity_attrs)
         if entity_attrs_el is None:
             return False
-        path = 'saml:Attribute[@Name="http://macedir.org/entity-category"]'
+        path = 'saml:Attribute[@Name="{!s}"]'.format(attr_name)
         categories_attr_el = entity_attrs_el.xpath(path, namespaces=NAMESPACES)
         if not categories_attr_el:
             return False
         return True
+
+    def has_categories_el(self):
+        attr_name = "http://macedir.org/entity-category"
+        return self._has_categories_el(attr_name)
+
+    def has_categories_support_el(self):
+        attr_name = "http://macedir.org/entity-category-support"
+        return self._has_categories_el(attr_name)
+
+    def has_assurance_certification_el(self):
+        attr_name = "urn:oasis:names:tc:SAML:attribute:assurance-certification"
+        return self._has_categories_el(attr_name)
 
     def get_or_create_uiinfo_el(self):
         extensions_el = self.get_or_create_descriptor_extensions_el()
@@ -453,6 +493,31 @@ class Metadata(object):
         if uiinfo_el is None:
             uiinfo_el = etree.SubElement(extensions_el, uiinfo_tag)
         return  uiinfo_el
+
+    def add_sirtfi_id_assurance(self):
+        certification_el = self.get_or_create_assurance_certification_el()
+        for child in certification_el.getchildren():
+            if child.text == SP_CATEGORIES['SIRTFI']:
+                break
+        else:
+            sirtfi = etree.SubElement(certification_el,
+                        addns('AttributeValue', NAMESPACES['saml']))
+            sirtfi.text = SP_CATEGORIES['SIRTFI']
+
+    def rm_sirtfi_id_assurance(self):
+        certification_el = self.get_or_create_assurance_certification_el()
+        for child in certification_el.getchildren():
+            if child.text == SP_CATEGORIES['SIRTFI']:
+                certification_el.remove(child)
+        if len(certification_el.getchildren()) == 0:
+            entity_attrs_el = certification_el.getparent()
+            entity_attrs_el.remove(certification_el)
+            if len(entity_attrs_el.getchildren()) == 0:
+                extensions_el = entity_attrs_el.getparent()
+                extensions_el.remove(entity_attrs_el)
+                if len(extensions_el.getchildren()) == 0:
+                    extensions_el.getparent().remove(extensions_el)
+
 
     def add_security_contact_person(self, email):
         if email == self.security_contact_email:
@@ -681,6 +746,10 @@ class Entity(models.Model):
     @property
     def sp_categorization(self):
         return self._load_metadata().sp_categories
+
+    @property
+    def certifications(self):
+        return self._load_metadata().certifications
 
     @property
     def privacy_statement_url(self):
