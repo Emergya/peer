@@ -393,3 +393,4 @@ class SPEntityCategoryForm(forms.ModelForm):
         super(SPEntityCategoryForm, self).save(*args, **kwargs)
         entity = self.instance.entity
         entity.modify(etree.tostring(entity._load_metadata().etree))
+        entity.save()
