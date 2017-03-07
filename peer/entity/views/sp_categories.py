@@ -10,8 +10,8 @@ def manage_categories(request, entity_id):
     try:
         sp_categories = entity.sp_categories
     except SPEntityCategory.DoesNotExist:
-        sp_categories = SPEntityCategory(entity=self)
-        self.sp_categories = sp_categories
+        sp_categories = SPEntityCategory(entity=entity)
+        entity.sp_categories = sp_categories
         sp_categories.save()
     if request.method == 'POST':
         form = SPEntityCategoryForm(request.POST,

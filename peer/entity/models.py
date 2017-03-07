@@ -29,6 +29,7 @@
 from datetime import datetime
 from lxml import etree
 from urlparse import urlparse
+import logging
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -46,6 +47,9 @@ from peer.entity.utils import expand_settings_permissions
 from peer.entity.utils import FetchError, fetch_resource
 from peer.entity.utils import write_temp_file
 from peer.entity.nagios import send_nagios_notification
+
+
+logger = logging.getLogger('peer.utils')
 
 XML_NAMESPACE = NAMESPACES['xml']
 XMLDSIG_NAMESPACE = NAMESPACES['ds']
@@ -290,11 +294,7 @@ class Metadata(object):
     @property
     def attributes(self):
         attrs = []
-        if self.role_descriptor == 'SP':
-            first_segment = addns('SPSSODescriptor')
-        else:
-            first_segment = addns('IDPSSODescriptor')
-        path = [first_segment, addns('Extensions'),
+        path = [addns('Extensions'),
                 addns('EntityAttributes', MDATTR_NAMESPACE),
                 addns('Attribute', SAML_NAMESPACE)]
         find_xml = self.etree.findall('/'.join(path))
@@ -303,14 +303,16 @@ class Metadata(object):
                 element = {}
                 for items in node_attr.items():
                     element[items[0]] = items[1]
-                element['Value'] = node_attr.getchildren()[0].text
+                children = node_attr.getchildren()
+                if len(children):
+                    element['Value'] = children[0].text
                 attrs.append(element)
         return attrs
 
     @property
     def security_contact_people(self):
-        contact_person_tag = addns('ContactPerson', 'md')
-        contact_type_attr = addns('contactType', 'remd')
+        contact_person_tag = 'md:ContactPerson'
+        contact_type_attr = 'remd:contactType'
         path = '//{!s}[@{!s} = "http://refeds.org/metadata/contactType/security"]'
         path = path.format(contact_person_tag, contact_type_attr)
         return self.etree.xpath(path, namespaces=NAMESPACES)
@@ -332,20 +334,15 @@ class Metadata(object):
         uiinfo_el = self.get_or_create_uiinfo_el()
         psu_tag = addns('PrivacyStatementURL', NAMESPACES['mdui'])
         psu_el = uiinfo_el.find(psu_tag)
-        if psu_el:
+        if psu_el is not None:
             return psu_el.text
 
     @property
     def sp_categories(self):
         categories = []
-        if self.role_descriptor == 'SP':
-            first_segment = 'md:SPSSODescriptor'
-        else:
-            first_segment = 'md:IDPSSODescriptor'
-        path_segments = [first_segment, 'md:Extensions',
-                'mdattr:EntityAttributes', 'saml:Attribute']
+        path_segments = ['md:Extensions', 'mdattr:EntityAttributes', 'saml:Attribute']
         path = '/'.join(path_segments)
-        xpath = '{!s}[@md:Name="http://macedir.org/entity-category"]'.format(path)
+        xpath = '{!s}[@Name="http://macedir.org/entity-category"]'.format(path)
         find_xml = self.etree.xpath(xpath, namespaces=NAMESPACES)
         if find_xml:
             categories_el = find_xml[0]
@@ -355,7 +352,7 @@ class Metadata(object):
         return categories
 
     def add_sp_categories(self, sp_categories):
-        categories, rm_categories = [], []
+        categories = []
         if sp_categories.research_and_scholarship:
             categories.append(SP_CATEGORIES['R&S'])
         if sp_categories.code_of_conduct:
@@ -379,11 +376,13 @@ class Metadata(object):
 #        else:
 #            self.rm_security_contact_person()
         categories_el = self.get_or_create_categories_el()
+        prev_categories = self.sp_categories
 
         for category in categories:
-            cat = etree.SubElement(categories_el,
-                        addns('AttributeValue', NAMESPACES['saml']))
-            cat.text = category
+            if category not in prev_categories:
+                cat = etree.SubElement(categories_el,
+                            addns('AttributeValue', NAMESPACES['saml']))
+                cat.text = category
 
         for category in SP_CATEGORIES.values():
             if category not in categories:
@@ -392,12 +391,19 @@ class Metadata(object):
                 for val in attr_values:
                     val.getparent().remove(val)
 
-    def get_or_create_extensions_el(self):
+    def get_or_create_entity_extensions_el(self):
+        extensions_tag = addns('Extensions', NAMESPACES['md'])
+        extensions_el = self.etree.find(extensions_tag)
+        if extensions_el is None:
+            extensions_el = etree.SubElement(self.etree, extensions_tag)
+        return extensions_el
+
+    def get_or_create_descriptor_extensions_el(self):
         if self.role_descriptor == 'SP':
             descriptor_tag = addns('SPSSODescriptor')
         else:
             descriptor_tag = addns('IDPSSODescriptor')
-        descriptor_el = self.etree.find(descriptor_tag)
+        descriptor_el = self.etree.find('.//{!s}'.format(descriptor_tag))
         extensions_tag = addns('Extensions', NAMESPACES['md'])
         extensions_el = descriptor_el.find(extensions_tag)
         if extensions_el is None:
@@ -405,8 +411,8 @@ class Metadata(object):
         return extensions_el
 
     def get_or_create_categories_el(self):
-        extensions_el = self.get_or_create_extensions_el()
-        entity_attrs = addns('EntityAttrributes', NAMESPACES['mdattr'])
+        extensions_el = self.get_or_create_entity_extensions_el()
+        entity_attrs = addns('EntityAttributes', NAMESPACES['mdattr'])
         entity_attrs_el = extensions_el.find(entity_attrs)
         if entity_attrs_el is None:
             entity_attrs_el = etree.SubElement(extensions_el, entity_attrs)
@@ -423,8 +429,23 @@ class Metadata(object):
             categories_attr_el = categories_attr_el[0]
         return categories_attr_el
 
+    def has_categories_el(self):
+        extensions_tag = addns('Extensions', NAMESPACES['md'])
+        extensions_el = self.etree.find(extensions_tag)
+        if extensions_el is None:
+            return False
+        entity_attrs = addns('EntityAttributes', NAMESPACES['mdattr'])
+        entity_attrs_el = extensions_el.find(entity_attrs)
+        if entity_attrs_el is None:
+            return False
+        path = 'saml:Attribute[@Name="http://macedir.org/entity-category"]'
+        categories_attr_el = entity_attrs_el.xpath(path, namespaces=NAMESPACES)
+        if not categories_attr_el:
+            return False
+        return True
+
     def get_or_create_uiinfo_el(self):
-        extensions_el = self.get_or_create_extensions_el()
+        extensions_el = self.get_or_create_descriptor_extensions_el()
         uiinfo_tag = addns('UIInfo', NAMESPACES['mdui'])
         uiinfo_el = extensions_el.find(uiinfo_tag)
         if uiinfo_el is None:
@@ -432,7 +453,7 @@ class Metadata(object):
         return  uiinfo_el
 
     def add_security_contact_person(self, email):
-        if email == self.security_person_email:
+        if email == self.security_contact_email:
             return
         NSMAP = {
                 None: NAMESPACES['md'],
@@ -585,10 +606,9 @@ class Entity(models.Model):
             try:
                 sp_categories = self.sp_categories
             except SPEntityCategory.DoesNotExist:
-                sp_categories = SPEntityCategory(entity=self)
-                self.sp_categories = sp_categories
-                sp_categories.save()
-            md.add_sp_categories(sp_categories)
+                pass
+            else:
+                md.add_sp_categories(sp_categories)
 
             self._parsed_metadata = md.etree
             return md
@@ -784,10 +804,10 @@ class SPEntityCategory(models.Model):
 def handler_sp_entity_category_post_save(sender, instance, created, **kwargs):
     entity = instance.entity
     if entity.state == Entity.STATE.PUB:
-        entity.modify(etree.tostring(entity._load_metadata().etree))
+        entity.temp_metadata = etree.tostring(entity._load_metadata().etree)
     else:
         old_metadata_str = entity.temp_metadata
-        old_metadata_tree = etree.XML(old_metadata_str)
+        old_metadata_tree = etree.XML(old_metadata_str.encode('utf-8'))
         old_metadata = Metadata(old_metadata_tree)
         old_metadata.add_sp_categories(instance)
         entity.temp_metadata = etree.tostring(old_metadata.etree)
