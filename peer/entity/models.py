@@ -365,6 +365,12 @@ class Metadata(object):
                     certifications.append(certification_el.text)
         return certifications
 
+    def _remove_childless_ancestors(self, el):
+        while len(el.getchildren()) == 0:
+            parent = el.getparent()
+            parent.remove(el)
+            el = parent
+
     def add_sp_categories(self, sp_categories):
         categories = []
         if sp_categories.research_and_scholarship:
@@ -402,6 +408,7 @@ class Metadata(object):
                 attr_values = categories_el.xpath(path, namespaces=NAMESPACES)
                 for val in attr_values:
                     val.getparent().remove(val)
+        self._remove_childless_ancestors(categories_el)
 
     def get_or_create_entity_extensions_el(self):
         extensions_tag = addns('Extensions', NAMESPACES['md'])
@@ -509,15 +516,7 @@ class Metadata(object):
         for child in certification_el.getchildren():
             if child.text == SP_CATEGORIES['SIRTFI']:
                 certification_el.remove(child)
-        if len(certification_el.getchildren()) == 0:
-            entity_attrs_el = certification_el.getparent()
-            entity_attrs_el.remove(certification_el)
-            if len(entity_attrs_el.getchildren()) == 0:
-                extensions_el = entity_attrs_el.getparent()
-                extensions_el.remove(entity_attrs_el)
-                if len(extensions_el.getchildren()) == 0:
-                    extensions_el.getparent().remove(extensions_el)
-
+        self._remove_childless_ancestors(certification_el)
 
     def add_security_contact_person(self, email):
         if email == self.security_contact_email:
@@ -531,23 +530,6 @@ class Metadata(object):
         contact_person_el = etree.Element(contact_person_tag, **{
             contact_type_attr: 'http://refeds.org/metadata/contactType/security',
             'contactType': 'other',
-            'nsmap': NSMAP
-            })
-        email_tag = addns('EmailAddress', NAMESPACES['md'])
-        email_el = etree.SubElement(contact_person_el, email_tag)
-        email_el.text = 'mailto:{!s}'.format(email)
-        self.etree.append(contact_person_el)
-        return contact_person_el
-
-    def rm_security_contact_person(self):
-        NSMAP = {
-                None: NAMESPACES['md'],
-                'remd': NAMESPACES['remd']
-                }
-        contact_person_tag = addns('ContactPerson', NAMESPACES['md'])
-        contact_type_attr = addns('contactType', NAMESPACES['remd'])
-        contact_person_el = etree.Element(contact_person_tag, **{
-            contact_type_attr: 'http://refeds.org/metadata/contactType/security',
             'nsmap': NSMAP
             })
         email_tag = addns('EmailAddress', NAMESPACES['md'])
