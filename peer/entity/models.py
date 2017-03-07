@@ -465,6 +465,7 @@ class Metadata(object):
         contact_type_attr = addns('contactType', NAMESPACES['remd'])
         contact_person_el = etree.Element(contact_person_tag, **{
             contact_type_attr: 'http://refeds.org/metadata/contactType/security',
+            'contactType': 'other',
             'nsmap': NSMAP
             })
         email_tag = addns('EmailAddress', NAMESPACES['md'])
