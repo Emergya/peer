@@ -2,11 +2,8 @@
 
     <ul class="nav-menu">
       {% canedit entity %}
-      {% if request.path|get_path != 'view' and request.path|get_path != 'detail' %}
-        <li><a href="{% url 'entities:entity_view' entity.id %}">{% trans "Entity Details" %}</a></li>
-      {% else %}
+      <li><a href="{% url 'entities:entity_view' entity.id %}">{% trans "Entity Details" %}</a></li>
       <li><a href="{% url 'entities:edit_metadata' entity.id %}">{% trans "Edit metadata" %}</a></li>
-      {% endif %}
       {% if MODERATION_ENABLED and entity.state != "published"%}
             {% canapprove entity %}
       <li><a href="{% url 'entities:edit_metadata' entity.id %}">{% trans "Approve/Reject metadata changes" %}</a></li>
