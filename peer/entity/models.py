@@ -837,6 +837,68 @@ class Entity(models.Model):
 
         return 'Success: Data was updated successfully'
 
+    def _store_certifications_database(self, cats):
+        if self._load_metadata().has_assurance_certification_el():
+            certifications = self.certifications
+            cats.sirtfi_id_assurance = CERTIFICATIONS['SIRTFI'] in certifications
+            if cats.sirtfi_id_assurance:
+                sce = self.security_contact_email
+                if sce is None:
+                    raise ValueError(_('To certify an entity with '
+                        'SIRTFI identity assurance, you must provide a '
+                        'security contact email'))
+                cats.security_contact_email = sce
+
+    def store_spcategory_database(self):
+        if (self._load_metadata().has_categories_el() or
+                self._load_metadata().has_assurance_certification_el()):
+            sp_cats, created = SPEntityCategory.objects.get_or_create(entity=self)
+        else:
+            return
+        if self._load_metadata().has_categories_el():
+            categories = self.sp_categorization
+            sp_cats.research_and_scholarship = SP_CATEGORIES['R&S'] in categories
+            sp_cats.code_of_conduct = SP_CATEGORIES['CoCo'] in categories
+            sp_cats.research_and_education = SP_CATEGORIES['R&E'] in categories
+            sp_cats.rae_hei_service = SP_CATEGORIES['HEI'] in categories
+            sp_cats.rae_nren_service = SP_CATEGORIES['NREN'] in categories
+            sp_cats.rae_eu_protection = SP_CATEGORIES['EU'] in categories
+            sp_cats.swamid_sfs = SP_CATEGORIES['SFS'] in categories
+            if (not sp_cats.research_and_education) and (sp_cats.rae_hei_service or
+                    sp_cats.rae_hei_service or sp_cats.rae_eu_protection):
+                raise ValueError(_('To categorize the entity with the '
+                    'HEI service, NREN service, or EU protection categories, '
+                    'you also need to categorize it for Research & Education'))
+            if sp_cats.code_of_conduct:
+                psu = entity.privacy_statement_url
+                if psu is None:
+                    raise ValueError(_('To categorize an entity with the '
+                        'GEANT Code of Conduct category, you must provide a '
+                        'privacy statement URL'))
+                sp_cats.coc_priv_statement_url = psu
+        self._store_certifications_database(sp_cats)
+        sp_cats.save()
+
+    def store_idpcategory_database(self):
+        if (self._load_metadata().has_categories_support_el() or
+                self._load_metadata().has_assurance_certification_el()):
+            idp_cats, created = IdPEntityCategory.objects.get_or_create(entity=self)
+        else:
+            return
+        if self._load_metadata().has_categories_support_el():
+            categories = self.idp_categorization
+            idp_cats.research_and_scholarship = IDP_CATEGORIES['R&S'] in categories
+            idp_cats.code_of_conduct = IDP_CATEGORIES['CoCo'] in categories
+            if idp_cats.code_of_conduct:
+                psu = self.privacy_statement_url
+                if psu is None:
+                    raise ValueError(_('To categorize an entity with support '
+                        'for the GEANT Code of Conduct category, you must provide a '
+                        'privacy statement URL'))
+                idp_cats.coc_priv_statement_url = psu
+        self._store_certifications_database(idp_cats)
+        idp_cats.save()
+
     @transition(field=state, source='*', target=STATE.MOD)
     def modify(self, temp_metadata):
         self.temp_metadata = temp_metadata
