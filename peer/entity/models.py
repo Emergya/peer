@@ -66,6 +66,15 @@ SP_CATEGORIES = {
     'HEI': 'http://www.swamid.se/category/hei-service',
     'NREN': 'http://www.swamid.se/category/nren-service',
     'EU': 'http://www.swamid.se/category/eu-adequate-protection',
+}
+
+
+IDP_CATEGORIES = {
+    'R&S': 'http://refeds.org/category/research-and-scholarship',
+    'CoCo': 'http://www.geant.net/uri/dataprotection-code-of-conduct/v1',
+}
+
+CERTIFICATIONS = {
     'SIRTFI': 'http://refeds.org/sirtfi',
 }
 
@@ -337,12 +346,11 @@ class Metadata(object):
         if psu_el is not None:
             return psu_el.text
 
-    @property
-    def sp_categories(self):
+    def _categories(self, attr_name):
         categories = []
         path_segments = ['md:Extensions', 'mdattr:EntityAttributes', 'saml:Attribute']
         path = '/'.join(path_segments)
-        xpath = '{!s}[@Name="http://macedir.org/entity-category"]'.format(path)
+        xpath = '{!s}[@Name="{!s}"]'.format(path, attr_name)
         find_xml = self.etree.xpath(xpath, namespaces=NAMESPACES)
         if find_xml:
             categories_el = find_xml[0]
@@ -352,24 +360,56 @@ class Metadata(object):
         return categories
 
     @property
+    def sp_categories(self):
+        attr_name = "http://macedir.org/entity-category"
+        return self._categories(attr_name)
+
+    @property
+    def idp_categories(self):
+        attr_name = "http://macedir.org/entity-category-support"
+        return self._categories(attr_name)
+
+    @property
     def certifications(self):
-        certifications = []
-        path_segments = ['md:Extensions', 'mdattr:EntityAttributes', 'saml:Attribute']
-        path = '/'.join(path_segments)
-        xpath = '{!s}[@Name="urn:oasis:names:tc:SAML:attribute:assurance-certification"]'.format(path)
-        find_xml = self.etree.xpath(xpath, namespaces=NAMESPACES)
-        if find_xml:
-            certifications_el = find_xml[0]
-            if certifications_el is not None:
-                for certification_el in certifications_el.getchildren():
-                    certifications.append(certification_el.text)
-        return certifications
+        attr_name = "urn:oasis:names:tc:SAML:attribute:assurance-certification"
+        return self._categories(attr_name)
 
     def _remove_childless_ancestors(self, el):
         while len(el.getchildren()) == 0:
             parent = el.getparent()
             parent.remove(el)
             el = parent
+
+    def _add_categories(el, prev, possible, categories):
+        for category in categories:
+            if category not in prev:
+                cat = etree.SubElement(el, addns('AttributeValue', NAMESPACES['saml']))
+                cat.text = category
+
+        for category in possible.values():
+            if category not in categories:
+                path = 'saml:AttributeValue[. = "{!s}"]'.format(category)
+                attr_values = el.xpath(path, namespaces=NAMESPACES)
+                for val in attr_values:
+                    val.getparent().remove(val)
+        self._remove_childless_ancestors(el)
+
+    def add_idp_categories(self, idp_categories):
+        categories = []
+        if idp_categories.research_and_scholarship:
+            categories.append(SP_CATEGORIES['R&S'])
+        if idp_categories.code_of_conduct:
+            categories.append(SP_CATEGORIES['CoCo'])
+            self.add_privacy_statement_url(idp_categories.coc_priv_statement_url)
+        if idp_categories.sirtfi_id_assurance:
+            self.add_sirtfi_id_assurance()
+            self.add_security_contact_person(idp_categories.security_contact_email)
+        else:
+            self.rm_sirtfi_id_assurance()
+        categories_el = self.get_or_create_categories_el()
+        categories_prev = self.idp_categories
+        self._add_categories(categories_el, categories_prev,
+                IDP_CATEGORIES, categories)
 
     def add_sp_categories(self, sp_categories):
         categories = []
@@ -394,21 +434,9 @@ class Metadata(object):
         else:
             self.rm_sirtfi_id_assurance()
         categories_el = self.get_or_create_categories_el()
-        prev_categories = self.sp_categories
-
-        for category in categories:
-            if category not in prev_categories:
-                cat = etree.SubElement(categories_el,
-                            addns('AttributeValue', NAMESPACES['saml']))
-                cat.text = category
-
-        for category in SP_CATEGORIES.values():
-            if category not in categories:
-                path = 'saml:AttributeValue[. = "{!s}"]'.format(category)
-                attr_values = categories_el.xpath(path, namespaces=NAMESPACES)
-                for val in attr_values:
-                    val.getparent().remove(val)
-        self._remove_childless_ancestors(categories_el)
+        categories_prev = self.sp_categories
+        self._add_categories(categories_el, categories_prev,
+                SP_CATEGORIES, categories)
 
     def get_or_create_entity_extensions_el(self):
         extensions_tag = addns('Extensions', NAMESPACES['md'])
@@ -504,17 +532,17 @@ class Metadata(object):
     def add_sirtfi_id_assurance(self):
         certification_el = self.get_or_create_assurance_certification_el()
         for child in certification_el.getchildren():
-            if child.text == SP_CATEGORIES['SIRTFI']:
+            if child.text == CERTIFICATIONS['SIRTFI']:
                 break
         else:
             sirtfi = etree.SubElement(certification_el,
                         addns('AttributeValue', NAMESPACES['saml']))
-            sirtfi.text = SP_CATEGORIES['SIRTFI']
+            sirtfi.text = CERTIFICATIONS['SIRTFI']
 
     def rm_sirtfi_id_assurance(self):
         certification_el = self.get_or_create_assurance_certification_el()
         for child in certification_el.getchildren():
-            if child.text == SP_CATEGORIES['SIRTFI']:
+            if child.text == CERTIFICATIONS['SIRTFI']:
                 certification_el.remove(child)
         self._remove_childless_ancestors(certification_el)
 
@@ -728,6 +756,10 @@ class Entity(models.Model):
     @property
     def sp_categorization(self):
         return self._load_metadata().sp_categories
+
+    @property
+    def idp_categorization(self):
+        return self._load_metadata().idp_categories
 
     @property
     def certifications(self):
