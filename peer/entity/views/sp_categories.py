@@ -10,7 +10,7 @@ from peer.entity.models import Entity, SPEntityCategory
 from peer.entity.forms import SPEntityCategoryForm
 
 
-def manage_categories(request, entity_id):
+def manage_sp_categories(request, entity_id):
     entity = get_object_or_404(Entity, id=entity_id)
     try:
         sp_categories = entity.sp_categories
@@ -33,4 +33,4 @@ def manage_categories(request, entity_id):
             'form': form,
             'entity': entity
             }
-    return render(request, 'entity/manage_categories.html', context)
+    return render(request, 'entity/manage_sp_categories.html', context)
