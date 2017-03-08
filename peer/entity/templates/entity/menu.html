@@ -17,7 +17,7 @@
         <li><a href="{% url 'entities:metarefresh_edit' entity.id %}">{% trans "Metarefresh" %}</a></li>
       {% endif %}
       {% if entity.role_descriptor == 'SP' %}
-        <li><a href="{% url 'entities:manage_categories' entity.id %}">{% trans "Manage SP Categories" %}</a></li>
+        <li><a href="{% url 'entities:manage_sp_categories' entity.id %}">{% trans "Manage SP Categories" %}</a></li>
       {% endif %}
       {% endcanedit %}
       {% if request.path|get_path != 'monitoring_prefs' %}
