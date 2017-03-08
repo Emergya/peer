@@ -240,7 +240,7 @@ class BaseMetadataEditForm(forms.Form):
     def _store_certifications_database(self, entity, cats):
         if entity._load_metadata().has_assurance_certification_el():
             certifications = entity.certifications
-            sp_cats.sirtfi_id_assurance = CERTIFICATIONS['SIRTFI'] in certifications
+            cats.sirtfi_id_assurance = CERTIFICATIONS['SIRTFI'] in certifications
             if cats.sirtfi_id_assurance:
                 sce = entity.security_contact_email
                 if sce is None:
@@ -425,7 +425,8 @@ class SPEntityCategoryForm(forms.ModelForm):
     def save(self, *args, **kwargs):
         super(SPEntityCategoryForm, self).save(*args, **kwargs)
         entity = self.instance.entity
-        entity.modify(etree.tostring(entity._load_metadata().etree))
+        entity.modify(etree.tostring(entity._load_metadata().etree,
+            pretty_print=True))
         entity.save()
 
 
@@ -456,5 +457,6 @@ class IdPEntityCategoryForm(forms.ModelForm):
     def save(self, *args, **kwargs):
         super(IdPEntityCategoryForm, self).save(*args, **kwargs)
         entity = self.instance.entity
-        entity.modify(etree.tostring(entity._load_metadata().etree))
+        entity.modify(etree.tostring(entity._load_metadata().etree,
+            pretty_print=True))
         entity.save()
