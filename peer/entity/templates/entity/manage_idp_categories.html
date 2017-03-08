@@ -18,7 +18,7 @@
       {{ form.as_p }}
       </fieldset>
       <fieldset class="actionRow">
-        <input class="button" type="submit" value="{% trans "Save changes" %}" />
+          <input class="button" type="submit" value="{% if MODERATION_ENABLED %}{% trans "Submit changes for moderation" %}{% else %}{% trans "Save changes" %}{% endif %}" />
         {% trans "or" %} <a class="button" href="{% url 'entities:entity_view' entity.id %}">{% trans "Cancel" %}</a>
       </fieldset>
 
