@@ -9,11 +9,11 @@
 {% block content %}
 <section class="mainContent">
   <hgroup>
-    <h1>{% trans "Manage Categories" %}</h1>
+    <h1>{% trans "Manage SP Categories" %}</h1>
     <h2>{{ entity }}</h2>
   </hgroup>
 
-    <form action="{% url 'entities:manage_categories' entity.id %}" method="post">{% csrf_token %}
+    <form action="{% url 'entities:manage_sp_categories' entity.id %}" method="post">{% csrf_token %}
       <fieldset>
       {{ form.as_p }}
       </fieldset>

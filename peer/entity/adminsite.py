@@ -93,9 +93,11 @@ class PublicAdminSite(AdminSite):
             url(r'^(?P<entity_id>\d+)/latest_metadata/$',
                 'peer.entity.views.revisions.get_latest_metadata', name='get_latest_metadata'),
 
-            # SP entity categories
+            # entity categories
             url(r'^(?P<entity_id>\d+)/sp-categories/$',
                 'peer.entity.views.categories.manage_sp_categories', name='manage_sp_categories'),
+            url(r'^(?P<entity_id>\d+)/idp-categories/$',
+                'peer.entity.views.categories.manage_idp_categories', name='manage_idp_categories'),
 
             # CSS with highlight colors
             url(r'^pygments.css$', 'peer.entity.views.revisions.get_pygments_css',

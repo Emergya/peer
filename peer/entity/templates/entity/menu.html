@@ -18,6 +18,8 @@
       {% endif %}
       {% if entity.role_descriptor == 'SP' %}
         <li><a href="{% url 'entities:manage_sp_categories' entity.id %}">{% trans "Manage SP Categories" %}</a></li>
+      {% elif entity.role_descriptor == 'IDP' %}
+        <li><a href="{% url 'entities:manage_idp_categories' entity.id %}">{% trans "Manage IDP Categories" %}</a></li>
       {% endif %}
       {% endcanedit %}
       {% if request.path|get_path != 'monitoring_prefs' %}
