@@ -855,6 +855,20 @@ class SPEntityCategory(models.Model):
     security_contact_email = models.EmailField(_('Security Contact Email'), null=True, blank=True)
 
 
+class IdPEntityCategory(models.Model):
+    entity = models.OneToOneField(Entity,
+                                  verbose_name=_(u'Entity'),
+                                  related_name='idp_categories',
+                                  primary_key=True)
+    research_and_scholarship = models.BooleanField(_('REFEDS Research and Scholarship'),
+                                                                default=False)
+    code_of_conduct = models.BooleanField(_('GEANT Code of Conduct'), default=False)
+    coc_priv_statement_url = models.URLField(_('Privacy Statement URL'), null=True, blank=True)
+    sirtfi_id_assurance =  models.BooleanField(_('REFEDS SIRTFI Identity Assurance Certification'),
+                                                                 default=False)
+    security_contact_email = models.EmailField(_('Security Contact Email'), null=True, blank=True)
+
+
 class EntityGroup(models.Model):
     app_label = 'peer.entity'
     name = SafeCharField(_(u'Name of the group'), max_length=200)
