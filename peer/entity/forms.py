@@ -254,6 +254,8 @@ class BaseMetadataEditForm(forms.Form):
         if (entity._load_metadata().has_categories_el() or
                 entity._load_metadata().has_assurance_certification_el()):
             sp_cats, created = SPEntityCategory.objects.get_or_create(entity=entity)
+        else:
+            return
         if entity._load_metadata().has_categories_el():
             categories = entity.sp_categorization
             sp_cats.research_and_scholarship = SP_CATEGORIES['R&S'] in categories
@@ -283,6 +285,8 @@ class BaseMetadataEditForm(forms.Form):
         if (entity._load_metadata().has_categories_support_el() or
                 entity._load_metadata().has_assurance_certification_el()):
             idp_cats, created = IdPEntityCategory.objects.get_or_create(entity=entity)
+        else:
+            return
         if entity._load_metadata().has_categories_support_el():
             categories = entity.idp_categorization
             idp_cats.research_and_scholarship = IDP_CATEGORIES['R&S'] in categories

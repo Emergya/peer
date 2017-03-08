@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext as _
 
 from peer.entity.models import Entity, SPEntityCategory, IdPEntityCategory
-from peer.entity.forms import SPEntityCategoryForm
+from peer.entity.forms import SPEntityCategoryForm, IdPEntityCategoryForm
 
 
 def manage_sp_categories(request, entity_id):
@@ -43,7 +43,7 @@ def manage_idp_categories(request, entity_id):
     except IdPEntityCategory.DoesNotExist:
         idp_categories = IdPEntityCategory(entity=entity)
         entity.idp_categories = idp_categories
-        sp_categories.save()
+        idp_categories.save()
     if request.method == 'POST':
         form = IdPEntityCategoryForm(request.POST,
                 instance=idp_categories)
