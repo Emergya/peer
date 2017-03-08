@@ -837,8 +837,8 @@ class Entity(models.Model):
 
         return 'Success: Data was updated successfully'
 
-    def _store_certifications_database(self, cats):
-        if self._load_metadata().has_assurance_certification_el():
+    def _store_certifications_database(self, metadata, cats):
+        if metadata.has_assurance_certification_el():
             certifications = self.certifications
             cats.sirtfi_id_assurance = CERTIFICATIONS['SIRTFI'] in certifications
             if cats.sirtfi_id_assurance:
@@ -849,14 +849,16 @@ class Entity(models.Model):
                         'security contact email'))
                 cats.security_contact_email = sce
 
-    def store_spcategory_database(self):
-        if (self._load_metadata().has_categories_el() or
-                self._load_metadata().has_assurance_certification_el()):
+    def store_spcategory_database(self, metadata=None):
+        if metadata is None:
+            metadata = self._load_metadata()
+        if (metadata.has_categories_el() or
+                metadata.has_assurance_certification_el()):
             sp_cats, created = SPEntityCategory.objects.get_or_create(entity=self)
         else:
             return
-        if self._load_metadata().has_categories_el():
-            categories = self.sp_categorization
+        if metadata.has_categories_el():
+            categories = metadata.sp_categories
             sp_cats.research_and_scholarship = SP_CATEGORIES['R&S'] in categories
             sp_cats.code_of_conduct = SP_CATEGORIES['CoCo'] in categories
             sp_cats.research_and_education = SP_CATEGORIES['R&E'] in categories
@@ -876,17 +878,19 @@ class Entity(models.Model):
                         'GEANT Code of Conduct category, you must provide a '
                         'privacy statement URL'))
                 sp_cats.coc_priv_statement_url = psu
-        self._store_certifications_database(sp_cats)
+        self._store_certifications_database(metadata, sp_cats)
         sp_cats.save()
 
-    def store_idpcategory_database(self):
-        if (self._load_metadata().has_categories_support_el() or
-                self._load_metadata().has_assurance_certification_el()):
+    def store_idpcategory_database(self, metadata=None):
+        if metadata is None:
+            metadata = self._load_metadata()
+        if (metadata.has_categories_support_el() or
+                metadata.has_assurance_certification_el()):
             idp_cats, created = IdPEntityCategory.objects.get_or_create(entity=self)
         else:
             return
-        if self._load_metadata().has_categories_support_el():
-            categories = self.idp_categorization
+        if metadata.has_categories_support_el():
+            categories = metadata.idp_categories
             idp_cats.research_and_scholarship = IDP_CATEGORIES['R&S'] in categories
             idp_cats.code_of_conduct = IDP_CATEGORIES['CoCo'] in categories
             if idp_cats.code_of_conduct:
@@ -896,8 +900,14 @@ class Entity(models.Model):
                         'for the GEANT Code of Conduct category, you must provide a '
                         'privacy statement URL'))
                 idp_cats.coc_priv_statement_url = psu
-        self._store_certifications_database(idp_cats)
+        self._store_certifications_database(metadata, idp_cats)
         idp_cats.save()
+
+    def revert_category_changes(self):
+        md_str = self.metadata.read()
+        metadata = Metadata(etree.XML(md_str))
+        self.store_idpcategory_database(metadata)
+        self.store_spcategory_database(metadata)
 
     @transition(field=state, source='*', target=STATE.MOD)
     def modify(self, temp_metadata):
@@ -910,6 +920,7 @@ class Entity(models.Model):
 
     @transition(field=state, source=STATE.MOD, target=STATE.PUB)
     def reject(self):
+        self.revert_category_changes()
         self.temp_metadata = ''
 
 
