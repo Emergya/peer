@@ -406,7 +406,7 @@ class Metadata(object):
             self.add_security_contact_person(idp_categories.security_contact_email)
         else:
             self.rm_sirtfi_id_assurance()
-        categories_el = self.get_or_create_categories_el()
+        categories_el = self.get_or_create_categories_support_el()
         categories_prev = self.idp_categories
         self._add_categories(categories_el, categories_prev,
                 IDP_CATEGORIES, categories)
@@ -470,8 +470,8 @@ class Metadata(object):
     def _get_or_create_categories_el(self, attr_name):
         entity_attrs_el = self.get_or_create_entity_attrs_el()
         path = 'saml:Attribute[@Name="{!s}"]'.format(attr_name)
-        categories_attr_el = entity_attrs_el.xpath(path, namespaces=NAMESPACES)
-        if not categories_attr_el:
+        categories_attr_els = entity_attrs_el.xpath(path, namespaces=NAMESPACES)
+        if not categories_attr_els:
             NSMAP = {None: NAMESPACES['saml']}
             categories_attr_el = etree.SubElement(entity_attrs_el,
                     addns('Attribute', NAMESPACES['saml']),
@@ -479,7 +479,7 @@ class Metadata(object):
                     Name=attr_name,
                     nsmap=NSMAP)
         else:
-            categories_attr_el = categories_attr_el[0]
+            categories_attr_el = categories_attr_els[0]
         return categories_attr_el
 
     def get_or_create_categories_el(self):
@@ -687,6 +687,12 @@ class Entity(models.Model):
                 pass
             else:
                 md.add_sp_categories(sp_categories)
+            try:
+                idp_categories = self.idp_categories
+            except IdPEntityCategory.DoesNotExist:
+                pass
+            else:
+                md.add_idp_categories(idp_categories)
 
             self._parsed_metadata = md.etree
             return md
