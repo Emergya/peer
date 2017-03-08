@@ -423,3 +423,34 @@ class SPEntityCategoryForm(forms.ModelForm):
         entity = self.instance.entity
         entity.modify(etree.tostring(entity._load_metadata().etree))
         entity.save()
+
+
+class IdPEntityCategoryForm(forms.ModelForm):
+    class Meta:
+        model = IdPEntityCategory
+        fields = (
+            'entity', 'research_and_scholarship',
+            'code_of_conduct', 'coc_priv_statement_url',
+            'sirtfi_id_assurance', 'security_contact_email',
+            )
+        widgets = {
+                'entity': forms.HiddenInput()
+                }
+
+    def clean(self):
+        super(IdPEntityCategoryForm, self).clean()
+        if (self.cleaned_data['code_of_conduct'] and
+                not self.cleaned_data['coc_priv_statement_url']):
+            raise forms.ValidationError(U('Checking GEANT Code of Conduct '
+                'requires that you provide a privacy statement URL'))
+        if (self.cleaned_data['sirtfi_id_assurance'] and
+                not self.cleaned_data['security_contact_email']):
+            raise forms.ValidationError(U('If you check the SIRTFI Identity '
+                'assurance certification, you must provide a '
+                'security contact'))
+
+    def save(self, *args, **kwargs):
+        super(IdPEntityCategoryForm, self).save(*args, **kwargs)
+        entity = self.instance.entity
+        entity.modify(etree.tostring(entity._load_metadata().etree))
+        entity.save()
