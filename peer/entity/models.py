@@ -380,7 +380,7 @@ class Metadata(object):
             parent.remove(el)
             el = parent
 
-    def _add_categories(el, prev, possible, categories):
+    def _add_categories(self, el, prev, possible, categories):
         for category in categories:
             if category not in prev:
                 cat = etree.SubElement(el, addns('AttributeValue', NAMESPACES['saml']))
