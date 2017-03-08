@@ -39,13 +39,13 @@ from django.conf import settings
 from peer.account.templatetags.account import authorname
 from peer.customfields import TermsOfUseField, readtou
 from peer.entity.models import Entity, EntityGroup, EntityMD, AttributesMD
-from peer.entity.models import SPEntityCategory
+from peer.entity.models import SPEntityCategory, IdPEntityCategory
 from peer.entity.validation import validate
 from peer.domain.validation import get_superdomain_verified
 from peer.entity.widgets import MetadataWidget
 from peer.entity.utils import FetchError, fetch_resource
 from peer.entity.utils import write_temp_file, strip_entities_descriptor
-from peer.entity.models import SP_CATEGORIES
+from peer.entity.models import SP_CATEGORIES, IDP_CATEGORIES, CERTIFICATIONS
 
 
 class EntityForm(forms.ModelForm):
@@ -193,7 +193,10 @@ class BaseMetadataEditForm(forms.Form):
             self.entity.metadata.save(name, content, username, commit_msg)
         self.entity.save()
         self.store_entitymd_database(self.entity.id)
-        self.store_spcategory_database(self.entity.id)
+        if self.entity.role_descriptor == 'SP':
+            self.store_spcategory_database(self.entity.id)
+        elif self.entity.role_descriptor == 'IDP':
+            self.store_idpcategory_database(self.entity.id)
         mail_owner = True if self.entity.owner != self.user else False
         if mail_owner:
             if not settings.MODERATION_ENABLED:
@@ -234,6 +237,18 @@ class BaseMetadataEditForm(forms.Form):
                                         value=attr.get('Value'),
                                         friendly_name=attr.get('FriendlyName'))
 
+    def _store_certifications_database(self, entity, cats):
+        if entity._load_metadata().has_assurance_certification_el():
+            certifications = entity.certifications
+            sp_cats.sirtfi_id_assurance = CERTIFICATIONS['SIRTFI'] in certifications
+            if cats.sirtfi_id_assurance:
+                sce = entity.security_contact_email
+                if sce is None:
+                    raise forms.ValidationError(_('To certify an entity with '
+                        'SIRTFI identity assurance, you must provide a '
+                        'security contact email'))
+                cats.security_contact_email = sce
+
     def store_spcategory_database(self, id_ent):
         entity = Entity.objects.get(id=id_ent)
         if (entity._load_metadata().has_categories_el() or
@@ -260,17 +275,27 @@ class BaseMetadataEditForm(forms.Form):
                         'GEANT Code of Conduct category, you must provide a '
                         'privacy statement URL'))
                 sp_cats.coc_priv_statement_url = psu
-        if entity._load_metadata().has_assurance_certification_el():
-            certifications = entity.certifications
-            sp_cats.sirtfi_id_assurance = SP_CATEGORIES['SIRTFI'] in certifications
-            if sp_cats.sirtfi_id_assurance:
-                sce = entity.security_contact_email
-                if sce is None:
-                    raise forms.ValidationError(_('To categorize an entity with the '
-                        'SIRTFI identity assurance category, you must provide a '
-                        'security contact email'))
-                sp_cats.security_contact_email = sce
-            sp_cats.save()
+        self._store_certifications_database(entity, sp_cats)
+        sp_cats.save()
+
+    def store_idpcategory_database(self, id_ent):
+        entity = Entity.objects.get(id=id_ent)
+        if (entity._load_metadata().has_categories_support_el() or
+                entity._load_metadata().has_assurance_certification_el()):
+            idp_cats, created = IdPEntityCategory.objects.get_or_create(entity=entity)
+        if entity._load_metadata().has_categories_support_el():
+            categories = entity.idp_categorization
+            idp_cats.research_and_scholarship = IDP_CATEGORIES['R&S'] in categories
+            idp_cats.code_of_conduct = IDP_CATEGORIES['CoCo'] in categories
+            if idp_cats.code_of_conduct:
+                psu = entity.privacy_statement_url
+                if psu is None:
+                    raise forms.ValidationError(_('To categorize an entity with support '
+                        'for the GEANT Code of Conduct category, you must provide a '
+                        'privacy statement URL'))
+                idp_cats.coc_priv_statement_url = psu
+        self._store_certifications_database(entity, idp_cats)
+        idp_cats.save()
 
 
 class MetadataTextEditForm(BaseMetadataEditForm):
