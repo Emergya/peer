@@ -565,7 +565,9 @@ class Metadata(object):
             return elements[0]
 
     def add_mdui_info_piece(self, tag, data, lang):
-        if self.get_mdui_info_piece(tag, lang) == data:
+        mdui_piece_el = self.get_mdui_info_piece(tag, lang)
+        if mdui_piece_el is not None:
+            mdui_piece_el.text = data
             return
         uiinfo_el = self.get_or_create_uiinfo_el()
         xml_tag = addns(tag, NAMESPACES['mdui'])
@@ -600,8 +602,9 @@ class Metadata(object):
         lang = mdui.lang
         for piece in MDUI_TR:
             tag = MDUI_TR[piece]
-            if getattr(mdui, piece, False):
-                self.add_mdui_info_piece(tag, lang)
+            data = getattr(mdui, piece, False)
+            if data:
+                self.add_mdui_info_piece(tag, data, lang)
             else:
                 self.rm_mdui_info_piece(tag, lang)
         uiinfo_el = self.get_or_create_uiinfo_el()
