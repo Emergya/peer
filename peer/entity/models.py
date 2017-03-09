@@ -166,6 +166,9 @@ class Entity(models.Model):
             else:
                 md.add_idp_categories(idp_categories)
 
+            for mdui in self.mdui:
+                md.add_mdui(mdui)
+
             self._parsed_metadata = md.etree
             return md
 

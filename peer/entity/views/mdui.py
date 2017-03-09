@@ -22,13 +22,13 @@ def manage_mdui_data(request, entity_id):
                      'entity': forms.HiddenInput()},
             max_num=nlangs, validate_max=True,
             min_num=nlangs, validate_min=True)
-    try:
-        mdui_sets = entity.mdui
-    except MDUIdata.DoesNotExist:
-        for lang in settings.MDUI_LANGS:
-            mdui = MDUIdata(entity=entity, lang=lang[0])
-            mdui.save()
-        mdui_sets = entity.mdui
+    # try:
+        # mdui_sets = entity.mdui
+    # except MDUIdata.DoesNotExist:
+        # for lang in settings.MDUI_LANGS:
+            # mdui = MDUIdata(entity=entity, lang=lang[0])
+            # mdui.save()
+        # mdui_sets = entity.mdui
     if request.method == 'POST':
         formset = MDUIdataFormSet(request.POST)
         if formset.is_valid():

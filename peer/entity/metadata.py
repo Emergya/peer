@@ -62,6 +62,13 @@ CERTIFICATIONS = {
     'SIRTFI': 'http://refeds.org/sirtfi',
 }
 
+MDUI_TR = {
+        'display_name': 'DisplayName',
+        'description': 'Description',
+        'priv_statement_url': 'PrivacyStatementURL',
+        'information_url': 'InformationURL',
+}
+
 
 class Metadata(object):
     def __init__(self, etree):
@@ -320,14 +327,6 @@ class Metadata(object):
                     email = email[7:]
                 return email
 
-    @property
-    def privacy_statement_url(self):
-        uiinfo_el = self.get_or_create_uiinfo_el()
-        psu_tag = addns('PrivacyStatementURL', NAMESPACES['mdui'])
-        psu_el = uiinfo_el.find(psu_tag)
-        if psu_el is not None:
-            return psu_el.text
-
     def _categories(self, attr_name):
         categories = []
         path_segments = ['md:Extensions', 'mdattr:EntityAttributes', 'saml:Attribute']
@@ -548,21 +547,52 @@ class Metadata(object):
         self.etree.append(contact_person_el)
         return contact_person_el
 
-    def add_privacy_statement_url(self, url):
-        if self.privacy_statement_url == url:
+    def _get_mdui_info_piece(self, tag, lang):
+        uiinfo_el = self.get_or_create_uiinfo_el()
+        lang_attr = 'xml:lang'
+        xpath_tag = 'mdui:' + tag
+        path = '{!s}[@{!s}="{!s}"]'.format(xpath_tag, lang_attr, lang)
+        elements = uiinfo_el.xpath(path, namespaces=NAMESPACES)
+        if len(elements):
+            return elements[0]
+
+    def _add_mdui_info_piece(self, tag, data, lang):
+        if self._get_mdui_info_piece(tag, lang) == data:
             return
         uiinfo_el = self.get_or_create_uiinfo_el()
-        psu_tag = addns('PrivacyStatementURL', NAMESPACES['mdui'])
+        xml_tag = addns(tag, NAMESPACES['mdui'])
         lang_attr = addns('lang', NAMESPACES['xml'])
-        psu_el = etree.SubElement(uiinfo_el, psu_tag, **{
-            lang_attr: 'en'
+        element = etree.SubElement(uiinfo_el, xml_tag, **{
+            lang_attr: lang
             })
-        psu_el.text = url
-        return psu_el
+        element.text = data
+        return element
 
-    def rm_privacy_statement_url(self):
+    def _rm_mdui_info_piece(self, tag, lang):
         uiinfo_el = self.get_or_create_uiinfo_el()
-        psu_tag = addns('PrivacyStatementURL', NAMESPACES['mdui'])
-        psu_el = uiinfo_el.find(psu_tag)
-        uiinfo_el.remove(psu_el)
+        element = self._get_mdui_info_piece(tag, lang)
+        if element is not None:
+            uiinfo_el.remove(element)
 
+##########################################
+# XXX add mdui lang to sp & idp categories
+    @property
+    def privacy_statement_url(self):
+        return self._get_mdui_info_piece('PrivacyStatementURL', 'en')
+
+    def add_privacy_statement_url(self, url):
+        return self._add_mdui_info_piece('PrivacyStatementURL', url, 'en')
+
+    def rm_privacy_statement_url(self, url):
+        return self._rm_mdui_info_piece('PrivacyStatementURL', 'en')
+# XXX add mdui lang to sp & idp categories
+##########################################
+
+    def add_mdui(self, mdui):
+        lang = mdui.lang
+        for piece in MDUI_TR:
+            tag = MDUI_TR[piece]
+            if getattr(mdui, piece, False):
+                self._add_mdui_info_piece(tag, lang)
+            else:
+                self._rm_mdui_info_piece(tag, lang)
