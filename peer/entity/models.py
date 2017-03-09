@@ -49,6 +49,7 @@ from peer.entity.utils import write_temp_file
 from peer.entity.nagios import send_nagios_notification
 from peer.entity.metadata import Metadata, CERTIFICATIONS
 from peer.entity.metadata import SP_CATEGORIES, IDP_CATEGORIES
+from peer.entity.metadata import MDUI_TR
 
 
 logger = logging.getLogger(__name__)
@@ -378,11 +379,26 @@ class Entity(models.Model):
         self._store_certifications_database(metadata, idp_cats)
         idp_cats.save()
 
+    def store_mdui_database(self, metadata=None):
+        if metadata is None:
+            metadata = self._load_metadata()
+        if not metadata.has_uiinfo_el():
+            return
+        uiinfo_el = metadata.get_or_create_uiinfo_el()
+        for language in settings.MDUI_LANGS:
+            lang = language[0]
+            mdui = MDUIdata.objects.get_or_create(entity=self, lang=lang)
+            for attr,tag in MDUI_TR.items():
+                data = metadata.get_mdui_info_piece(tag, lang[0])
+                setattr(mdui, attr, data)
+            mdui.save()
+
     def revert_category_changes(self):
         md_str = self.metadata.read()
         metadata = Metadata(etree.XML(md_str))
         self.store_idpcategory_database(metadata)
         self.store_spcategory_database(metadata)
+        self.store_mdui_database(metadata)
 
     @transition(field=state, source='*', target=STATE.MOD)
     def modify(self, temp_metadata):

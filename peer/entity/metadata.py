@@ -502,6 +502,14 @@ class Metadata(object):
         attr_name = "urn:oasis:names:tc:SAML:attribute:assurance-certification"
         return self._has_categories_el(attr_name)
 
+    def has_uiinfo_el(self):
+        extensions_el = self.get_or_create_descriptor_extensions_el()
+        uiinfo_tag = addns('UIInfo', NAMESPACES['mdui'])
+        uiinfo_el = extensions_el.find(uiinfo_tag)
+        if uiinfo_el is None:
+            return False
+        return  True
+
     def get_or_create_uiinfo_el(self):
         extensions_el = self.get_or_create_descriptor_extensions_el()
         uiinfo_tag = addns('UIInfo', NAMESPACES['mdui'])
@@ -547,7 +555,7 @@ class Metadata(object):
         self.etree.append(contact_person_el)
         return contact_person_el
 
-    def _get_mdui_info_piece(self, tag, lang):
+    def get_mdui_info_piece(self, tag, lang):
         uiinfo_el = self.get_or_create_uiinfo_el()
         lang_attr = 'xml:lang'
         xpath_tag = 'mdui:' + tag
@@ -556,8 +564,8 @@ class Metadata(object):
         if len(elements):
             return elements[0]
 
-    def _add_mdui_info_piece(self, tag, data, lang):
-        if self._get_mdui_info_piece(tag, lang) == data:
+    def add_mdui_info_piece(self, tag, data, lang):
+        if self.get_mdui_info_piece(tag, lang) == data:
             return
         uiinfo_el = self.get_or_create_uiinfo_el()
         xml_tag = addns(tag, NAMESPACES['mdui'])
@@ -568,9 +576,9 @@ class Metadata(object):
         element.text = data
         return element
 
-    def _rm_mdui_info_piece(self, tag, lang):
+    def rm_mdui_info_piece(self, tag, lang):
         uiinfo_el = self.get_or_create_uiinfo_el()
-        element = self._get_mdui_info_piece(tag, lang)
+        element = self.get_mdui_info_piece(tag, lang)
         if element is not None:
             uiinfo_el.remove(element)
 
@@ -578,13 +586,13 @@ class Metadata(object):
 # XXX add mdui lang to sp & idp categories
     @property
     def privacy_statement_url(self):
-        return self._get_mdui_info_piece('PrivacyStatementURL', 'en')
+        return self.get_mdui_info_piece('PrivacyStatementURL', 'en')
 
     def add_privacy_statement_url(self, url):
-        return self._add_mdui_info_piece('PrivacyStatementURL', url, 'en')
+        return self.add_mdui_info_piece('PrivacyStatementURL', url, 'en')
 
     def rm_privacy_statement_url(self, url):
-        return self._rm_mdui_info_piece('PrivacyStatementURL', 'en')
+        return self.rm_mdui_info_piece('PrivacyStatementURL', 'en')
 # XXX add mdui lang to sp & idp categories
 ##########################################
 
@@ -593,6 +601,8 @@ class Metadata(object):
         for piece in MDUI_TR:
             tag = MDUI_TR[piece]
             if getattr(mdui, piece, False):
-                self._add_mdui_info_piece(tag, lang)
+                self.add_mdui_info_piece(tag, lang)
             else:
-                self._rm_mdui_info_piece(tag, lang)
+                self.rm_mdui_info_piece(tag, lang)
+        uiinfo_el = self.get_or_create_uiinfo_el()
+        self._remove_childless_ancestors(uiinfo_el)

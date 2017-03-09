@@ -200,6 +200,8 @@ class BaseMetadataEditForm(forms.Form):
                 self.entity.store_idpcategory_database()
         except ValueError as  e:
             raise forms.ValidationError(e.args[0])
+        self.entity.store_mdui_database()
+
         mail_owner = True if self.entity.owner != self.user else False
         if mail_owner:
             if not settings.MODERATION_ENABLED:
