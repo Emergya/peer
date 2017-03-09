@@ -452,6 +452,21 @@ class IdPEntityCategory(models.Model):
     security_contact_email = models.EmailField(_('Security Contact Email'), null=True, blank=True)
 
 
+class MDUIdata(models.Model):
+    entity = models.ForeignKey(Entity,
+                               verbose_name=_(u'Entity'),
+                               related_name='mdui')
+    lang = models.CharField(max_length=2,
+                            verbose_name=_('Language'),
+                            choices=settings.MDUI_LANGS)
+    display_name = models.CharField(max_length=255, verbose_name=_('Display Name'))
+    description = models.TextField(verbose_name=_(u'Description'))
+    priv_statement_url = models.URLField(verbose_name=_('Privacy Statement URL'),
+                                         blank=True, null=True)
+    information_url = models.URLField(verbose_name=_('Information URL'),
+                                         blank=True, null=True)
+
+
 class EntityGroup(models.Model):
     app_label = 'peer.entity'
     name = SafeCharField(_(u'Name of the group'), max_length=200)

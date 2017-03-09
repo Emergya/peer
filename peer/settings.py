@@ -349,6 +349,12 @@ LOCAL_LOGIN_ENABLED = True
 # membership requests ttl in days
 MEMBERSHIP_REQUEST_TTL = 7
 
+# required languages for MDUI
+MDUI_LANGS = (
+        ('en', 'English'),
+        ('sv', 'Svenska'),
+)
+
 try:
     from local_settings import *
 except ImportError:

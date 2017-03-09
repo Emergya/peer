@@ -21,6 +21,7 @@
       {% elif entity.role_descriptor == 'IDP' %}
         <li><a href="{% url 'entities:manage_idp_categories' entity.id %}">{% trans "Manage IDP Categories" %}</a></li>
       {% endif %}
+      <li><a href="{% url 'entities:manage_mdui_data' entity.id %}">{% trans "Manage MDUI metadata" %}</a></li>
       {% endcanedit %}
       {% if request.path|get_path != 'monitoring_prefs' %}
         <li><a href="{% url 'entities:monitoring_prefs' entity.id %}">{% trans "Monitor endpoints" %}</a></li>

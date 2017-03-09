@@ -99,6 +99,10 @@ class PublicAdminSite(AdminSite):
             url(r'^(?P<entity_id>\d+)/idp-categories/$',
                 'peer.entity.views.categories.manage_idp_categories', name='manage_idp_categories'),
 
+            # MDUI
+            url(r'^(?P<entity_id>\d+)/mdui/$',
+                'peer.entity.views.mdui.manage_mdui_data', name='manage_mdui_data'),
+
             # CSS with highlight colors
             url(r'^pygments.css$', 'peer.entity.views.revisions.get_pygments_css',
                 name='get_pygments_css'),
