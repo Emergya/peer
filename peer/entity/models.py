@@ -154,6 +154,10 @@ class Entity(models.Model):
                 raise ValueError('invalid metadata XML')
 
             md = Metadata(metadata_tree)
+
+            if self.mdui.count():
+                for mdui in self.mdui.all():
+                    md.add_mdui(mdui)
             try:
                 sp_categories = self.sp_categories
             except SPEntityCategory.DoesNotExist:
@@ -166,9 +170,6 @@ class Entity(models.Model):
                 pass
             else:
                 md.add_idp_categories(idp_categories)
-
-            for mdui in self.mdui.all():
-                md.add_mdui(mdui)
 
             self._parsed_metadata = md.etree
             return md
@@ -384,12 +385,12 @@ class Entity(models.Model):
             metadata = self._load_metadata()
         if not metadata.has_uiinfo_el():
             return
-        uiinfo_el = metadata.get_or_create_uiinfo_el()
         for language in settings.MDUI_LANGS:
             lang = language[0]
-            mdui = MDUIdata.objects.get_or_create(entity=self, lang=lang)
+            mdui, created = MDUIdata.objects.get_or_create(entity=self, lang=lang)
             for attr,tag in MDUI_TR.items():
-                data = metadata.get_mdui_info_piece(tag, lang[0])
+                data = metadata.get_mdui_info_piece(tag, lang)
+                data = data.text if data is not None else None
                 setattr(mdui, attr, data)
             mdui.save()
 
@@ -478,12 +479,21 @@ class MDUIdata(models.Model):
     lang = models.CharField(max_length=2,
                             verbose_name=_('Language'),
                             choices=settings.MDUI_LANGS)
-    display_name = models.CharField(max_length=255, verbose_name=_('Display Name'))
-    description = models.TextField(verbose_name=_(u'Description'))
+    display_name = models.CharField(max_length=255, verbose_name=_('Display Name'),
+                                    blank=True, null=True)
+    description = models.TextField(verbose_name=_(u'Description'),
+                                   blank=True, null=True)
     priv_statement_url = models.URLField(verbose_name=_('Privacy Statement URL'),
                                          blank=True, null=True)
     information_url = models.URLField(verbose_name=_('Information URL'),
                                          blank=True, null=True)
+
+
+# def handler_entity_post_save(sender, instance, created, **kwargs):
+    # raise Exception()
+
+# models.signals.post_save.connect(handler_entity_post_save, sender=MDUIdata)
+
 
 
 class EntityGroup(models.Model):

@@ -32,6 +32,7 @@ from lxml import etree
 from django import forms
 from django.core.mail import send_mail
 from django.db.models import Q
+from django.forms import modelformset_factory
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext as U
 from django.conf import settings
@@ -39,7 +40,7 @@ from django.conf import settings
 from peer.account.templatetags.account import authorname
 from peer.customfields import TermsOfUseField, readtou
 from peer.entity.models import Entity, EntityGroup, EntityMD, AttributesMD
-from peer.entity.models import SPEntityCategory, IdPEntityCategory
+from peer.entity.models import SPEntityCategory, IdPEntityCategory, MDUIdata
 from peer.entity.validation import validate
 from peer.domain.validation import get_superdomain_verified
 from peer.entity.widgets import MetadataWidget
@@ -192,6 +193,7 @@ class BaseMetadataEditForm(forms.Form):
         else:
             self.entity.metadata.save(name, content, username, commit_msg)
         self.entity.save()
+        self.entity.store_mdui_database()
         self.store_entitymd_database(self.entity.id)
         try:
             if self.entity.role_descriptor == 'SP':
@@ -200,7 +202,6 @@ class BaseMetadataEditForm(forms.Form):
                 self.entity.store_idpcategory_database()
         except ValueError as  e:
             raise forms.ValidationError(e.args[0])
-        self.entity.store_mdui_database()
 
         mail_owner = True if self.entity.owner != self.user else False
         if mail_owner:
