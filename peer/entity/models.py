@@ -349,12 +349,13 @@ class Entity(models.Model):
                     'HEI service, NREN service, or EU protection categories, '
                     'you also need to categorize it for Research & Education'))
             if sp_cats.code_of_conduct:
-                psu = entity.privacy_statement_url
+                lang, psu = self.privacy_statement_url
                 if psu is None:
                     raise ValueError(_('To categorize an entity with the '
                         'GEANT Code of Conduct category, you must provide a '
                         'privacy statement URL'))
                 sp_cats.coc_priv_statement_url = psu
+                sp_cats.lang_priv_statement_url = getlang(psu)
         self._store_certifications_database(metadata, sp_cats)
         sp_cats.save()
 
@@ -371,12 +372,13 @@ class Entity(models.Model):
             idp_cats.research_and_scholarship = IDP_CATEGORIES['R&S'] in categories
             idp_cats.code_of_conduct = IDP_CATEGORIES['CoCo'] in categories
             if idp_cats.code_of_conduct:
-                psu = self.privacy_statement_url
+                lang, psu = self.privacy_statement_url
                 if psu is None:
                     raise ValueError(_('To categorize an entity with support '
                         'for the GEANT Code of Conduct category, you must provide a '
                         'privacy statement URL'))
                 idp_cats.coc_priv_statement_url = psu
+                idp_cats.lang_priv_statement_url = lang
         self._store_certifications_database(metadata, idp_cats)
         idp_cats.save()
 
@@ -447,6 +449,9 @@ class SPEntityCategory(models.Model):
                                                                 default=False)
     code_of_conduct = models.BooleanField(_('GEANT Code of Conduct'), default=False)
     coc_priv_statement_url = models.URLField(_('Privacy Statement URL'), null=True, blank=True)
+    lang_priv_statement_url = models.CharField(max_length=2,
+                                            verbose_name=_('Privacy statement language'),
+                                            choices=settings.MDUI_LANGS)
     research_and_education = models.BooleanField(_('SWAMID Research and Education'),
                                                                 default=False)
     swamid_sfs = models.BooleanField(_('SWAMID SFS'), default=False)
@@ -458,6 +463,17 @@ class SPEntityCategory(models.Model):
     security_contact_email = models.EmailField(_('Security Contact Email'), null=True, blank=True)
 
 
+def handler_cat_post_save(sender, instance, **kwargs):
+    if instance.coc_priv_statement_url and instance.lang_priv_statement_url:
+        mdui, created = MDUIdata.objects.get_or_create(entity=instance.entity,
+                                                lang=instance.lang_priv_statement_url)
+        if mdui.priv_statement_url != instance.coc_priv_statement_url:
+            mdui.priv_statement_url = instance.coc_priv_statement_url
+            mdui.save()
+
+models.signals.post_save.connect(handler_cat_post_save, sender=SPEntityCategory)
+
+
 class IdPEntityCategory(models.Model):
     entity = models.OneToOneField(Entity,
                                   verbose_name=_(u'Entity'),
@@ -467,9 +483,14 @@ class IdPEntityCategory(models.Model):
                                                                 default=False)
     code_of_conduct = models.BooleanField(_('GEANT Code of Conduct'), default=False)
     coc_priv_statement_url = models.URLField(_('Privacy Statement URL'), null=True, blank=True)
+    lang_priv_statement_url = models.CharField(max_length=2,
+                                            verbose_name=_('Privacy statement language'),
+                                            choices=settings.MDUI_LANGS)
     sirtfi_id_assurance =  models.BooleanField(_('REFEDS SIRTFI Identity Assurance Certification'),
                                                                  default=False)
     security_contact_email = models.EmailField(_('Security Contact Email'), null=True, blank=True)
+
+models.signals.post_save.connect(handler_cat_post_save, sender=IdPEntityCategory)
 
 
 class MDUIdata(models.Model):
@@ -489,11 +510,18 @@ class MDUIdata(models.Model):
                                          blank=True, null=True)
 
 
-# def handler_entity_post_save(sender, instance, created, **kwargs):
-    # raise Exception()
+def handler_mdui_post_save(sender, instance, **kwargs):
+    if instance.priv_statement_url:
+        if instance.entity.role_descriptor == 'SP':
+            cats, created = SPEntityCategory.objects.get_or_create(entity=instance.entity)
+        else:
+            cats, created = IdPEntityCategory.objects.get_or_create(entity=instance.entity)
+        if cats.coc_priv_statement_url != instance.priv_statement_url:
+            cats.coc_priv_statement_url = instance.priv_statement_url
+            cats.lang_priv_statement_url = instance.lang
+            cats.save()
 
-# models.signals.post_save.connect(handler_entity_post_save, sender=MDUIdata)
-
+models.signals.post_save.connect(handler_mdui_post_save, sender=MDUIdata)
 
 
 class EntityGroup(models.Model):

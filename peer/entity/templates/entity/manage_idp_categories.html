@@ -31,15 +31,18 @@
       (function ($) {
           $(document).ready(function () {
               $('#id_coc_priv_statement_url').parent().css('margin-left', '20px');
+              $('#id_lang_priv_statement_url').parent().css('margin-left', '20px');
               $('#id_security_contact_email').parent().css('margin-left', '20px');
               if ($('#id_coc_priv_statement_url').val() === '') {
                   $('#id_coc_priv_statement_url').parent().css('margin-left', '20px').hide();
+                  $('#id_lang_priv_statement_url').parent().css('margin-left', '20px').hide();
               }
               if ($('#id_security_contact_email').val() === '') {
                   $('#id_security_contact_email').parent().css('margin-left', '20px').hide();
               }
               $('#id_code_of_conduct').click(function (e) {
                   $('#id_coc_priv_statement_url').parent().show(e.target.checked);
+                  $('#id_lang_priv_statement_url').parent().show(e.target.checked);
               });
               $('#id_sirtfi_id_assurance').click(function (e) {
                   $('#id_security_contact_email').parent().show(e.target.checked);

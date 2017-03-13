@@ -336,6 +336,7 @@ class SPEntityCategoryForm(forms.ModelForm):
         fields = (
             'entity', 'research_and_scholarship',
             'code_of_conduct', 'coc_priv_statement_url',
+            'lang_priv_statement_url',
             'research_and_education', 'rae_eu_protection',
             'rae_hei_service', 'rae_nren_service',
             'swamid_sfs', 'sirtfi_id_assurance',
@@ -351,6 +352,10 @@ class SPEntityCategoryForm(forms.ModelForm):
                 not self.cleaned_data['coc_priv_statement_url']):
             raise forms.ValidationError(U('Checking GEANT Code of Conduct '
                 'requires that you provide a privacy statement URL'))
+        if (self.cleaned_data['coc_priv_statement_url'] and
+                not self.cleaned_data['lang_priv_statement_url']):
+            raise forms.ValidationError(U('You must provide the language '
+                'for the privacy statement'))
         if not self.cleaned_data['research_and_education']:
             if (self.cleaned_data['rae_hei_service'] or
                     self.cleaned_data['rae_nren_service'] or
@@ -378,6 +383,7 @@ class IdPEntityCategoryForm(forms.ModelForm):
         fields = (
             'entity', 'research_and_scholarship',
             'code_of_conduct', 'coc_priv_statement_url',
+            'lang_priv_statement_url',
             'sirtfi_id_assurance', 'security_contact_email',
             )
         widgets = {
@@ -390,6 +396,10 @@ class IdPEntityCategoryForm(forms.ModelForm):
                 not self.cleaned_data['coc_priv_statement_url']):
             raise forms.ValidationError(U('Checking GEANT Code of Conduct '
                 'requires that you provide a privacy statement URL'))
+        if (self.cleaned_data['coc_priv_statement_url'] and
+                not self.cleaned_data['lang_priv_statement_url']):
+            raise forms.ValidationError(U('You must provide the language '
+                'for the privacy statement'))
         if (self.cleaned_data['sirtfi_id_assurance'] and
                 not self.cleaned_data['security_contact_email']):
             raise forms.ValidationError(U('If you check the SIRTFI Identity '

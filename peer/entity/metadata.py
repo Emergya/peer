@@ -381,7 +381,9 @@ class Metadata(object):
             categories.append(SP_CATEGORIES['R&S'])
         if idp_categories.code_of_conduct:
             categories.append(SP_CATEGORIES['CoCo'])
-            self.add_privacy_statement_url(idp_categories.coc_priv_statement_url)
+            self.add_mdui_info_piece('PrivacyStatementURL',
+                    idp_categories.coc_priv_statement_url,
+                    idp_categories.lang_priv_statement_url)
         if idp_categories.sirtfi_id_assurance:
             self.add_sirtfi_id_assurance()
             self.add_security_contact_person(idp_categories.security_contact_email)
@@ -398,7 +400,9 @@ class Metadata(object):
             categories.append(SP_CATEGORIES['R&S'])
         if sp_categories.code_of_conduct:
             categories.append(SP_CATEGORIES['CoCo'])
-            self.add_privacy_statement_url(sp_categories.coc_priv_statement_url)
+            self.add_mdui_info_piece('PrivacyStatementURL',
+                    sp_categories.coc_priv_statement_url,
+                    sp_categories.lang_priv_statement_url)
         if sp_categories.research_and_education:
             categories.append(SP_CATEGORIES['R&E'])
             if sp_categories.rae_hei_service:
@@ -584,19 +588,17 @@ class Metadata(object):
         if element is not None:
             uiinfo_el.remove(element)
 
-##########################################
-# XXX add mdui lang to sp & idp categories
     @property
     def privacy_statement_url(self):
-        return self.get_mdui_info_piece('PrivacyStatementURL', 'en')
-
-    def add_privacy_statement_url(self, url):
-        return self.add_mdui_info_piece('PrivacyStatementURL', url, 'en')
-
-    def rm_privacy_statement_url(self, url):
-        return self.rm_mdui_info_piece('PrivacyStatementURL', 'en')
-# XXX add mdui lang to sp & idp categories
-##########################################
+        uiinfo_el = self.get_or_create_uiinfo_el()
+        lang_attr = 'xml:lang'
+        xpath_tag = 'mdui:PrivacyStatementURL'
+        for language in settings.MDUI_LANGS:
+            lang = language[0]
+            path = '{!s}[@{!s}="{!s}"]'.format(xpath_tag, lang_attr, lang)
+            elements = uiinfo_el.xpath(path, namespaces=NAMESPACES)
+            if len(elements):
+                return lang, elements[0]
 
     def add_mdui(self, mdui):
         lang = mdui.lang
