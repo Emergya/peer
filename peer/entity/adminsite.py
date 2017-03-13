@@ -103,6 +103,10 @@ class PublicAdminSite(AdminSite):
             url(r'^(?P<entity_id>\d+)/mdui/$',
                 'peer.entity.views.mdui.manage_mdui_data', name='manage_mdui_data'),
 
+            # Contacts
+            url(r'^(?P<entity_id>\d+)/contacts/$',
+                'peer.entity.views.contacts.manage_contact_data', name='manage_contact_data'),
+
             # CSS with highlight colors
             url(r'^pygments.css$', 'peer.entity.views.revisions.get_pygments_css',
                 name='get_pygments_css'),

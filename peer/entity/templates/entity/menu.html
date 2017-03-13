@@ -17,11 +17,12 @@
         <li><a href="{% url 'entities:metarefresh_edit' entity.id %}">{% trans "Metarefresh" %}</a></li>
       {% endif %}
       {% if entity.role_descriptor == 'SP' %}
-        <li><a href="{% url 'entities:manage_sp_categories' entity.id %}">{% trans "Manage SP Categories" %}</a></li>
+        <li><a href="{% url 'entities:manage_sp_categories' entity.id %}">{% trans "SP Categories" %}</a></li>
       {% elif entity.role_descriptor == 'IDP' %}
-        <li><a href="{% url 'entities:manage_idp_categories' entity.id %}">{% trans "Manage IDP Categories" %}</a></li>
+        <li><a href="{% url 'entities:manage_idp_categories' entity.id %}">{% trans "IDP Categories" %}</a></li>
       {% endif %}
-      <li><a href="{% url 'entities:manage_mdui_data' entity.id %}">{% trans "Manage MDUI metadata" %}</a></li>
+      <li><a href="{% url 'entities:manage_mdui_data' entity.id %}">{% trans "MDUI metadata" %}</a></li>
+      <li><a href="{% url 'entities:manage_contact_data' entity.id %}">{% trans "Contact metadata" %}</a></li>
       {% endcanedit %}
       {% if request.path|get_path != 'monitoring_prefs' %}
         <li><a href="{% url 'entities:monitoring_prefs' entity.id %}">{% trans "Monitor endpoints" %}</a></li>

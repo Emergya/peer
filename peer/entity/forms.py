@@ -194,6 +194,10 @@ class BaseMetadataEditForm(forms.Form):
             self.entity.metadata.save(name, content, username, commit_msg)
         self.entity.save()
         self.entity.store_mdui_database()
+        try:
+            self.entity.store_contacts_database()
+        except ValueError as  e:
+            raise forms.ValidationError(e.args[0])
         self.store_entitymd_database(self.entity.id)
         try:
             if self.entity.role_descriptor == 'SP':

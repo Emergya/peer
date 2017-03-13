@@ -158,6 +158,10 @@ class Entity(models.Model):
             if self.mdui.count():
                 for mdui in self.mdui.all():
                     md.add_mdui(mdui)
+
+            if self.contact_people.count():
+                for contact in self.contact_people.all():
+                    md.add_contact(contact)
             try:
                 sp_categories = self.sp_categories
             except SPEntityCategory.DoesNotExist:
@@ -396,12 +400,29 @@ class Entity(models.Model):
                 setattr(mdui, attr, data)
             mdui.save()
 
+    def store_contacts_database(self, metadata=None):
+        if metadata is None:
+            metadata = self._load_metadata()
+        for t in ContactPerson.CONTACT_TYPES:
+            type = t[0]
+            contact, created = ContactPerson.objects.get_or_create(entity=self, type=type)
+            email = metadata.get_contact_data('EmailAddress', type)
+            if not email:
+                raise ValueError(_('You must provide an email for every contact'))
+            elif email.startswith('mailto'):
+                email = email[7:]
+            contact.email = email
+            contact.name = metadata.get_contact_data('SurName', type)
+            contact.phone = metadata.get_contact_data('TelephoneNumber', type)
+            contact.save()
+
     def revert_category_changes(self):
         md_str = self.metadata.read()
         metadata = Metadata(etree.XML(md_str))
         self.store_idpcategory_database(metadata)
         self.store_spcategory_database(metadata)
         self.store_mdui_database(metadata)
+        self.store_contacts_database(metadata)
 
     @transition(field=state, source='*', target=STATE.MOD)
     def modify(self, temp_metadata):
@@ -594,3 +615,25 @@ class AttributesMD(models.Model):
     name = models.CharField(null=True, max_length=250)
     name_format = models.CharField(null=True, max_length=250)
     value = models.CharField(null=True, max_length=250)
+
+
+class ContactPerson(models.Model):
+
+    CONTACT_TYPES = (
+        ('S', 'support'),
+        ('A', 'administrative'),
+        ('T', 'technical'),
+    )
+
+    entity = models.ForeignKey(Entity,
+            verbose_name=_(u'Entity'),
+            related_name='contact_people')
+    type = models.CharField(_(u'Contact type'),
+            max_length=2, choices=CONTACT_TYPES,
+            blank=True, null=True)
+    email = models.EmailField(_('Email address'),
+            null=True, blank=True)
+    name = models.TextField(_(u'Name'),
+            blank=True, null=True)
+    phone = models.CharField(_(u'Phone number'),
+            max_length=255, blank=True, null=True)

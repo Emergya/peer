@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block extra_menu %}
+{% include "entity/menu.html" %}
+{% endblock %}
+
+{% block content %}
+<section class="mainContent">
+  <hgroup>
+    <h1>{% trans "Manage Contact data" %}</h1>
+    <h2>{{ entity }}</h2>
+  </hgroup>
+
+    <form action="{% url 'entities:manage_contact_data' entity.id %}" method="post">{% csrf_token %}
+      <fieldset>
+      {{ formset }}
+      </fieldset>
+      <fieldset class="actionRow">
+        <input class="button" type="submit" value="{% if MODERATION_ENABLED %}{% trans "Submit changes for moderation" %}{% else %}{% trans "Save changes" %}{% endif %}" />
+        {% trans "or" %} <a class="button" href="{% url 'entities:entity_view' entity.id %}">{% trans "Cancel" %}</a>
+      </fieldset>
+
+  </form>
+</section>
+{% endblock %}
+
