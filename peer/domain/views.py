@@ -274,11 +274,11 @@ def accept_membership_request(request, domain_id, username):
         raise PermissionDenied
 
     _add_delegate(request, domain_id, username)
+    domain = Domain.objects.get(pk=domain_id)
+    requester = User.objects.get(username=username)
     DomainTeamMembershipRequest.objects.filter(domain=domain,
                                              requester=requester).delete()
 
-    domain = Domain.objects.get(pk=domain_id)
-    requester = User.objects.get(username=username)
     email = requester.email
     subject = _('Domain team membership request ACCEPTED')
     data = {'domain_name': domain.name}
