@@ -30,6 +30,8 @@ from datetime import datetime
 from lxml import etree
 import logging
 
+from django.conf import settings
+
 from peer.entity.utils import NAMESPACES, addns, delns, getlang
 
 
@@ -548,13 +550,19 @@ class Metadata(object):
                 }
         contact_person_tag = addns('ContactPerson', NAMESPACES['md'])
         contact_type_attr = addns('contactType', NAMESPACES['remd'])
-        contact_person_el = etree.Element(contact_person_tag, **{
-            contact_type_attr: 'http://refeds.org/metadata/contactType/security',
-            'contactType': 'other',
-            'nsmap': NSMAP
-            })
+        people = self.security_contact_people
+        if len(people):
+            contact_person_el = people[0]
+        else:
+            contact_person_el = etree.Element(contact_person_tag, **{
+                contact_type_attr: 'http://refeds.org/metadata/contactType/security',
+                'contactType': 'other',
+                'nsmap': NSMAP
+                })
         email_tag = addns('EmailAddress', NAMESPACES['md'])
-        email_el = etree.SubElement(contact_person_el, email_tag)
+        email_el = contact_person_el.find(email_tag)
+        if email_el is None:
+            email_el = etree.SubElement(contact_person_el, email_tag)
         email_el.text = 'mailto:{!s}'.format(email)
         self.etree.append(contact_person_el)
         return contact_person_el
@@ -647,14 +655,20 @@ class Metadata(object):
             contact_el = self.add_contact_person(contact.type)
         if contact.email:
             email_tag = addns('EmailAddress', NAMESPACES['md'])
-            email_el = etree.SubElement(contact_el, email_tag)
+            email_el = contact_el.find(email_tag)
+            if email_el is None:
+                email_el = etree.SubElement(contact_el, email_tag)
             email_el.text = 'mailto:{!s}'.format(contact.email)
         if contact.name:
             name_tag = addns('SurName', NAMESPACES['md'])
-            name_el = etree.SubElement(contact_el, name_tag)
+            name_el = contact_el.find(name_tag)
+            if name_el is None:
+                name_el = etree.SubElement(contact_el, name_tag)
             name_el.text = contact.name
         if contact.phone:
             phone_tag = addns('TelephoneNumber', NAMESPACES['md'])
-            phone_el = etree.SubElement(contact_el, phone_tag)
+            phone_el = contact_el.find(phone_tag)
+            if phone_el is None:
+                phone_el = etree.SubElement(contact_el, phone_tag)
             phone_el.text = contact.phone
         return contact_el
