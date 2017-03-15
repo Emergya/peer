@@ -197,7 +197,8 @@ class BaseMetadataEditForm(forms.Form):
         try:
             self.entity.store_contacts_database()
         except ValueError as  e:
-            raise forms.ValidationError(e.args[0])
+            # XXX set entity as incomplete, send message to user
+            pass
         self.store_entitymd_database(self.entity.id)
         try:
             if self.entity.role_descriptor == 'SP':
@@ -205,7 +206,8 @@ class BaseMetadataEditForm(forms.Form):
             elif self.entity.role_descriptor == 'IDP':
                 self.entity.store_idpcategory_database()
         except ValueError as  e:
-            raise forms.ValidationError(e.args[0])
+            # XXX set entity as incomplete, send message to user
+            pass
 
         mail_owner = True if self.entity.owner != self.user else False
         if mail_owner:
