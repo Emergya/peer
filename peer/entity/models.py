@@ -419,10 +419,14 @@ class Entity(models.Model):
     def revert_category_changes(self):
         md_str = self.metadata.read()
         metadata = Metadata(etree.XML(md_str))
-        self.store_idpcategory_database(metadata)
-        self.store_spcategory_database(metadata)
-        self.store_mdui_database(metadata)
-        self.store_contacts_database(metadata)
+        try:
+            self.store_idpcategory_database(metadata)
+            self.store_spcategory_database(metadata)
+            self.store_mdui_database(metadata)
+            self.store_contacts_database(metadata)
+        except ValueError:
+            # XXX set entity as incomplete, send message to user
+            pass
 
     @transition(field=state, source='*', target=STATE.MOD)
     def modify(self, temp_metadata):
