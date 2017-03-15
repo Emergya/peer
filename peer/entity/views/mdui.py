@@ -17,7 +17,8 @@ def manage_mdui_data(request, entity_id):
 
     MDUIdataFormSet = modelformset_factory(MDUIdata,
             fields = ('entity', 'lang', 'display_name', 'description',
-                'priv_statement_url', 'information_url'),
+                'priv_statement_url', 'information_url',
+                'logo', 'logo_height', 'logo_width'),
             widgets={'lang': forms.TextInput(attrs={'readonly': 'readonly'}),
                      'entity': forms.HiddenInput()},
             max_num=len(settings.MDUI_LANGS), validate_max=True,

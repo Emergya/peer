@@ -399,8 +399,8 @@ class Entity(models.Model):
                 data = data_el.text if data_el is not None else None
                 setattr(mdui, attr, data)
                 if data_el is not None and attr == 'logo':
-                    mdui.logo_height = data_el.attrib('height')
-                    mdui.logo_width = data_el.attrib('width')
+                    mdui.logo_height = data_el.attrib['height']
+                    mdui.logo_width = data_el.attrib['width']
             mdui.save()
 
     def store_contacts_database(self, metadata=None):

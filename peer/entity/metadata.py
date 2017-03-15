@@ -633,10 +633,10 @@ class Metadata(object):
         for piece in MDUI_TR:
             tag = MDUI_TR[piece]
             data = getattr(mdui, piece, False)
-            if data is not False:
+            if data not in (False, None):
                 if piece == 'logo':
                     self.add_mdui_logo(data, lang,
-                            mdui.logo_height, mdui.logo_width)
+                            str(mdui.logo_height), str(mdui.logo_width))
                 else:
                     self.add_mdui_info_piece(tag, data, lang)
             else:
