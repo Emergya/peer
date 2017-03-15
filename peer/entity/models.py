@@ -63,6 +63,7 @@ class Entity(models.Model):
 
     class STATE:
         NEW = 'new'
+        INC = 'incomplete'
         MOD = 'modified'
         PUB = 'published'
 
@@ -423,6 +424,15 @@ class Entity(models.Model):
         self.store_spcategory_database(metadata)
         self.store_mdui_database(metadata)
         self.store_contacts_database(metadata)
+
+    def check_complete(self):
+        missing = []
+        md = self._load_metadata()
+        for language in settings.MDUI_LANGS:
+            lang = language[0]
+            for tag in []:
+                pass
+            
 
     @transition(field=state, source='*', target=STATE.MOD)
     def modify(self, temp_metadata):
