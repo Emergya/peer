@@ -69,6 +69,7 @@ MDUI_TR = {
         'description': 'Description',
         'priv_statement_url': 'PrivacyStatementURL',
         'information_url': 'InformationURL',
+        'logo': 'Logo',
 }
 
 
@@ -590,6 +591,25 @@ class Metadata(object):
         element.text = data
         return element
 
+    def add_mdui_logo(self, data, lang, height, width):
+        tag = 'Logo'
+        logo_el = self.get_mdui_info_piece(tag, lang)
+        if logo_el is not None:
+            logo_el.text = data
+            logo_el.attrib['height'] = height
+            logo_el.attrib['width'] = width
+            return
+        uiinfo_el = self.get_or_create_uiinfo_el()
+        xml_tag = addns(tag, NAMESPACES['mdui'])
+        lang_attr = addns('lang', NAMESPACES['xml'])
+        element = etree.SubElement(uiinfo_el, xml_tag, **{
+            lang_attr: lang,
+            'height': height,
+            'width': width,
+            })
+        element.text = data
+        return element
+
     def rm_mdui_info_piece(self, tag, lang):
         uiinfo_el = self.get_or_create_uiinfo_el()
         element = self.get_mdui_info_piece(tag, lang)
@@ -613,8 +633,12 @@ class Metadata(object):
         for piece in MDUI_TR:
             tag = MDUI_TR[piece]
             data = getattr(mdui, piece, False)
-            if data:
-                self.add_mdui_info_piece(tag, data, lang)
+            if data not in (False, None):
+                if piece == 'logo':
+                    self.add_mdui_logo(data, lang,
+                            str(mdui.logo_height), str(mdui.logo_width))
+                else:
+                    self.add_mdui_info_piece(tag, data, lang)
             else:
                 self.rm_mdui_info_piece(tag, lang)
         uiinfo_el = self.get_or_create_uiinfo_el()
