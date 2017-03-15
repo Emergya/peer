@@ -395,9 +395,12 @@ class Entity(models.Model):
             lang = language[0]
             mdui, created = MDUIdata.objects.get_or_create(entity=self, lang=lang)
             for attr,tag in MDUI_TR.items():
-                data = metadata.get_mdui_info_piece(tag, lang)
-                data = data.text if data is not None else None
+                data_el = metadata.get_mdui_info_piece(tag, lang)
+                data = data_el.text if data_el is not None else None
                 setattr(mdui, attr, data)
+                if data_el is not None and attr == 'logo':
+                    mdui.logo_height = data_el.attrib('height')
+                    mdui.logo_width = data_el.attrib('width')
             mdui.save()
 
     def store_contacts_database(self, metadata=None):
@@ -529,6 +532,11 @@ class MDUIdata(models.Model):
                                          blank=True, null=True)
     information_url = models.URLField(verbose_name=_('Information URL'),
                                          blank=True, null=True)
+    logo = models.URLField(verbose_name=_('Logo'), blank=True, null=True)
+    logo_height = models.PositiveSmallIntegerField(verbose_name=_('Height of the logo'),
+                                          blank=True, null=True)
+    logo_width = models.PositiveSmallIntegerField(verbose_name=_('Width of the logo'),
+                                          blank=True, null=True)
 
 
 def handler_mdui_post_save(sender, instance, **kwargs):

@@ -23,7 +23,6 @@ def manage_mdui_data(request, entity_id):
             max_num=len(settings.MDUI_LANGS), validate_max=True,
             min_num=len(settings.MDUI_LANGS), validate_min=True)
 
-
     if request.method == 'POST':
         formset = MDUIdataFormSet(request.POST,
                 queryset=MDUIdata.objects.filter(entity=entity))
