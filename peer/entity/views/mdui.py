@@ -1,5 +1,7 @@
 from lxml import etree
 
+from django import forms
+from django.forms import modelformset_factory
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
@@ -7,10 +9,10 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext as _
 
+from peer.account.templatetags.account import authorname
 from peer.entity.models import Entity, MDUIdata
+from peer.entity.utils import write_temp_file
 
-from django import forms
-from django.forms import modelformset_factory
 
 def manage_mdui_data(request, entity_id):
     entity = get_object_or_404(Entity, id=entity_id)
@@ -30,8 +32,16 @@ def manage_mdui_data(request, entity_id):
         if formset.is_valid():
             for form in formset:
                 form.save()
-            entity.modify(etree.tostring(entity._load_metadata().etree,
-                pretty_print=True))
+            md_str = etree.tostring(entity._load_metadata().etree,
+                    pretty_print=True)
+            if settings.MODERATION_ENABLED:
+                entity.modify(md_str)
+            else:
+                content = write_temp_file(md_str)
+                name = entity.metadata.name
+                username = authorname(request.user)
+                commit_msg = 'Saving MDUI Data'
+                entity.metadata.save(name, content, username, commit_msg)
             entity.save()
             msg = _('MDUI data successfully changed')
             messages.success(request, msg)

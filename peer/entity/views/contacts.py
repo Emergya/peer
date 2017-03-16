@@ -9,7 +9,9 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext as _
 
+from peer.account.templatetags.account import authorname
 from peer.entity.models import Entity, ContactPerson
+from peer.entity.utils import write_temp_file
 
 
 def manage_contact_data(request, entity_id):
@@ -29,8 +31,16 @@ def manage_contact_data(request, entity_id):
         if formset.is_valid():
             for form in formset:
                 form.save()
-            entity.modify(etree.tostring(entity._load_metadata().etree,
-                pretty_print=True))
+            md_str = etree.tostring(entity._load_metadata().etree,
+                    pretty_print=True)
+            if settings.MODERATION_ENABLED:
+                entity.modify(md_str)
+            else:
+                content = write_temp_file(md_str)
+                name = entity.metadata.name
+                username = authorname(request.user)
+                commit_msg = 'Saving Contact Data'
+                entity.metadata.save(name, content, username, commit_msg)
             entity.save()
             msg = _('Contact data successfully changed')
             messages.success(request, msg)

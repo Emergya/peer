@@ -336,7 +336,30 @@ class EditMonitoringPreferencesForm(forms.Form):
     )
 
 
-class SPEntityCategoryForm(forms.ModelForm):
+class BaseEntityCategoryForm(forms.ModelForm):
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super(BaseEntityCategoryForm, self).__init__(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        super(BaseEntityCategoryForm, self).save(*args, **kwargs)
+        entity = self.instance.entity
+        md_str = etree.tostring(entity._load_metadata().etree,
+                pretty_print=True)
+        if settings.MODERATION_ENABLED:
+            entity.modify(md_str)
+        else:
+            content = write_temp_file(md_str)
+            name = entity.metadata.name
+            username = authorname(self.user)
+            commit_msg = 'Saving SP categories'
+            entity.metadata.save(name, content, username, commit_msg)
+        entity.save()
+
+
+class SPEntityCategoryForm(BaseEntityCategoryForm):
+
     class Meta:
         model = SPEntityCategory
         fields = (
@@ -375,15 +398,9 @@ class SPEntityCategoryForm(forms.ModelForm):
                 'assurance certification, you must provide a '
                 'security contact'))
 
-    def save(self, *args, **kwargs):
-        super(SPEntityCategoryForm, self).save(*args, **kwargs)
-        entity = self.instance.entity
-        entity.modify(etree.tostring(entity._load_metadata().etree,
-            pretty_print=True))
-        entity.save()
 
+class IdPEntityCategoryForm(BaseEntityCategoryForm):
 
-class IdPEntityCategoryForm(forms.ModelForm):
     class Meta:
         model = IdPEntityCategory
         fields = (
@@ -411,10 +428,3 @@ class IdPEntityCategoryForm(forms.ModelForm):
             raise forms.ValidationError(U('If you check the SIRTFI Identity '
                 'assurance certification, you must provide a '
                 'security contact'))
-
-    def save(self, *args, **kwargs):
-        super(IdPEntityCategoryForm, self).save(*args, **kwargs)
-        entity = self.instance.entity
-        entity.modify(etree.tostring(entity._load_metadata().etree,
-            pretty_print=True))
-        entity.save()
