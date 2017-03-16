@@ -437,9 +437,27 @@ class Entity(models.Model):
         md = self._load_metadata()
         for language in settings.MDUI_LANGS:
             lang = language[0]
-            for tag in []:
-                pass
-            
+            for tag in ['DisplayName', 'Description']:
+                data = md.get_mdui_info_piece(tag, lang)
+                if data is None:
+                    missing.append('{!s} ({!s}) missing. Please visit '
+                          'the "MDUI metadata" tab.'.format(tag, language[1]))
+        for type in ('support', 'administrative', 'technical'):
+            email = md.get_contact_data('EmailAddress', type)
+            if email is None:
+                missing.append('{!s} contact email missing. Please visit '
+                      'the "Contact metadata" tab.'.format(type))
+        return missing
+
+    def try_to_modify(self, temp_metadata):
+        if len(self.check_complete()) > 0:
+            self.modify(temp_metadata)
+        else:
+            self.incomplete(temp_metadata)
+
+    @transition(field=state, source='*', target=STATE.INC)
+    def incomplete(self, temp_metadata):
+        self.temp_metadata = temp_metadata
 
     @transition(field=state, source='*', target=STATE.MOD)
     def modify(self, temp_metadata):
