@@ -45,7 +45,12 @@
   {% endif %}
   {% endwith %}
   <p>{% trans "This entity belongs to the domain" %} <a href="http://{{ entity.domain }}">{{ entity.domain }}</a></p>
-
+  {% if incomplete %}
+  <div class="missing-md">
+    <h3><span class="ui-icon ui-icon-alert"></span>{% trans "This entity is missing metadata:" %}</h3>
+    {% include "entity/missing-md.include.html" %}
+  </div>
+  {% endif %}
   {% if entity.has_metadata %}
     <dl>
       {% if entity.entityid %}

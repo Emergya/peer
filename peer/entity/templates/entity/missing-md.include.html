@@ -1,0 +1,12 @@
+{% load i18n l10n %}
+
+{% if incomplete %}
+<div class="ui-widget">
+  {% for message in incomplete %}
+  {% with tag=message.0 url=message.1 link=message.2 %}
+      <p><span class="ui-icon ui-icon-alert"></span>{% blocktrans %}The {{ tag }} is missing. Please visit the <a href="{{ url }}">{{ link }}</a> tab.{% endblocktrans %}</p>
+  {%endwith %}
+  {% endfor %}
+</div>
+{% endif %}
+

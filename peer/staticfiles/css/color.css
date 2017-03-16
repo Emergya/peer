@@ -346,3 +346,7 @@ ul.errorlist li.error {
     border-right: 1px solid #FFF;
     border-bottom: border-top: 1px solid #D7DEFB;
 }
+
+div.missing-md {
+    color: #ff7b33;
+}

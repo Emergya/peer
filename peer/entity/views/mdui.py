@@ -35,7 +35,7 @@ def manage_mdui_data(request, entity_id):
             md_str = etree.tostring(entity._load_metadata().etree,
                     pretty_print=True)
             if settings.MODERATION_ENABLED:
-                entity.modify(md_str)
+                entity.try_to_modify(md_str)
             else:
                 content = write_temp_file(md_str)
                 name = entity.metadata.name

@@ -645,8 +645,6 @@ class Metadata(object):
         self._remove_childless_ancestors(uiinfo_el)
 
     def get_contact_people(self, type):
-        from peer.entity.models import ContactPerson
-        type = dict(ContactPerson.CONTACT_TYPES)[type]
         contact_person_tag = 'md:ContactPerson'
         contact_type_attr = 'contactType'
         path = '//{!s}[@{!s} = "{!s}"]'
@@ -671,12 +669,12 @@ class Metadata(object):
             if element is not None:
                 return element.text
 
-    def add_contact(self, contact):
-        contacts = self.get_contact_people(contact.type)
+    def add_contact(self, contact, type):
+        contacts = self.get_contact_people(type)
         if len(contacts):
             contact_el = contacts[0]
         else:
-            contact_el = self.add_contact_person(contact.type)
+            contact_el = self.add_contact_person(type)
         if contact.email:
             email_tag = addns('EmailAddress', NAMESPACES['md'])
             email_el = contact_el.find(email_tag)

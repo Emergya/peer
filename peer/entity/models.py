@@ -31,6 +31,7 @@ from lxml import etree
 from urlparse import urlparse
 import logging
 
+from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext
@@ -156,30 +157,35 @@ class Entity(models.Model):
 
             md = Metadata(metadata_tree)
 
-            if self.mdui.count():
-                for mdui in self.mdui.all():
-                    md.add_mdui(mdui)
-
-            if self.contact_people.count():
-                for contact in self.contact_people.all():
-                    md.add_contact(contact)
-            try:
-                sp_categories = self.sp_categories
-            except SPEntityCategory.DoesNotExist:
-                pass
-            else:
-                md.add_sp_categories(sp_categories)
-            try:
-                idp_categories = self.idp_categories
-            except IdPEntityCategory.DoesNotExist:
-                pass
-            else:
-                md.add_idp_categories(idp_categories)
+            md = self._load_from_db(md)
 
             self._parsed_metadata = md.etree
             return md
 
         return Metadata(self._parsed_metadata)
+
+    def _load_from_db(self, md):
+        if self.mdui.count():
+            for mdui in self.mdui.all():
+                md.add_mdui(mdui)
+
+        if self.contact_people.count():
+            for contact in self.contact_people.all():
+                type = dict(contact.CONTACT_TYPES)[contact.type]
+                md.add_contact(contact, type)
+        try:
+            sp_categories = self.sp_categories
+        except SPEntityCategory.DoesNotExist:
+            pass
+        else:
+            md.add_sp_categories(sp_categories)
+        try:
+            idp_categories = self.idp_categories
+        except IdPEntityCategory.DoesNotExist:
+            pass
+        else:
+            md.add_idp_categories(idp_categories)
+        return md
 
     def has_metadata(self):
         try:
@@ -348,17 +354,17 @@ class Entity(models.Model):
             sp_cats.rae_nren_service = SP_CATEGORIES['NREN'] in categories
             sp_cats.rae_eu_protection = SP_CATEGORIES['EU'] in categories
             sp_cats.swamid_sfs = SP_CATEGORIES['SFS'] in categories
-            if (not sp_cats.research_and_education) and (sp_cats.rae_hei_service or
-                    sp_cats.rae_hei_service or sp_cats.rae_eu_protection):
-                raise ValueError(_('To categorize the entity with the '
-                    'HEI service, NREN service, or EU protection categories, '
-                    'you also need to categorize it for Research & Education'))
+            # if (not sp_cats.research_and_education) and (sp_cats.rae_hei_service or
+                    # sp_cats.rae_hei_service or sp_cats.rae_eu_protection):
+                # raise ValueError(_('To categorize the entity with the '
+                    # 'HEI service, NREN service, or EU protection categories, '
+                    # 'you also need to categorize it for Research & Education'))
             if sp_cats.code_of_conduct:
                 lang, psu = self.privacy_statement_url
-                if psu is None:
-                    raise ValueError(_('To categorize an entity with the '
-                        'GEANT Code of Conduct category, you must provide a '
-                        'privacy statement URL'))
+                # if psu is None:
+                    # raise ValueError(_('To categorize an entity with the '
+                        # 'GEANT Code of Conduct category, you must provide a '
+                        # 'privacy statement URL'))
                 sp_cats.coc_priv_statement_url = psu
                 sp_cats.lang_priv_statement_url = getlang(psu)
         self._store_certifications_database(metadata, sp_cats)
@@ -378,10 +384,10 @@ class Entity(models.Model):
             idp_cats.code_of_conduct = IDP_CATEGORIES['CoCo'] in categories
             if idp_cats.code_of_conduct:
                 lang, psu = self.privacy_statement_url
-                if psu is None:
-                    raise ValueError(_('To categorize an entity with support '
-                        'for the GEANT Code of Conduct category, you must provide a '
-                        'privacy statement URL'))
+                # if psu is None:
+                    # raise ValueError(_('To categorize an entity with support '
+                        # 'for the GEANT Code of Conduct category, you must provide a '
+                        # 'privacy statement URL'))
                 idp_cats.coc_priv_statement_url = psu
                 idp_cats.lang_priv_statement_url = lang
         self._store_certifications_database(metadata, idp_cats)
@@ -408,52 +414,68 @@ class Entity(models.Model):
         if metadata is None:
             metadata = self._load_metadata()
         for t in ContactPerson.CONTACT_TYPES:
-            type = t[0]
-            contact, created = ContactPerson.objects.get_or_create(entity=self, type=type)
-            email = metadata.get_contact_data('EmailAddress', type)
-            if not email:
-                raise ValueError(_('You must provide an email for every contact'))
-            elif email.startswith('mailto'):
+            contact, created = ContactPerson.objects.get_or_create(entity=self, type=t[0])
+            email = metadata.get_contact_data('EmailAddress', t[1])
+            # if not email:
+                # raise ValueError(_('You must provide an email for every contact'))
+            if email is not None and email.startswith('mailto'):
                 email = email[7:]
             contact.email = email
-            contact.name = metadata.get_contact_data('SurName', type)
-            contact.phone = metadata.get_contact_data('TelephoneNumber', type)
+            contact.name = metadata.get_contact_data('SurName', t[1])
+            contact.phone = metadata.get_contact_data('TelephoneNumber', t[1])
             contact.save()
 
     def revert_category_changes(self):
         md_str = self.metadata.read()
         metadata = Metadata(etree.XML(md_str))
-        try:
-            self.store_idpcategory_database(metadata)
-            self.store_spcategory_database(metadata)
-            self.store_mdui_database(metadata)
-            self.store_contacts_database(metadata)
-        except ValueError:
-            # XXX set entity as incomplete, send message to user
-            pass
+        self.store_idpcategory_database(metadata)
+        self.store_spcategory_database(metadata)
+        self.store_mdui_database(metadata)
+        self.store_contacts_database(metadata)
 
-    def check_complete(self):
+    def check_complete(self, md = None):
         missing = []
-        md = self._load_metadata()
+        if md is None:
+            md = self._load_metadata()
         for language in settings.MDUI_LANGS:
             lang = language[0]
             for tag in ['DisplayName', 'Description']:
                 data = md.get_mdui_info_piece(tag, lang)
                 if data is None:
-                    missing.append('{!s} ({!s}) missing. Please visit '
-                          'the "MDUI metadata" tab.'.format(tag, language[1]))
+                    missing.append(('{!s} ({!s})'.format(tag, language[1]),
+                                    reverse('entities:manage_mdui_data',
+                                         args=(self.pk,)),
+                                    _('MDUI metadata')))
         for type in ('support', 'administrative', 'technical'):
             email = md.get_contact_data('EmailAddress', type)
             if email is None:
-                missing.append('{!s} contact email missing. Please visit '
-                      'the "Contact metadata" tab.'.format(type))
+                missing.append(('{!s} contact email'.format(type),
+                                reverse('entities:manage_contact_data',
+                                     args=(self.pk,)),
+                                _('Contact metadata')))
         return missing
 
     def try_to_modify(self, temp_metadata):
-        if len(self.check_complete()) > 0:
+        md = self._load_from_db(Metadata(etree.XML(temp_metadata)))
+        if len(self.check_complete(md = md)) == 0:
             self.modify(temp_metadata)
         else:
             self.incomplete(temp_metadata)
+
+    def try_to_approve(self, temp_metadata, name, content, username, commit_msg):
+        md = self._load_from_db(Metadata(etree.XML(temp_metadata)))
+        if len(self.check_complete(md = md)) == 0:
+            self.approve(name, content, username, commit_msg)
+        else:
+            self.incomplete(temp_metadata)
+
+    def try_to_reject(self):
+        md = self._load_from_db(Metadata(etree.XML(temp_metadata)))
+        if len(self.check_complete(md = md)) == 0:
+            self.reject()
+        else:
+            self.revert_category_changes()
+            self.incomplete('')
 
     @transition(field=state, source='*', target=STATE.INC)
     def incomplete(self, temp_metadata):

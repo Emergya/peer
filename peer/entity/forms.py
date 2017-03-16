@@ -185,11 +185,12 @@ class BaseMetadataEditForm(forms.Form):
         commit_msg = self.cleaned_data['commit_msg_' + self.type].encode('utf8')
         if settings.MODERATION_ENABLED:
             if action == 'submit_changes':
-                self.entity.modify(self.metadata)
+                self.entity.try_to_modify(self.metadata)
             elif action == 'approve_changes':
-                self.entity.approve(name, content, username, commit_msg)
+                self.entity.try_to_approve(self.metadata, name, content,
+                        username, commit_msg)
             elif action == 'discard_changes':
-                self.entity.reject()
+                self.entity.try_to_reject()
         else:
             self.entity.metadata.save(name, content, username, commit_msg)
         self.entity.save()
@@ -348,7 +349,7 @@ class BaseEntityCategoryForm(forms.ModelForm):
         md_str = etree.tostring(entity._load_metadata().etree,
                 pretty_print=True)
         if settings.MODERATION_ENABLED:
-            entity.modify(md_str)
+            entity.try_to_modify(md_str)
         else:
             content = write_temp_file(md_str)
             name = entity.metadata.name

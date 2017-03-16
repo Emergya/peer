@@ -1,6 +1,12 @@
 {% load i18n entity_permissions %}
 
 {% block content %}
+  {% if incomplete %}
+  <div class="missing-md">
+    <h3><span class="ui-icon ui-icon-alert"></span>{% trans "This entity is missing metadata:" %}</h3>
+    {% include "entity/missing-md.include.html" %}
+  </div>
+  {% endif %}
 <form class="metadataForm"
       id="{{ form_id }}"
       enctype="multipart/form-data"
@@ -31,10 +37,14 @@
             {% canedit entity %}
     <input class="button" name="submit_changes" type="submit" value="Submit changes for moderation" />
             {% endcanedit %}
+            {% if entity.has_metadata %}
             {% canapprove entity %}
+            {% if not incomplete %}
     <input class="button" name="approve_changes" type="submit" value="Review and publish changes" />
     <input class="button" name="discard_changes" type="submit" value="Discard changes" />
+            {% endif %}
             {% endcanapprove %}
+            {% endif %}
       {% else %}
             {% canedit entity %}
     <input class="button" type="submit" value="Submit changes" />

@@ -92,6 +92,18 @@ def entity_add_with_domain(request, domain_name=None,
 
 def entity_view(request, entity_id):
     entity = get_object_or_404(Entity, id=entity_id)
+    incomplete = entity.check_complete()
+    if incomplete:
+        storage = messages.get_messages(request)
+        for message in storage: pass
+        storage.used = True
+        msg = _('Entity metadata still incomplete. Please fill in the '
+                'missing data before submitting for review')
+        messages.warning(request, msg)
+    elif entity.state != entity.STATE.PUB:
+        msg = _('Entity metadata complete. You can now submit '
+                'your entity for review')
+        messages.success(request, msg)
     if entity.has_metadata():
         try:
             revs = add_previous_revisions(entity.metadata.list_revisions())
@@ -104,6 +116,7 @@ def entity_view(request, entity_id):
     return render_to_response('entity/view.html', {
         'entity': entity,
         'revs': revs,
+        'incomplete': incomplete,
     }, context_instance=RequestContext(request))
 
 

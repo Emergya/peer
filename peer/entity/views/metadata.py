@@ -71,6 +71,10 @@ def _get_edit_metadata_form(request, entity, edit_mode, form=None):
             form = MetadataRemoteEditForm(entity, request.user)
     form_action = reverse('entities:%s_edit_metadata' % edit_mode,
                           args=(entity.id, ))
+    try:
+        incomplete = entity.check_complete()
+    except IOError:
+        incomplete = []
 
     context_instance = RequestContext(request)
     return render_to_string('entity/simple_edit_metadata.html', {
@@ -79,6 +83,7 @@ def _get_edit_metadata_form(request, entity, edit_mode, form=None):
         'form': form,
         'form_action': form_action,
         'form_id': edit_mode + '_edit_form',
+        'incomplete': incomplete,
     }, context_instance=context_instance)
 
 
@@ -87,7 +92,7 @@ def _get_success_message(action):
         if 'approve_changes' == action:
             success_message = _('Entity metadata has been modified')
         elif 'submit_changes' == action:
-            success_message = _('Entity metadata modification has been submitted for review')
+            success_message = _('Entity metadata has been saved')
         elif 'discard_changes' == action:
             success_message = _('Entity metadata modifications have been discarded')
     else:

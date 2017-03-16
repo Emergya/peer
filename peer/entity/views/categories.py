@@ -19,7 +19,7 @@ def manage_sp_categories(request, entity_id):
         entity.sp_categories = sp_categories
         sp_categories.save()
     if request.method == 'POST':
-        form = SPEntityCategoryForm(request.POST,
+        form = SPEntityCategoryForm(request.user, request.POST,
                 instance=sp_categories)
         if form.is_valid():
             form.save()
@@ -28,7 +28,7 @@ def manage_sp_categories(request, entity_id):
             return HttpResponseRedirect(reverse('entities:entity_view',
                                          args=(entity_id,)))
     else:
-        form = SPEntityCategoryForm(instance=sp_categories)
+        form = SPEntityCategoryForm(request.user, instance=sp_categories)
     context = {
             'form': form,
             'entity': entity
@@ -45,7 +45,7 @@ def manage_idp_categories(request, entity_id):
         entity.idp_categories = idp_categories
         idp_categories.save()
     if request.method == 'POST':
-        form = IdPEntityCategoryForm(request.POST,
+        form = IdPEntityCategoryForm(request.user, request.POST,
                 instance=idp_categories)
         if form.is_valid():
             form.save()
@@ -54,7 +54,7 @@ def manage_idp_categories(request, entity_id):
             return HttpResponseRedirect(reverse('entities:entity_view',
                                          args=(entity_id,)))
     else:
-        form = IdPEntityCategoryForm(instance=idp_categories)
+        form = IdPEntityCategoryForm(request.user, instance=idp_categories)
     context = {
             'form': form,
             'entity': entity
