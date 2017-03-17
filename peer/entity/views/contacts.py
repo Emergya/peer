@@ -12,15 +12,14 @@ from django.utils.translation import ugettext as _
 from peer.account.templatetags.account import authorname
 from peer.entity.models import Entity, ContactPerson
 from peer.entity.utils import write_temp_file
+from peer.entity.forms import ContactForm
 
 
 def manage_contact_data(request, entity_id):
     entity = get_object_or_404(Entity, id=entity_id)
 
     ContactsFormSet = modelformset_factory(ContactPerson,
-            fields = ('entity', 'type', 'email', 'name', 'phone'),
-            widgets={'entity': forms.HiddenInput(),
-                     'name': forms.TextInput()},
+            form=ContactForm,
             max_num=3, validate_max=True,
             min_num=3, validate_min=True)
 

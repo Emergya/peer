@@ -3,8 +3,12 @@
 {% if incomplete %}
 <div class="ui-widget">
   {% for message in incomplete %}
-  {% with tag=message.0 url=message.1 link=message.2 %}
-      <p><span class="ui-icon ui-icon-alert"></span>{% blocktrans %}The {{ tag }} is missing. Please visit the <a href="{{ url }}">{{ link }}</a> tab.{% endblocktrans %}</p>
+  {% with type=message.0 tag=message.1 url=message.2 link=message.3 %}
+    {% if type == 'missing' %}
+      <p><span class="ui-icon ui-icon-alert"></span>{% blocktrans %}The {{ tag }} is missing. Please go to the <a href="{{ url }}">{{ link }}</a> tab to fix it.{% endblocktrans %}</p>
+    {% else %}
+      <p><span class="ui-icon ui-icon-alert"></span>{% blocktrans %}{{ tag }}. Please go to the <a href="{{ url }}">{{ link }}</a> tab to fix it.{% endblocktrans %}</p>
+    {% endif %}
   {%endwith %}
   {% endfor %}
 </div>

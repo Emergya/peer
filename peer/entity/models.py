@@ -331,11 +331,8 @@ class Entity(models.Model):
             cats.sirtfi_id_assurance = CERTIFICATIONS['SIRTFI'] in certifications
             if cats.sirtfi_id_assurance:
                 sce = self.security_contact_email
-                if sce is None:
-                    raise ValueError(_('To certify an entity with '
-                        'SIRTFI identity assurance, you must provide a '
-                        'security contact email'))
-                cats.security_contact_email = sce
+                if sce is not None:
+                    cats.security_contact_email = sce
 
     def store_spcategory_database(self, metadata=None):
         if metadata is None:
@@ -354,17 +351,8 @@ class Entity(models.Model):
             sp_cats.rae_nren_service = SP_CATEGORIES['NREN'] in categories
             sp_cats.rae_eu_protection = SP_CATEGORIES['EU'] in categories
             sp_cats.swamid_sfs = SP_CATEGORIES['SFS'] in categories
-            # if (not sp_cats.research_and_education) and (sp_cats.rae_hei_service or
-                    # sp_cats.rae_hei_service or sp_cats.rae_eu_protection):
-                # raise ValueError(_('To categorize the entity with the '
-                    # 'HEI service, NREN service, or EU protection categories, '
-                    # 'you also need to categorize it for Research & Education'))
             if sp_cats.code_of_conduct:
                 lang, psu = self.privacy_statement_url
-                # if psu is None:
-                    # raise ValueError(_('To categorize an entity with the '
-                        # 'GEANT Code of Conduct category, you must provide a '
-                        # 'privacy statement URL'))
                 sp_cats.coc_priv_statement_url = psu
                 sp_cats.lang_priv_statement_url = getlang(psu)
         self._store_certifications_database(metadata, sp_cats)
@@ -384,10 +372,6 @@ class Entity(models.Model):
             idp_cats.code_of_conduct = IDP_CATEGORIES['CoCo'] in categories
             if idp_cats.code_of_conduct:
                 lang, psu = self.privacy_statement_url
-                # if psu is None:
-                    # raise ValueError(_('To categorize an entity with support '
-                        # 'for the GEANT Code of Conduct category, you must provide a '
-                        # 'privacy statement URL'))
                 idp_cats.coc_priv_statement_url = psu
                 idp_cats.lang_priv_statement_url = lang
         self._store_certifications_database(metadata, idp_cats)
@@ -442,17 +426,57 @@ class Entity(models.Model):
             for tag in ['DisplayName', 'Description']:
                 data = md.get_mdui_info_piece(tag, lang)
                 if data is None:
-                    missing.append(('{!s} ({!s})'.format(tag, language[1]),
+                    missing.append('missing',
+                                   ('{!s} ({!s})'.format(tag, language[1]),
                                     reverse('entities:manage_mdui_data',
                                          args=(self.pk,)),
                                     _('MDUI metadata')))
         for type in ('support', 'administrative', 'technical'):
             email = md.get_contact_data('EmailAddress', type)
             if email is None:
-                missing.append(('{!s} contact email'.format(type),
+                missing.append(('missing',
+                                '{!s} contact email'.format(type),
                                 reverse('entities:manage_contact_data',
                                      args=(self.pk,)),
                                 _('Contact metadata')))
+        if md.has_categories_el():
+            if self.role_descriptor == 'SP':
+                categories = md.sp_categories
+                coco = SP_CATEGORIES['CoCo']
+                if SP_CATEGORIES['R&E'] not in categories:
+                    if (SP_CATEGORIES['HEI'] in categories or
+                            SP_CATEGORIES['NREN'] in categories or
+                            SP_CATEGORIES['EU'] in categories):
+                        missing.append(('inconsistent',
+                                        _('To categorize the entity with the '
+                        'HEI service, NREN service, or EU protection categories, '
+                        'you also need to categorize it for Research & Education'),
+                                        reverse('entities.manage_sp_categories',
+                                             args=(self.pk,)),
+                                        _('SP Categories')))
+            elif self.role_descriptor == 'IDP':
+                categories = md.idp_categories
+                coco = IDP_CATEGORIES['CoCo']
+
+            if coco in categories:
+                _, psu = md.privacy_statement_url
+                if not psu:
+                    missing.append(('inconsistent',
+                                    _('To categorize an entity with the '
+                    'GEANT Code of Conduct category, you must provide a '
+                    'privacy statement URL'),
+                                    reverse('entities.manage_sp_categories',
+                                         args=(self.pk,)),
+                                    _('SP Categories')))
+            if CERTIFICATIONS['SIRTFI'] in md.certifications:
+                if md.security_contact_email is None:
+                    missing.append(('inconsistent',
+                                    _('To certify an entity with '
+                    'SIRTFI identity assurance, you must provide a '
+                    'security contact email'),
+                                    reverse('entities.manage_sp_categories',
+                                         args=(self.pk,)),
+                                    _('SP Categories')))
         return missing
 
     def try_to_modify(self, temp_metadata):

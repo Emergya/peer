@@ -40,13 +40,14 @@ from django.conf import settings
 from peer.account.templatetags.account import authorname
 from peer.customfields import TermsOfUseField, readtou
 from peer.entity.models import Entity, EntityGroup, EntityMD, AttributesMD
-from peer.entity.models import SPEntityCategory, IdPEntityCategory, MDUIdata
+from peer.entity.models import SPEntityCategory, IdPEntityCategory
+from peer.entity.models import MDUIdata,ContactPerson
+from peer.entity.models import SP_CATEGORIES, IDP_CATEGORIES, CERTIFICATIONS
 from peer.entity.validation import validate
 from peer.domain.validation import get_superdomain_verified
 from peer.entity.widgets import MetadataWidget
 from peer.entity.utils import FetchError, fetch_resource
 from peer.entity.utils import write_temp_file, strip_entities_descriptor
-from peer.entity.models import SP_CATEGORIES, IDP_CATEGORIES, CERTIFICATIONS
 
 
 class EntityForm(forms.ModelForm):
@@ -195,20 +196,12 @@ class BaseMetadataEditForm(forms.Form):
             self.entity.metadata.save(name, content, username, commit_msg)
         self.entity.save()
         self.entity.store_mdui_database()
-        try:
-            self.entity.store_contacts_database()
-        except ValueError as  e:
-            # XXX set entity as incomplete, send message to user
-            pass
+        self.entity.store_contacts_database()
         self.store_entitymd_database(self.entity.id)
-        try:
-            if self.entity.role_descriptor == 'SP':
-                self.entity.store_spcategory_database()
-            elif self.entity.role_descriptor == 'IDP':
-                self.entity.store_idpcategory_database()
-        except ValueError as  e:
-            # XXX set entity as incomplete, send message to user
-            pass
+        if self.entity.role_descriptor == 'SP':
+            self.entity.store_spcategory_database()
+        elif self.entity.role_descriptor == 'IDP':
+            self.entity.store_idpcategory_database()
 
         mail_owner = True if self.entity.owner != self.user else False
         if mail_owner:
@@ -429,3 +422,50 @@ class IdPEntityCategoryForm(BaseEntityCategoryForm):
             raise forms.ValidationError(U('If you check the SIRTFI Identity '
                 'assurance certification, you must provide a '
                 'security contact'))
+
+
+class MDUIdataForm(forms.ModelForm):
+
+    class Meta:
+        model = MDUIdata
+        fields = (
+            'entity', 'lang', 'display_name', 'description',
+            'priv_statement_url', 'information_url',
+            'logo', 'logo_height', 'logo_width'
+        )
+        widgets={
+            'lang': forms.TextInput(attrs={'readonly': 'readonly'}),
+            'entity': forms.HiddenInput()
+        }
+
+    def clean(self):
+        if any(self.errors):
+            return
+        required = {
+                'display_name': 'DisplayName',
+                'description': 'Description'
+        }
+        for field in required:
+            data = self.cleaned_data[field]
+            if not data:
+                msg = _('{field} is required').format(required[field])
+                raise forms.ValidationError(msg)
+
+
+class ContactForm(forms.ModelForm):
+
+    class Meta:
+        model = ContactPerson
+        fields = ('entity', 'type', 'email', 'name', 'phone'),
+        widgets={
+            'name': forms.TextInput(),
+            'entity': forms.HiddenInput()
+        }
+
+    def clean(self):
+        if any(self.errors):
+            return
+        email = self.cleaned_data['email']
+        if not email:
+            msg = _('Email is required')
+            raise forms.ValidationError(msg)

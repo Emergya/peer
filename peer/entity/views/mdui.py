@@ -12,17 +12,14 @@ from django.utils.translation import ugettext as _
 from peer.account.templatetags.account import authorname
 from peer.entity.models import Entity, MDUIdata
 from peer.entity.utils import write_temp_file
+from peer.entity.forms import MDUIdataForm
 
 
 def manage_mdui_data(request, entity_id):
     entity = get_object_or_404(Entity, id=entity_id)
 
     MDUIdataFormSet = modelformset_factory(MDUIdata,
-            fields = ('entity', 'lang', 'display_name', 'description',
-                'priv_statement_url', 'information_url',
-                'logo', 'logo_height', 'logo_width'),
-            widgets={'lang': forms.TextInput(attrs={'readonly': 'readonly'}),
-                     'entity': forms.HiddenInput()},
+            form=MDUIdataForm,
             max_num=len(settings.MDUI_LANGS), validate_max=True,
             min_num=len(settings.MDUI_LANGS), validate_min=True)
 
