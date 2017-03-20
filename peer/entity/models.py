@@ -65,6 +65,7 @@ class Entity(models.Model):
     class STATE:
         NEW = 'new'
         INC = 'incomplete'
+        COM = 'complete'
         MOD = 'modified'
         PUB = 'published'
 
@@ -173,18 +174,16 @@ class Entity(models.Model):
             for contact in self.contact_people.all():
                 type = dict(contact.CONTACT_TYPES)[contact.type]
                 md.add_contact(contact, type)
+
         try:
-            sp_categories = self.sp_categories
+            md.add_sp_categories(self.sp_categories)
         except SPEntityCategory.DoesNotExist:
             pass
-        else:
-            md.add_sp_categories(sp_categories)
         try:
-            idp_categories = self.idp_categories
+            md.add_idp_categories(self.idp_categories)
         except IdPEntityCategory.DoesNotExist:
             pass
-        else:
-            md.add_idp_categories(idp_categories)
+
         return md
 
     def has_metadata(self):
@@ -451,7 +450,7 @@ class Entity(models.Model):
                                         _('To categorize the entity with the '
                         'HEI service, NREN service, or EU protection categories, '
                         'you also need to categorize it for Research & Education'),
-                                        reverse('entities.manage_sp_categories',
+                                        reverse('entities:manage_sp_categories',
                                              args=(self.pk,)),
                                         _('SP Categories')))
             elif self.role_descriptor == 'IDP':
@@ -459,13 +458,13 @@ class Entity(models.Model):
                 coco = IDP_CATEGORIES['CoCo']
 
             if coco in categories:
-                _, psu = md.privacy_statement_url
-                if not psu:
+                lang, psu = md.privacy_statement_url
+                if psu is None:
                     missing.append(('inconsistent',
                                     _('To categorize an entity with the '
                     'GEANT Code of Conduct category, you must provide a '
                     'privacy statement URL'),
-                                    reverse('entities.manage_sp_categories',
+                                    reverse('entities:manage_sp_categories',
                                          args=(self.pk,)),
                                     _('SP Categories')))
             if CERTIFICATIONS['SIRTFI'] in md.certifications:
@@ -474,15 +473,22 @@ class Entity(models.Model):
                                     _('To certify an entity with '
                     'SIRTFI identity assurance, you must provide a '
                     'security contact email'),
-                                    reverse('entities.manage_sp_categories',
+                                    reverse('entities:manage_sp_categories',
                                          args=(self.pk,)),
                                     _('SP Categories')))
         return missing
 
-    def try_to_modify(self, temp_metadata):
+    def try_to_submit(self, temp_metadata):
         md = self._load_from_db(Metadata(etree.XML(temp_metadata)))
         if len(self.check_complete(md = md)) == 0:
             self.modify(temp_metadata)
+        else:
+            self.incomplete(temp_metadata)
+
+    def try_to_complete(self, temp_metadata):
+        md = self._load_from_db(Metadata(etree.XML(temp_metadata)))
+        if len(self.check_complete(md = md)) == 0:
+            self.complete(temp_metadata)
         else:
             self.incomplete(temp_metadata)
 
@@ -500,6 +506,10 @@ class Entity(models.Model):
         else:
             self.revert_category_changes()
             self.incomplete('')
+
+    @transition(field=state, source='*', target=STATE.COM)
+    def complete(self, temp_metadata):
+        self.temp_metadata = temp_metadata
 
     @transition(field=state, source='*', target=STATE.INC)
     def incomplete(self, temp_metadata):

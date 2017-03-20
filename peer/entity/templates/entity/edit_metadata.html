@@ -107,6 +107,11 @@
                 update_xmlcontent();
                 return true;
             });
+            $("form input[name=update_changes]").click(function () {
+                $("form input[name=button_clicked]").val("update_changes");
+                update_xmlcontent();
+                return true;
+            });
             $("form input[name=submit_changes]").click(function () {
                 $("form input[name=button_clicked]").val("submit_changes");
                 update_xmlcontent();

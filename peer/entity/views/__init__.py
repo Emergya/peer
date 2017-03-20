@@ -26,6 +26,8 @@
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of Terena.
 
+from lxml import etree
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -100,9 +102,15 @@ def entity_view(request, entity_id):
         msg = _('Entity metadata still incomplete. Please fill in the '
                 'missing data before submitting for review')
         messages.warning(request, msg)
+    elif entity.state == entity.STATE.COM:
+        entity.modify(etree.tostring(entity._load_metadata().etree))
+        msg = _('Entity metadata complete. You can now '
+                'submit for review')
+        messages.success(request, msg)
     elif entity.state != entity.STATE.PUB:
-        msg = _('Entity metadata complete. You can now submit '
-                'your entity for review')
+        entity.modify(etree.tostring(entity._load_metadata().etree))
+        msg = _('Entity metadata complete. Your entity is now '
+                'pending review')
         messages.success(request, msg)
     if entity.has_metadata():
         try:

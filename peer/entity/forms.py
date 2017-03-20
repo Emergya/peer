@@ -185,8 +185,10 @@ class BaseMetadataEditForm(forms.Form):
         username = authorname(self.user)
         commit_msg = self.cleaned_data['commit_msg_' + self.type].encode('utf8')
         if settings.MODERATION_ENABLED:
-            if action == 'submit_changes':
-                self.entity.try_to_modify(self.metadata)
+            if action == 'update_changes':
+                self.entity.try_to_complete(self.metadata)
+            elif action == 'submit_changes':
+                self.entity.try_to_submit(self.metadata)
             elif action == 'approve_changes':
                 self.entity.try_to_approve(self.metadata, name, content,
                         username, commit_msg)
@@ -208,6 +210,8 @@ class BaseMetadataEditForm(forms.Form):
             if not settings.MODERATION_ENABLED:
                 action = 'modified'
             else:
+                if action == 'update_changes':
+                    action = 'saved changes for'
                 if action == 'submit_changes':
                     action = 'submitted changes for'
                 if action == 'approve_changes':
@@ -342,7 +346,7 @@ class BaseEntityCategoryForm(forms.ModelForm):
         md_str = etree.tostring(entity._load_metadata().etree,
                 pretty_print=True)
         if settings.MODERATION_ENABLED:
-            entity.try_to_modify(md_str)
+            entity.try_to_complete(md_str)
         else:
             content = write_temp_file(md_str)
             name = entity.metadata.name
@@ -456,7 +460,7 @@ class ContactForm(forms.ModelForm):
 
     class Meta:
         model = ContactPerson
-        fields = ('entity', 'type', 'email', 'name', 'phone'),
+        fields = ('entity', 'type', 'email', 'name', 'phone')
         widgets={
             'name': forms.TextInput(),
             'entity': forms.HiddenInput()

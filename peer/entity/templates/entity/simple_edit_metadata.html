@@ -35,11 +35,14 @@
   <fieldset class="actionRowMD">
       {% if MODERATION_ENABLED %}
             {% canedit entity %}
-    <input class="button" name="submit_changes" type="submit" value="Submit changes for moderation" />
+    <input class="button" name="update_changes" type="submit" value="Save changes" />
+            {% if complete %}
+    <input class="button" name="submit_changes" type="submit" value="Submit for moderation" />
+            {% endif %}
             {% endcanedit %}
             {% if entity.has_metadata %}
             {% canapprove entity %}
-            {% if not incomplete %}
+            {% if submitted %}
     <input class="button" name="approve_changes" type="submit" value="Review and publish changes" />
     <input class="button" name="discard_changes" type="submit" value="Discard changes" />
             {% endif %}

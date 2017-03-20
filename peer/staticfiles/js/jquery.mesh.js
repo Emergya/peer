@@ -9,6 +9,7 @@
             titleReviewMsg: 'Review Changes',
             titleCommitMsg: 'Commit Changes',
             titleDiscardMsg: 'Discard Changes',
+            titleSaveMsg: 'Save Changes',
             diffDiscardMsg: 'The following changes will be discarded',
             validatingMsg: 'Validating metadata ...',
             validMetadataMsg: 'The metadata is valid!',
@@ -171,6 +172,9 @@
                 }else if (act == 'submit_changes'){
                     $dialog.dialog("option", "title", settings.titleReviewMsg);
                     $dialog.find("#msg").html(settings.noReviewMessageAlert);
+                }else if (act == 'update_changes'){
+                    $dialog.dialog("option", "title", settings.titleSaveMsg);
+                    $dialog.find("#msg").html(settings.noReviewMessageAlert);
                 }else if (act == 'approve_changes'){
                     $dialog.dialog("option", "title", settings.titleCommitMsg);
                     $dialog.find("#msg").html(settings.noCommitMessageAlert);
@@ -238,6 +242,10 @@
                 }else{
                     $dialog.data("action", "submit_changes").dialog('open');
                 }
+            });
+            $form.find("input[name=update_changes]").click(function (event) {
+                event.preventDefault();
+                $dialog.data("action", "update_changes").dialog('open');
             });
             $form.find("input[name=approve_changes]").click(function (event) {
                 event.preventDefault();
