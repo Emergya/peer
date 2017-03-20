@@ -10,6 +10,9 @@
       <li><a href="{% url 'entities:edit_metadata' entity.id %}">{% trans "Approve/Reject metadata changes" %}</a></li>
             {% endif %}
             {% endcanapprove %}
+            {% if entity.state == entity.STATE.COM %}
+      <li><a href="{% url 'entities:edit_metadata' entity.id %}">{% trans "Submit for moderation" %}</a></li>
+            {% endif %}
       {% endif %}
       <li><a href="{% url 'entities:entity_remove' entity.id %}">{% trans "Remove" %}</a></li>
       {% canchangeteam entity %}
