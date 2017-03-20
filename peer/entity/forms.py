@@ -460,9 +460,10 @@ class ContactForm(forms.ModelForm):
 
     class Meta:
         model = ContactPerson
-        fields = ('entity', 'type', 'email', 'name', 'phone')
+        fields = ('entity', 'type', 'email', 'given_name', 'name', 'phone')
         widgets={
             'name': forms.TextInput(),
+            'given_name': forms.TextInput(),
             'entity': forms.HiddenInput()
         }
 

@@ -675,22 +675,32 @@ class Metadata(object):
             contact_el = contacts[0]
         else:
             contact_el = self.add_contact_person(type)
-        if contact.email:
-            email_tag = addns('EmailAddress', NAMESPACES['md'])
-            email_el = contact_el.find(email_tag)
-            if email_el is None:
-                email_el = etree.SubElement(contact_el, email_tag)
-            email_el.text = 'mailto:{!s}'.format(contact.email)
         if contact.name:
             name_tag = addns('SurName', NAMESPACES['md'])
             name_el = contact_el.find(name_tag)
             if name_el is None:
-                name_el = etree.SubElement(contact_el, name_tag)
+                name_el = etree.Element(name_tag)
             name_el.text = contact.name
+            contact_el.insert(0, name_el)
+        if contact.given_name:
+            gname_tag = addns('GivenName', NAMESPACES['md'])
+            gname_el = contact_el.find(gname_tag)
+            if gname_el is None:
+                gname_el = etree.Element(gname_tag)
+            gname_el.text = contact.given_name
+            contact_el.insert(0, gname_el)
+        if contact.email:
+            email_tag = addns('EmailAddress', NAMESPACES['md'])
+            email_el = contact_el.find(email_tag)
+            if email_el is None:
+                email_el = etree.Element(email_tag)
+            email_el.text = 'mailto:{!s}'.format(contact.email)
+            contact_el.append(email_el)
         if contact.phone:
             phone_tag = addns('TelephoneNumber', NAMESPACES['md'])
             phone_el = contact_el.find(phone_tag)
             if phone_el is None:
-                phone_el = etree.SubElement(contact_el, phone_tag)
+                phone_el = etree.Element(phone_tag)
             phone_el.text = contact.phone
+            contact_el.append(phone_el)
         return contact_el

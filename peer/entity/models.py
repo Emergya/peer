@@ -399,12 +399,11 @@ class Entity(models.Model):
         for t in ContactPerson.CONTACT_TYPES:
             contact, created = ContactPerson.objects.get_or_create(entity=self, type=t[0])
             email = metadata.get_contact_data('EmailAddress', t[1])
-            # if not email:
-                # raise ValueError(_('You must provide an email for every contact'))
             if email is not None and email.startswith('mailto'):
                 email = email[7:]
             contact.email = email
             contact.name = metadata.get_contact_data('SurName', t[1])
+            contact.given_name = metadata.get_contact_data('GivenName', t[1])
             contact.phone = metadata.get_contact_data('TelephoneNumber', t[1])
             contact.save()
 
@@ -729,7 +728,9 @@ class ContactPerson(models.Model):
             blank=True, null=True)
     email = models.EmailField(_('Email address'),
             null=True, blank=True)
-    name = models.TextField(_(u'Name'),
+    name = models.TextField(_(u'Surname'),
             blank=True, null=True)
+    given_name = models.TextField(_(u'Given Name'),
+                   blank=True, null=True)
     phone = models.CharField(_(u'Phone number'),
             max_length=255, blank=True, null=True)
