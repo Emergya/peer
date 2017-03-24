@@ -424,8 +424,8 @@ class Entity(models.Model):
             for tag in ['DisplayName', 'Description']:
                 data = md.get_mdui_info_piece(tag, lang)
                 if data is None:
-                    missing.append('missing',
-                                   ('{!s} ({!s})'.format(tag, language[1]),
+                    missing.append(('missing',
+                                   '{!s} ({!s})'.format(tag, language[1]),
                                     reverse('entities:manage_mdui_data',
                                          args=(self.pk,)),
                                     _('MDUI metadata')))

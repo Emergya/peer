@@ -107,7 +107,7 @@ def entity_view(request, entity_id):
         msg = _('Entity metadata complete. You can now '
                 '<a href="{!s}">submit for review</a>').format(
                         reverse('entities:edit_metadata', args=(entity_id,)))
-        messages.success(request, msg)
+        messages.success(request, msg, extra_tags='safe')
     elif entity.state != entity.STATE.PUB:
         entity.modify(etree.tostring(entity._load_metadata().etree))
         msg = _('Entity metadata complete. Your entity is now '

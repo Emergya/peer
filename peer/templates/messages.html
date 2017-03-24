@@ -2,7 +2,7 @@
 <div class="ui-widget">
   {% for message in messages %}
   <div class="{% if message.tags == 'success' %}ui-state-highlight{% else %}ui-state-error{% endif %} ui-corner-all">
-    <p><span class="ui-icon {% if message.tags == 'success' %}ui-icon-info{% else %}ui-icon-alert{% endif %}"></span>{{ message }}</p>
+    <p><span class="ui-icon {% if message.tags == 'success' %}ui-icon-info{% else %}ui-icon-alert{% endif %}"></span>{% if 'safe' in message.tags %}{{ message|safe }}{% else %}{{ message }}{% endif %}</p>
   </div>
   {% endfor %}
 </div>
