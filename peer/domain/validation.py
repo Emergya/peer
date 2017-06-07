@@ -171,7 +171,7 @@ def get_superdomain_verified(domain):
         try:
             sup = Domain.objects.get(Q(name=superdomain) & Q(validated=True))
         except Domain.DoesNotExist:
-            nsegments +=1
+            n +=1
             continue
         return sup
     return False
